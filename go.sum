@@ -299,7 +299,6 @@ github.com/cenkalti/backoff/v4 v4.3.0 h1:MyRJ/UdXutAwSAT+s3wNd7MfTIcy71VQueUuFK3
 github.com/cenkalti/backoff/v4 v4.3.0/go.mod h1:Y3VNntkOUPxTVeUxJ/G5vcM//AlwfmyYozVcomhLiZE=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/census-instrumentation/opencensus-proto v0.3.0/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
-github.com/cespare/xxhash v1.1.0 h1:a6HrQnmkObjyL+Gs60czilIUGqrzKutQD6XZog3p+ko=
 github.com/cespare/xxhash v1.1.0/go.mod h1:XrSqR1VqqWfGrhpAt58auRo0WTKS1nRRg3ghfAqPWnc=
 github.com/cespare/xxhash/v2 v2.1.1/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
@@ -362,8 +361,6 @@ github.com/dolthub/flatbuffers/v23 v23.3.3-dh.2 h1:u3PMzfF8RkKd3lB9pZ2bfn0qEG+1G
 github.com/dolthub/flatbuffers/v23 v23.3.3-dh.2/go.mod h1:mIEZOHnFx4ZMQeawhw9rhsj+0zwQj7adVsnBX7t+eKY=
 github.com/dolthub/fslock v0.0.4 h1:p0FcUPu81bO53349qPT1im7XyGu3CwZDsB0PEVdFcaE=
 github.com/dolthub/fslock v0.0.4/go.mod h1:895XJNoMTlL5N1TjOJbd9Pnpjtv1DW/Ddw9qShcAYsM=
-github.com/dolthub/fslock v0.0.5 h1:QoXhBhgY1oumHE26qyE7tgmXUT8qjJwxsIzo54O/B/k=
-github.com/dolthub/fslock v0.0.5/go.mod h1:sdofYYqE0D79zNZyB4/kmlnsQOVap1C2yByjGKSirEM=
 github.com/dolthub/go-icu-regex v0.0.0-20260610153742-72563bc7ca83 h1:FEMjCGEroDnY/BXyAffVZxUpXhP2GpoUJyyq5KaLn8c=
 github.com/dolthub/go-icu-regex v0.0.0-20260610153742-72563bc7ca83/go.mod h1:F3cnm+vMRK1HaU6+rNqQrOCyR03HHhR1GWG2gnPOqaE=
 github.com/dolthub/go-mysql-server v0.20.1-0.20260507202550-43d6daf5958b h1:Ew5nacrGUHRVyae1+/0vUjt3ZbX/6vaDEZfeDNMCSj8=
@@ -898,8 +895,6 @@ github.com/ugorji/go v1.1.7/go.mod h1:kZn38zHttfInRq0xu/PH0az30d+z6vm202qpg1oXVM
 github.com/ugorji/go/codec v1.1.7/go.mod h1:Ax+UKWsSmolVDwsd+7N3ZtXu+yMGCf907BLYF3GoBXY=
 github.com/vbauerster/mpb/v8 v8.12.1 h1:pyj3yQ2ZGQJgUXm4h17QpR+eERaNz5OQ1ftPSEE/sMM=
 github.com/vbauerster/mpb/v8 v8.12.1/go.mod h1:XLXRfStkw/6i5k0aQltijDHT1Z93fD1DVwmIdcFUp6k=
-github.com/vbauerster/mpb/v8 v8.13.0 h1:uv5hrYmoVNy+3w4mjePgQXwmqUzLjhKX5p2+77CFfwo=
-github.com/vbauerster/mpb/v8 v8.13.0/go.mod h1:yY6DDD9c3idT01aDMzs98st5aotXIOXXUgPG3hAbAHk=
 github.com/xitongsys/parquet-go v1.5.1/go.mod h1:xUxwM8ELydxh4edHGegYq1pA8NnMKDx0K/GyB0o2bww=
 github.com/xitongsys/parquet-go v1.6.2 h1:MhCaXii4eqceKPu9BwrjLqyK10oX9WF+xGhwvwbw7xM=
 github.com/xitongsys/parquet-go v1.6.2/go.mod h1:IulAQyalCm0rPiZVNnCgm/PCL64X2tdSVGMQ/UeKqWA=
