@@ -75,17 +75,6 @@ func expandHome(path string) string {
 	return path
 }
 
-func getDSN(cmd *cobra.Command) string {
-	dsn, _ := cmd.Flags().GetString("dsn")
-	if dsn != "" {
-		return dsn
-	}
-	if env := os.Getenv("PRISMCTL_DSN"); env != "" {
-		return env
-	}
-	return defaultDSN
-}
-
 func versionCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "version",
