@@ -1,0 +1,63 @@
+site_name: PRISM Control
+site_description: Product Delivery Control Plane — cross-repository initiatives, RMIs, lease-based assignments, and delivery evidence
+repo_url: https://github.com/ProductBuildersHQ/prism-control
+
+theme:
+  name: material
+  palette:
+    - scheme: slate
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - scheme: default
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - content.code.copy
+    - toc.follow
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: getting-started/install.md
+    - Connection Modes: getting-started/connection-modes.md
+    - Session Protocol: getting-started/session-protocol.md
+  - User Guide:
+    - Dashboard: guide/dashboard.md
+    - Programs & Dependencies: guide/programs.md
+    - Roadmap Sync: guide/roadmap-sync.md
+    - Commit Attribution: guide/commit-attribution.md
+    - Product Repo Setup: guide/product-repo-setup.md
+    - Data Backup: guide/backup.md
+  - CLI Reference: cli-reference.md
+  - MCP Server: mcp-server.md
+  - Integrations:
+    - VisionStudio: integrations/visionstudio.md
+    - omnidevx: integrations/omnidevx.md
+    - DevFolio: integrations/devfolio.md
+  - Architecture: architecture.md
+  - Specs:
+    - PRD: specs/PRD.md
+    - TRD: specs/TRD.md
+    - PLAN: specs/PLAN.md
+    - ROADMAP: specs/ROADMAP.md
+    - WALKTHROUGH: specs/WALKTHROUGH.md
+  - Case Study: case-study.md
