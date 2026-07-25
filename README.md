@@ -29,6 +29,8 @@ Product Delivery Control Plane — the canonical, queryable store for cross-repo
 
 PRISM Control is headless and library-first. It coordinates work across repositories and agent sessions; it does not execute work, render UIs, or compute metrics. Those responsibilities belong to the execution layer (Claude Code sessions), the metrics layer (omnidevx, devfolio), and the visualization layer (VisionStudio).
 
+![PRISM Dashboard](docs/images/ss_prism-dashboard_prism-control.png)
+
 ## Quick Start
 
 ### Prerequisites
