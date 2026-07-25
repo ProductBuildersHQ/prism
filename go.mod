@@ -71,7 +71,7 @@ require (
 	github.com/dolthub/dolt/go v0.40.5-0.20260507221239-14b38e279fc6 // indirect
 	github.com/dolthub/eventsapi_schema v0.0.0-20260715220557-d9b4a1c6b4d4 // indirect
 	github.com/dolthub/flatbuffers/v23 v23.3.3-dh.2 // indirect
-	github.com/dolthub/fslock v0.0.4 // indirect
+	github.com/dolthub/fslock v0.0.5 // indirect
 	github.com/dolthub/go-icu-regex v0.0.0-20260610153742-72563bc7ca83 // indirect
 	github.com/dolthub/go-mysql-server v0.20.1-0.20260507202550-43d6daf5958b // indirect
 	github.com/dolthub/gozstd v0.0.0-20240423170813-23a2903bca63 // indirect
@@ -146,7 +146,7 @@ require (
 	github.com/tidwall/match v1.2.0 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/tidwall/sjson v1.2.5 // indirect
-	github.com/vbauerster/mpb/v8 v8.12.1 // indirect
+	github.com/vbauerster/mpb/v8 v8.13.0 // indirect
 	github.com/xitongsys/parquet-go v1.6.2 // indirect
 	github.com/xitongsys/parquet-go-source v0.0.0-20241021075129-b732d2ac9c9b // indirect
 	github.com/xtaci/smux v1.5.57 // indirect
