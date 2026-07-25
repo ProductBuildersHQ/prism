@@ -11,10 +11,10 @@
       
       
       
-        <link rel="prev" href="../product-repo-setup/">
+        <link rel="prev" href="../../specs/WALKTHROUGH/">
       
       
-        <link rel="next" href="../../cli-reference/">
+        <link rel="next" href="../../case-study/">
       
       
         
@@ -25,7 +25,7 @@
     
     
       
-        <title>Data Backup - PRISM Control</title>
+        <title>v0.1.0 - PRISM Control</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#data-backup" class="md-skip">
+        <a href="#release-notes-v010" class="md-skip">
           Skip to content
         </a>
       
@@ -112,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Data Backup
+              v0.1.0
             
           </span>
         </div>
@@ -427,8 +427,6 @@
       
   
   
-    
-  
   
   
     
@@ -441,11 +439,13 @@
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
         
           
           <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
@@ -466,7 +466,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -484,7 +484,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../dashboard/" class="md-nav__link">
+      <a href="../../guide/dashboard/" class="md-nav__link">
         
   
   
@@ -512,7 +512,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../programs/" class="md-nav__link">
+      <a href="../../guide/programs/" class="md-nav__link">
         
   
   
@@ -540,7 +540,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../roadmap-sync/" class="md-nav__link">
+      <a href="../../guide/roadmap-sync/" class="md-nav__link">
         
   
   
@@ -568,7 +568,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../commit-attribution/" class="md-nav__link">
+      <a href="../../guide/commit-attribution/" class="md-nav__link">
         
   
   
@@ -596,7 +596,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../product-repo-setup/" class="md-nav__link">
+      <a href="../../guide/product-repo-setup/" class="md-nav__link">
         
   
   
@@ -621,37 +621,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Data Backup
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../guide/backup/" class="md-nav__link">
         
   
   
@@ -667,70 +640,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#push-to-a-git-remote" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Push to a Git Remote
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#automated-backup" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Automated Backup
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#restore" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Restore
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#jsonl-export" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        JSONL Export
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1174,8 +1083,10 @@
       
   
   
+    
   
   
+  
     
     
     
@@ -1186,13 +1097,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" checked>
         
           
           <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
@@ -1213,7 +1122,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1228,10 +1137,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../releases/v0.1.0/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v0.1.0
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1247,6 +1183,153 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#highlights" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Highlights
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#whats-new" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's New
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What&#39;s New">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug Fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#infrastructure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Infrastructure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#breaking-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Breaking Changes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migration-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migration Guide
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#full-changelog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Full Changelog
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1313,10 +1396,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#push-to-a-git-remote" class="md-nav__link">
+  <a href="#summary" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Push to a Git Remote
+        Summary
       
     </span>
   </a>
@@ -1324,10 +1407,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#automated-backup" class="md-nav__link">
+  <a href="#highlights" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Automated Backup
+        Highlights
       
     </span>
   </a>
@@ -1335,10 +1418,82 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#restore" class="md-nav__link">
+  <a href="#whats-new" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Restore
+        What's New
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What&#39;s New">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug Fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#infrastructure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Infrastructure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#breaking-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Breaking Changes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation
       
     </span>
   </a>
@@ -1346,10 +1501,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#jsonl-export" class="md-nav__link">
+  <a href="#migration-guide" class="md-nav__link">
     <span class="md-ellipsis">
       
-        JSONL Export
+        Migration Guide
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#full-changelog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Full Changelog
       
     </span>
   </a>
@@ -1376,30 +1542,60 @@
   
 
 
-<h1 id="data-backup">Data Backup<a class="headerlink" href="#data-backup" title="Permanent link">&para;</a></h1>
-<p>Dolt databases support git-style remotes, making backup straightforward.</p>
-<h2 id="push-to-a-git-remote">Push to a Git Remote<a class="headerlink" href="#push-to-a-git-remote" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>~/.productbuildershq/prism/prismcontrol
-dolt<span class="w"> </span>remote<span class="w"> </span>add<span class="w"> </span>backup<span class="w"> </span>git@github.com:org/prism-backup.git
-dolt<span class="w"> </span>push<span class="w"> </span>backup<span class="w"> </span>main
+<h1 id="release-notes-v010">Release Notes: v0.1.0<a class="headerlink" href="#release-notes-v010" title="Permanent link">&para;</a></h1>
+<p><strong>Release Date:</strong> 2026-07-25</p>
+<p><strong>Status:</strong> Release. This is the initial tagged release of PRISM Control, covering all changes accumulated since the project's initial commit.</p>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>This is the initial build-out of PRISM Control: an Ent-backed (Dolt/MySQL) control plane for cross-repository initiatives, phases, roadmap items (RMIs), lease-based work assignments, and delivery evidence. It ships as a library-first Go SDK (<code>prismcontrol</code>) with a Cobra CLI (<code>prismctl</code>) and an MCP server, both built on one shared service layer, plus tooling to keep <code>ROADMAP.md</code> and the database in sync.</p>
+<h2 id="highlights">Highlights<a class="headerlink" href="#highlights" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Ent-backed domain store (MySQL dialect targeting Dolt) with an in-memory <code>MemStore</code> fake, so all domain logic is unit-testable without a running database</li>
+<li>Full delivery model: initiatives, phases with derived status, roadmap items (RMIs), lease-based work assignments, and delivery evidence</li>
+<li>One shared service layer powers both the <code>prismctl</code> Cobra CLI and an MCP server exposing 9 tools for Claude Code session integration</li>
+<li>Bidirectional <code>ROADMAP.md</code> sync, git commit ingestion for <code>Refs:</code> trailers, and JSONL snapshot export for portable backups</li>
+</ul>
+<h2 id="whats-new">What's New<a class="headerlink" href="#whats-new" title="Permanent link">&para;</a></h2>
+<h3 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Ent schema and codegen</strong> for <code>Initiative</code>, <code>Phase</code>, <code>RoadmapItem</code>, <code>Assignment</code>, <code>DeliveryEvidence</code>, <code>Repository</code>, and their dependency edges (<code>db4d1eb</code>)</li>
+<li><strong>Store interface</strong> with sub-interfaces for initiatives, phases, RMIs, assignments, evidence, and repositories; a <code>MemStore</code> in-memory fake for unit testing; an Ent-backed <code>DoltStore</code> implementation with embedded and server connection modes; typed error kinds in <code>pcerr</code> (<code>5a5fd93</code>)</li>
+<li><strong>Core domain packages</strong>: initiative lifecycle with phase status always derived from member RMIs (never stored directly), lease-based work assignments (claim/release/renew/complete), commit trailer parsing for <code>Refs:</code> and <code>Co-authored-by</code>, and RMI status/dependency tracking (<code>acd03da</code>)</li>
+<li><strong>Roadmap sync, ingestion, and export</strong>: a <code>ROADMAP.md</code> parser, generator, and diff for bidirectional sync between markdown specs and the database; git commit ingestion for <code>Refs:</code> trailers and structured-changelog import; JSONL snapshot export with manifest for portable backups (<code>ad376da</code>)</li>
+<li><strong>Reporting, release planning, and validation</strong>: initiative report generation (markdown and JSON), dependency-ordered release planning, git repository scanning via <code>gogit</code> for commit attribution, and store-wide consistency validation — ID format, dangling dependencies, cycles, expired leases, status coherence, and evidence coverage (<code>0832dfa</code>)</li>
+<li><strong>Shared service layer and MCP server</strong>: one service layer called identically by the CLI and MCP adapters (initiative CRUD, phase management, RMI operations, work claims with lease enforcement, roadmap sync, ingestion, reports, validation, export); an MCP server exposing 9 tools over stdio transport for Claude Code session integration (<code>c60ed09</code>)</li>
+<li><strong>SDK facade</strong>: the root <code>prismcontrol</code> package as the importable Go SDK (<code>0b62479</code>)</li>
+<li><strong>CLI</strong>: full <code>prismctl</code> Cobra CLI covering database management (init, serve, create-views), a two-level dashboard (live server and static snapshot), registry, initiatives (CRUD, dependencies, program grouping), phases, RMIs (CRUD, dependencies, bulk status), work assignments (claim, release, renew, complete), roadmap sync, ingestion, reports, validation, export, and an MCP server launcher (<code>64c1a4f</code>)</li>
+</ul>
+<h3 id="bug-fixes">Bug Fixes<a class="headerlink" href="#bug-fixes" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Resolved all <code>golangci-lint</code> errors: gofmt formatting across 10 files, <code>ReadHeaderTimeout</code> on the dashboard HTTP server (Slowloris mitigation), tightened <code>WriteFile</code> permissions to <code>0o600</code>, gosec suppressions for a test helper exec and an intentional <code>safeHTML</code> template func, and removal of always-constant test helper parameters (<code>0ba1916</code>)</li>
+</ul>
+<h3 id="changed">Changed<a class="headerlink" href="#changed" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Gated all <code>doltstore</code>-importing code behind a <code>dolt</code> build tag so <code>go build</code>, <code>go test</code>, and <code>golangci-lint run</code> work without CGO or ICU headers; full Dolt functionality now requires <code>-tags dolt</code> (<code>d536cc5</code>)</li>
+</ul>
+<h3 id="infrastructure">Infrastructure<a class="headerlink" href="#infrastructure" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Excluded the <code>doltstore</code> and <code>cmd/prismctl</code> packages (which require ICU C headers unavailable on standard CI runners) from test, lint, and CodeQL workflows; dropped Windows from the test matrix, bumped actions to v7, and fixed checkout-before-setup-go ordering (<code>ff62c8a</code>)</li>
+</ul>
+<h3 id="breaking-changes">Breaking Changes<a class="headerlink" href="#breaking-changes" title="Permanent link">&para;</a></h3>
+<p>None — this is the project's initial build-out; no prior tagged release exists.</p>
+<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ProductBuildersHQ/prism.git
+<span class="nb">cd</span><span class="w"> </span>prism
+git<span class="w"> </span>checkout<span class="w"> </span>v0.1.0
+
+<span class="c1"># ICU headers are required for the embedded Dolt driver (see docs/getting-started/install.md)</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">CGO_CPPFLAGS</span><span class="o">=</span><span class="s2">&quot;-I</span><span class="k">$(</span>brew<span class="w"> </span>--prefix<span class="w"> </span>icu4c<span class="k">)</span><span class="s2">/include&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">CGO_LDFLAGS</span><span class="o">=</span><span class="s2">&quot;-L</span><span class="k">$(</span>brew<span class="w"> </span>--prefix<span class="w"> </span>icu4c<span class="k">)</span><span class="s2">/lib&quot;</span>
+
+go<span class="w"> </span>build<span class="w"> </span>-o<span class="w"> </span>prismctl<span class="w"> </span>./cmd/prismctl/
 </code></pre></div>
-<p>This pushes the full database (schema, data, commit history) to GitHub. The remote repository contains the complete Dolt database — you can clone it on another machine to restore.</p>
-<h2 id="automated-backup">Automated Backup<a class="headerlink" href="#automated-backup" title="Permanent link">&para;</a></h2>
-<p>Add to cron for daily backups:</p>
-<div class="highlight"><pre><span></span><code><span class="m">0</span><span class="w"> </span><span class="m">2</span><span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>~/.productbuildershq/prism/prismcontrol<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>dolt<span class="w"> </span>push<span class="w"> </span>backup<span class="w"> </span>main
-</code></pre></div>
-<h2 id="restore">Restore<a class="headerlink" href="#restore" title="Permanent link">&para;</a></h2>
-<p>Clone from the remote to restore on a new machine:</p>
-<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>~/.productbuildershq/prism
-<span class="nb">cd</span><span class="w"> </span>~/.productbuildershq/prism
-dolt<span class="w"> </span>clone<span class="w"> </span>git@github.com:org/prism-backup.git<span class="w"> </span>prismcontrol
-</code></pre></div>
-<p>Then run <code>prismctl db init</code> to ensure the schema is up to date.</p>
-<h2 id="jsonl-export">JSONL Export<a class="headerlink" href="#jsonl-export" title="Permanent link">&para;</a></h2>
-<p>For portable snapshots that don't require Dolt:</p>
-<div class="highlight"><pre><span></span><code>prismctl<span class="w"> </span><span class="nb">export</span><span class="w"> </span>--dir<span class="w"> </span>./exports
-</code></pre></div>
-<p>This writes one JSONL file per table plus a <code>manifest.json</code> with record counts and timestamp.</p>
+<p>See <a href="../../getting-started/install/">Installation</a> for full prerequisites and setup.</p>
+<h2 id="migration-guide">Migration Guide<a class="headerlink" href="#migration-guide" title="Permanent link">&para;</a></h2>
+<p>Not applicable — there is no prior release to migrate from.</p>
+<h2 id="full-changelog">Full Changelog<a class="headerlink" href="#full-changelog" title="Permanent link">&para;</a></h2>
+<p>See <a href="../../CHANGELOG.md">CHANGELOG.md</a> for the complete list of changes.</p>
 
 
 
