@@ -51,7 +51,7 @@ const (
 
 	// Integrity errors — data invariant violated.
 	IntegrityDuplicate  = "INTEGRITY_DUPLICATE"  // unique constraint
-	IntegrityConstraint = "INTEGRITY_CONSTRAINT"  // FK or check constraint
+	IntegrityConstraint = "INTEGRITY_CONSTRAINT" // FK or check constraint
 
 	// Internal errors — unexpected failure in the service or store.
 	InternalStore   = "INTERNAL_STORE"   // database/store layer failure
@@ -60,10 +60,10 @@ const (
 
 // Error is the structured error type returned by the service layer.
 type Error struct {
-	Code     string   // machine-readable code (e.g. "STATE_WRONG_STATUS")
-	Message  string   // human-readable summary
-	Recovery string   // actionable hint for recovery (shown to agents)
-	Cause    error    // wrapped underlying error, if any
+	Code     string // machine-readable code (e.g. "STATE_WRONG_STATUS")
+	Message  string // human-readable summary
+	Recovery string // actionable hint for recovery (shown to agents)
+	Cause    error  // wrapped underlying error, if any
 }
 
 func (e *Error) Error() string {

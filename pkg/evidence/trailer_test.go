@@ -114,4 +114,3 @@ func TestAttribute(t *testing.T) {
 		})
 	}
 }
-

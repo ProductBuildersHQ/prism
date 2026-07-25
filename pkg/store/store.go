@@ -129,15 +129,15 @@ type DeliveryEvidence struct {
 
 // Repository is a catalog entry for a participating repository.
 type Repository struct {
-	ID               string
-	Organization     string
-	RepositoryName   string
-	DefaultBranch    string
-	LocalPath        string // absolute path on disk (for ingest/scan)
-	GoModule         string // go.mod module path (from gitscan)
-	Domain           string
-	Status           string
-	IngestHighWater  string // last scanned commit SHA
+	ID              string
+	Organization    string
+	RepositoryName  string
+	DefaultBranch   string
+	LocalPath       string // absolute path on disk (for ingest/scan)
+	GoModule        string // go.mod module path (from gitscan)
+	Domain          string
+	Status          string
+	IngestHighWater string // last scanned commit SHA
 }
 
 // RepositoryDependency is a directed edge between two repositories

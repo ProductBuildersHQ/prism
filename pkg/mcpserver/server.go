@@ -278,7 +278,7 @@ func taskClaimHandler(svc *service.Service) mcp.ToolHandler {
 			"assignment_id": result.Assignment.ID,
 			"rmi_id":        result.Assignment.RMIID,
 			"worker":        result.Assignment.Worker,
-			"lease_expires":  result.Assignment.LeaseExpiresAt,
+			"lease_expires": result.Assignment.LeaseExpiresAt,
 			"trailer_line":  result.TrailerLine,
 		})
 	}
@@ -309,7 +309,7 @@ func taskReleaseTool() *mcp.Tool {
 func taskReleaseHandler(svc *service.Service) mcp.ToolHandler {
 	return func(ctx context.Context, req *mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		var args struct {
-			AssignmentID string        `json:"assignment_id"`
+			AssignmentID string         `json:"assignment_id"`
 			Handoff      *store.Handoff `json:"handoff"`
 		}
 		if err := json.Unmarshal(req.Params.Arguments, &args); err != nil {

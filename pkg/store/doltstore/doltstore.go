@@ -84,8 +84,8 @@ func (d *DoltStore) Migrate(ctx context.Context) error {
 // DoltUnitOfWork implements store.UnitOfWork with Ent transactions
 // followed by a Dolt commit.
 type DoltUnitOfWork struct {
-	store  *DoltStore
-	actor  string
+	store *DoltStore
+	actor string
 }
 
 // NewUnitOfWork creates a unit-of-work that attributes Dolt commits to actor.

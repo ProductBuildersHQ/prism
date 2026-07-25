@@ -127,10 +127,10 @@ func build(init *store.Initiative, phases []*store.Phase, rmis []*store.RoadmapI
 	for _, p := range phases {
 		phaseRMIs := rmisByPhase[p.ID]
 		pr := PhaseReport{
-			PhaseID:  p.ID,
-			Title:    p.Title,
-			Theme:    p.Theme,
-			Status:   initiative.DerivePhaseStatus(phaseRMIs),
+			PhaseID:   p.ID,
+			Title:     p.Title,
+			Theme:     p.Theme,
+			Status:    initiative.DerivePhaseStatus(phaseRMIs),
 			RMIsTotal: len(phaseRMIs),
 		}
 		for _, rmi := range phaseRMIs {

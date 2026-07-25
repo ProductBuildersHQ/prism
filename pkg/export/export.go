@@ -118,7 +118,7 @@ func Run(ctx context.Context, s store.Store, dir string) (*Result, error) {
 	if err != nil {
 		return nil, fmt.Errorf("marshal manifest: %w", err)
 	}
-	if err := os.WriteFile(filepath.Join(dir, "manifest.json"), manifestBytes, 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "manifest.json"), manifestBytes, 0o600); err != nil {
 		return nil, fmt.Errorf("write manifest: %w", err)
 	}
 

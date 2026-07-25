@@ -69,4 +69,3 @@ func Attribute(trailerValue, branch string) Attribution {
 	}
 	return Attribution{}
 }
-

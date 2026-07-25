@@ -45,10 +45,10 @@ func connectService(cmd *cobra.Command) (*service.Service, func(), error) {
 	}
 	svc := service.New(ds)
 	return svc, func() {
-			if err := ds.Close(); err != nil {
-				fmt.Fprintf(os.Stderr, "warning: close database: %v\n", err)
-			}
-		}, nil
+		if err := ds.Close(); err != nil {
+			fmt.Fprintf(os.Stderr, "warning: close database: %v\n", err)
+		}
+	}, nil
 }
 
 func registryAddCmd() *cobra.Command {

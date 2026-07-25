@@ -8,10 +8,10 @@ import (
 	"github.com/ProductBuildersHQ/prism-control/pkg/store"
 )
 
-func validRMI(id, repoID, initID, phaseID, status string) *store.RoadmapItem {
+func validRMI(id, repoID, status string) *store.RoadmapItem {
 	return &store.RoadmapItem{
-		ID: id, RepositoryID: repoID, InitiativeID: initID,
-		PhaseID: phaseID, Title: id, ItemType: "capability",
+		ID: id, RepositoryID: repoID, InitiativeID: "INIT-TEST-001",
+		PhaseID: "INIT-TEST-001/phase-1", Title: id, ItemType: "capability",
 		Status: status, Required: true,
 		CreatedAt: time.Now(), UpdatedAt: time.Now(),
 	}
@@ -34,7 +34,7 @@ func TestCleanStore(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
-	rmi := validRMI("RMI-TEST-001", "github.com/test/repo", "INIT-TEST-001", "INIT-TEST-001/phase-1", "ready")
+	rmi := validRMI("RMI-TEST-001", "github.com/test/repo", "ready")
 	if err := s.CreateRMI(ctx, rmi); err != nil {
 		t.Fatal(err)
 	}
@@ -66,7 +66,7 @@ func TestIDFormatViolation(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	bad := validRMI("BAD-ID", "repo", "INIT-TEST-001", "INIT-TEST-001/phase-1", "ready")
+	bad := validRMI("BAD-ID", "repo", "ready")
 	if err := s.CreateRMI(ctx, bad); err != nil {
 		t.Fatal(err)
 	}
@@ -106,7 +106,7 @@ func TestDanglingDependency(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
-	rmi := validRMI("RMI-TEST-001", "repo", "INIT-TEST-001", "INIT-TEST-001/phase-1", "ready")
+	rmi := validRMI("RMI-TEST-001", "repo", "ready")
 	if err := s.CreateRMI(ctx, rmi); err != nil {
 		t.Fatal(err)
 	}
@@ -150,7 +150,7 @@ func TestDependencyCycle(t *testing.T) {
 	}
 
 	for _, id := range []string{"RMI-TEST-001", "RMI-TEST-002", "RMI-TEST-003"} {
-		rmi := validRMI(id, "repo", "INIT-TEST-001", "INIT-TEST-001/phase-1", "ready")
+		rmi := validRMI(id, "repo", "ready")
 		if err := s.CreateRMI(ctx, rmi); err != nil {
 			t.Fatal(err)
 		}
@@ -199,7 +199,7 @@ func TestExpiredLease(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
-	rmi := validRMI("RMI-TEST-001", "repo", "INIT-TEST-001", "INIT-TEST-001/phase-1", "in_progress")
+	rmi := validRMI("RMI-TEST-001", "repo", "in_progress")
 	if err := s.CreateRMI(ctx, rmi); err != nil {
 		t.Fatal(err)
 	}
@@ -247,7 +247,7 @@ func TestStatusCoherence(t *testing.T) {
 	}
 
 	// Required RMI still in_progress under a delivery_complete initiative.
-	rmi := validRMI("RMI-TEST-001", "repo", "INIT-TEST-001", "INIT-TEST-001/phase-1", "in_progress")
+	rmi := validRMI("RMI-TEST-001", "repo", "in_progress")
 	if err := s.CreateRMI(ctx, rmi); err != nil {
 		t.Fatal(err)
 	}
@@ -286,7 +286,7 @@ func TestCompletedRMINoEvidence(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	rmi := validRMI("RMI-TEST-001", "repo", "INIT-TEST-001", "INIT-TEST-001/phase-1", "completed")
+	rmi := validRMI("RMI-TEST-001", "repo", "completed")
 	rmi.CompletedAt = &completed
 	if err := s.CreateRMI(ctx, rmi); err != nil {
 		t.Fatal(err)

@@ -14,6 +14,7 @@ import (
 	"runtime"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -68,7 +69,7 @@ func runDashboardStatic(cmd *cobra.Command) error {
 
 	tmpDir := os.TempDir()
 	outPath := filepath.Join(tmpDir, "prismctl-dashboard.html")
-	if err := os.WriteFile(outPath, html, 0644); err != nil {
+	if err := os.WriteFile(outPath, html, 0o600); err != nil {
 		return fmt.Errorf("write file: %w", err)
 	}
 
@@ -79,7 +80,7 @@ func runDashboardStatic(cmd *cobra.Command) error {
 func runDashboardServer(cmd *cobra.Command, port int) error {
 	mux := http.NewServeMux()
 
-	serve := func(w http.ResponseWriter, r *http.Request, render func(*service.Service) ([]byte, error)) {
+	serve := func(w http.ResponseWriter, _ *http.Request, render func(*service.Service) ([]byte, error)) {
 		svc, cleanup, err := connectService(cmd)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("connect: %v", err), http.StatusInternalServerError)
@@ -162,7 +163,10 @@ func runDashboardServer(cmd *cobra.Command, port int) error {
 	ctx, stop := signal.NotifyContext(cmd.Context(), os.Interrupt)
 	defer stop()
 
-	srv := &http.Server{Handler: mux}
+	srv := &http.Server{
+		Handler:           mux,
+		ReadHeaderTimeout: 10 * time.Second,
+	}
 	go func() {
 		<-ctx.Done()
 		srv.Close()
@@ -368,7 +372,7 @@ var tmplFuncs = template.FuncMap{
 	"displayStatus":     func(s string) string { return strings.ReplaceAll(s, "_", " ") },
 	"typeIcon":          typeIcon,
 	"shortRepo":         shortRepo,
-	"safeHTML":          func(s string) template.HTML { return template.HTML(s) },
+	"safeHTML":          func(s string) template.HTML { return template.HTML(s) }, //nolint:gosec // trusted server-side rendered HTML
 	"add":               func(a, b int) int { return a + b },
 	"phaseStatusCounts": phaseStatusCounts,
 	"phaseTooltip":      phaseTooltip,

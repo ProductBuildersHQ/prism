@@ -289,8 +289,8 @@ func (s *Service) UpdateHandoffByRef(ctx context.Context, ref string, handoff *s
 // ClaimPhaseResult holds the claimed assignments and diagnostic info about
 // skipped RMIs so the caller can report why items weren't claimed.
 type ClaimPhaseResult struct {
-	Claimed     []*ClaimResult
-	Blocked     []string // RMI IDs skipped because of unmet dependencies
+	Claimed      []*ClaimResult
+	Blocked      []string // RMI IDs skipped because of unmet dependencies
 	AlreadyOwned []string // RMI IDs skipped because already claimed
 }
 
@@ -384,10 +384,10 @@ func (s *Service) suggestRecovery(counts map[string]int, phaseID string) string 
 
 // CompletePhaseResult holds completed assignments and diagnostics.
 type CompletePhaseResult struct {
-	Completed              []*store.Assignment
-	NoAssignment           []string // in_progress RMIs without an active assignment
-	InitiativeAllComplete  bool     // true if all required RMIs in the initiative are now completed
-	InitiativeID           string   // the parent initiative ID
+	Completed             []*store.Assignment
+	NoAssignment          []string // in_progress RMIs without an active assignment
+	InitiativeAllComplete bool     // true if all required RMIs in the initiative are now completed
+	InitiativeID          string   // the parent initiative ID
 }
 
 // CompletePhase completes all in-progress RMIs with active assignments in a phase.

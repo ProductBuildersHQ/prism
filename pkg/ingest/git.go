@@ -128,4 +128,3 @@ func GitAll(ctx context.Context, svc *service.Service, workers int) ([]*GitResul
 	}
 	return out, nil
 }
-
