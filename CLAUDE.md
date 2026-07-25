@@ -54,25 +54,18 @@ prismctl supports two database modes:
 ### Starting Server Mode
 
 ```bash
-# Terminal 1: start the server (runs in foreground)
+# Terminal 1: start the server (auto-saves DSN to ~/.productbuildershq/prism/config.json)
 prismctl db serve --port 13306
 
-# Terminal 2+: set DSN so prismctl uses the server instead of embedded
-export PRISMCTL_DSN="root:@tcp(127.0.0.1:13306)/prismcontrol"
+# Terminal 2+: prismctl reads the DSN from config automatically
 prismctl initiative list   # connects to the server
 ```
 
-When `PRISMCTL_DSN` is set, all prismctl commands use the server. When unset, they use embedded mode. Both modes use the same data directory.
+DSN resolution order: `--dsn` flag > `$PRISMCTL_DSN` env > config file > embedded default. Use `prismctl config show` to see the resolved value, or `prismctl config set dsn <value>` to set it manually.
 
 ## Session Protocol
 
 Claude Code sessions are first-class users of PRISM Control. Every session that implements work follows this four-step protocol. The same service layer backs both the MCP tools (`prismctl mcp`) and the CLI (`prismctl`), so the two are interchangeable.
-
-**Always connect to the shared server** — embedded mode holds an exclusive lock that blocks other sessions:
-
-```bash
-export PRISMCTL_DSN="root:@tcp(127.0.0.1:13306)/prismcontrol"
-```
 
 ### Dashboard
 
@@ -183,8 +176,4 @@ Product repos that participate in PRISM-tracked initiatives add this block to th
 ```markdown
 ## PRISM Control
 
-This repo's roadmap items are tracked in [prism-control](https://github.com/ProductBuildersHQ/prism-control). Before running any `prismctl` command, connect to the shared Dolt server:
-
-    export PRISMCTL_DSN="root:@tcp(127.0.0.1:13306)/prismcontrol"
-
-Use `prismctl work ready --repo github.com/ProductBuildersHQ/<this-repo>` to find claimable work, and carry the `Refs: RMI-<REPOSLUG>-<NNN>` trailer on every commit.
+This repo's roadmap items are tracked in [prism-control](https://github.com/ProductBuildersHQ/prism-control). Use `prismctl work ready --repo github.com/ProductBuildersHQ/<this-repo>` to find claimable work, and carry the `Refs: RMI-<REPOSLUG>-<NNN>` trailer on every commit.
