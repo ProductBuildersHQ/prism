@@ -13,10 +13,23 @@ Specs are the source of truth for design decisions — read before implementing:
 
 - **Stack:** Ent (`entgo.io/ent`, MySQL dialect → Dolt), Cobra CLI, official Go MCP SDK (`github.com/modelcontextprotocol/go-sdk`). Verify latest versions before adding to `go.mod`.
 - **Library-first:** all behavior lives in `pkg/*` and the root `prismcontrol` SDK facade. `cmd/prismctl` and the MCP server are thin adapters over one shared service layer; CLI and MCP write paths must call identical service methods.
-- **Unit-first testing:** domain logic is pure or depends only on the `pkg/store` interface (in-memory fake). Only the `doltstore` integration suite may require a running Dolt; guard it with a build tag.
+- **Unit-first testing:** domain logic is pure or depends only on the `pkg/store` interface (in-memory fake). Only the `doltstore` integration suite may require a running Dolt; guard it with a build tag. CI excludes `pkg/store/doltstore` and `cmd/prismctl` from test/lint/SAST because they need ICU C headers (`dolthub/go-icu-regex`) not available on standard runners — all domain logic is covered via MemStore.
 - **Plan is authoritative; commits are evidence.** Ingest never mutates plan structure — mismatches are validation errors to surface.
 - **Phases:** themed groupings of RMIs; phase status is always derived from member RMIs, never set directly.
 - **JSON types:** Go structs are the source of truth; generate schemas with `invopop/jsonschema`, lint with `schemago`, embed via `//go:embed` under `schema/`.
+
+## Building Locally
+
+The embedded Dolt driver requires ICU C headers. On macOS with Homebrew:
+
+```bash
+export CGO_CPPFLAGS="-I/opt/homebrew/opt/icu4c@78/include"
+export CGO_LDFLAGS="-L/opt/homebrew/opt/icu4c@78/lib"
+go build -o ~/go/bin/prismctl ./cmd/prismctl/
+go test -v ./...
+```
+
+Without these flags, `pkg/store/doltstore` and `cmd/prismctl` will fail to compile. The `pkg/` unit tests (which use MemStore) work without ICU.
 
 ## Commit Attribution (applies to this repo now)
 
