@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 
 	"github.com/spf13/cobra"
+
+	"github.com/ProductBuildersHQ/prism-control/pkg/config"
 )
 
 const defaultDSN = "root:@tcp(127.0.0.1:3306)/prismcontrol"
@@ -31,6 +33,7 @@ func rootCmd() *cobra.Command {
 
 	cmd.AddCommand(
 		versionCmd(),
+		configCmd(),
 		dbCmd(),
 		registryCmd(),
 		initiativeCmd(),
@@ -57,8 +60,10 @@ func getDataDir(cmd *cobra.Command) string {
 	if env := os.Getenv("PRISMCTL_DATA"); env != "" {
 		return expandHome(env)
 	}
-	// Server mode is opt-in via PRISMCTL_DSN; embedded is the default.
 	if os.Getenv("PRISMCTL_DSN") != "" {
+		return ""
+	}
+	if cfg, err := config.Load(); err == nil && cfg.DSN != "" {
 		return ""
 	}
 	return expandHome(defaultDataDir)

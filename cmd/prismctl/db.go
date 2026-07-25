@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/ProductBuildersHQ/prism-control/pkg/config"
 	"github.com/ProductBuildersHQ/prism-control/pkg/service"
 )
 
@@ -46,8 +47,20 @@ databases. Other sessions connect via PRISMCTL_DSN.`,
 			}
 
 			port, _ := cmd.Flags().GetInt("port")
+			dsn := fmt.Sprintf("root:@tcp(127.0.0.1:%d)/prismcontrol", port)
+
+			cfg, err := config.Load()
+			if err != nil {
+				cfg = &config.Config{}
+			}
+			cfg.DSN = dsn
+			if err := cfg.Save(); err != nil {
+				cmd.PrintErrf("warning: could not save config: %v\n", err)
+			} else {
+				cmd.Printf("Saved DSN to config file (all prismctl sessions will use this server)\n")
+			}
+
 			cmd.Printf("Starting Dolt SQL server on 127.0.0.1:%d (dir: %s)...\n", port, absDir)
-			cmd.Printf("Connect with: export PRISMCTL_DSN=\"root:@tcp(127.0.0.1:%d)/prismcontrol\"\n", port)
 			return service.DBServe(cmd.Context(), absDir, port)
 		},
 	}

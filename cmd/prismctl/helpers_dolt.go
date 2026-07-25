@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+
+	"github.com/ProductBuildersHQ/prism-control/pkg/config"
 )
 
 func getDSN(cmd *cobra.Command) string {
@@ -17,6 +19,9 @@ func getDSN(cmd *cobra.Command) string {
 	}
 	if env := os.Getenv("PRISMCTL_DSN"); env != "" {
 		return env
+	}
+	if cfg, err := config.Load(); err == nil && cfg.DSN != "" {
+		return cfg.DSN
 	}
 	return defaultDSN
 }
