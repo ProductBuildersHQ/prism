@@ -91,15 +91,14 @@ PRISMCTL_DATA=/path/to/data prismctl initiative list
 Start a Dolt SQL server for concurrent access:
 
 ```bash
-# Terminal 1: start the server
+# Terminal 1: start the server (auto-saves DSN to config)
 prismctl db serve --port 13306
 
-# Terminal 2+: connect via DSN
-export PRISMCTL_DSN="root:@tcp(127.0.0.1:13306)/prismcontrol"
+# Terminal 2+: prismctl reads the DSN from config automatically
 prismctl initiative list
 ```
 
-When `PRISMCTL_DSN` is set, all commands use the server. When unset, they use embedded mode.
+Use `prismctl config show` to see the resolved DSN, or `prismctl config set dsn <value>` to set it manually.
 
 ## Session Protocol
 

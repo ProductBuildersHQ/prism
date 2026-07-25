@@ -54,12 +54,23 @@ prismctl initiative list
 prismctl validate
 ```
 
-## Environment Variables
+## Configuration
 
-| Variable | Mode | Description |
-|----------|------|-------------|
-| *(none)* | Embedded (default) | Uses `~/.productbuildershq/prism` |
-| `PRISMCTL_DATA` | Embedded | Override the data directory path |
-| `PRISMCTL_DSN` | Server | MySQL-compatible DSN for a running Dolt SQL server |
+prismctl stores configuration at `~/.productbuildershq/prism/config.json`. The `db serve` command writes the DSN automatically; you can also manage it manually:
+
+```bash
+prismctl config show                    # display config and resolved DSN
+prismctl config set dsn <value>         # set DSN manually
+prismctl config unset dsn               # clear DSN (revert to embedded)
+```
+
+### Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `PRISMCTL_DATA` | Override the embedded data directory (default: `~/.productbuildershq/prism`) |
+| `PRISMCTL_DSN` | Override the DSN (takes precedence over config file) |
+
+DSN resolution order: `--dsn` flag > `$PRISMCTL_DSN` > config file > embedded default.
 
 See [Connection Modes](connection-modes.md) for details on embedded vs. server mode.

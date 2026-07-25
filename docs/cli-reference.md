@@ -5,7 +5,16 @@ All commands accept global flags:
 | Flag | Description |
 |------|-------------|
 | `--data-dir` | Data directory for embedded Dolt (default: `$PRISMCTL_DATA` or `~/.productbuildershq/prism`) |
-| `--dsn` | MySQL-compatible DSN for server mode (default: `$PRISMCTL_DSN` or `root:@tcp(127.0.0.1:3306)/prismcontrol`) |
+| `--dsn` | MySQL-compatible DSN for server mode (resolution: flag > `$PRISMCTL_DSN` > config file > embedded default) |
+
+## Config
+
+| Command | Description |
+|---------|-------------|
+| `config show` | Display current configuration and resolved DSN |
+| `config set <key> <value>` | Set a config value (supported: `dsn`) |
+| `config unset <key>` | Remove a config value |
+| `config path` | Print the config file path |
 
 ## Database
 

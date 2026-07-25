@@ -27,21 +27,30 @@ Multi-session access. Start a Dolt SQL server in one terminal, connect from any 
 prismctl db serve --port 13306
 ```
 
-The server prints the connection string on startup:
-
-```
-Connect with: export PRISMCTL_DSN="root:@tcp(127.0.0.1:13306)/prismcontrol"
-```
+On startup, `db serve` automatically saves the DSN to `~/.productbuildershq/prism/config.json`. All other `prismctl` sessions pick it up immediately — no environment variables needed.
 
 ### Connecting
 
 ```bash
-# Terminal 2+: set DSN so prismctl uses the server
-export PRISMCTL_DSN="root:@tcp(127.0.0.1:13306)/prismcontrol"
+# Terminal 2+: prismctl reads the DSN from config automatically
 prismctl initiative list   # connects to the server
 ```
 
-When `PRISMCTL_DSN` is set, all `prismctl` commands use the server. When unset, they use embedded mode. Both modes use the same data directory.
+### DSN Resolution Order
+
+1. `--dsn` CLI flag
+2. `$PRISMCTL_DSN` environment variable
+3. Config file (`~/.productbuildershq/prism/config.json`)
+4. Embedded mode (default)
+
+### Managing the Config
+
+```bash
+prismctl config show                    # display config and resolved DSN
+prismctl config set dsn <value>         # set DSN manually
+prismctl config unset dsn               # clear DSN (revert to embedded)
+prismctl config path                    # print config file location
+```
 
 **When to use:** Multiple Claude Code sessions (e.g., in separate tmux panes) need concurrent access to the same database. Required when several agent sessions are working on different initiatives simultaneously.
 
