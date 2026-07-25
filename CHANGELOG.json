@@ -1,0 +1,126 @@
+{
+  "irVersion": "1.0",
+  "project": "prism-control",
+  "repository": "https://github.com/ProductBuildersHQ/prism",
+  "versioning": "semver",
+  "commitConvention": "conventional",
+  "maintainers": [
+    "ProductBuildersHQ",
+    "johncwang@gmail.com"
+  ],
+  "releases": [
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-25",
+      "commit": "f3a59f4",
+      "highlights": [
+        {
+          "description": "Ent-backed domain store (MySQL dialect targeting Dolt) with an in-memory MemStore fake, so all domain logic is unit-testable without a running database"
+        },
+        {
+          "description": "Full delivery model: initiatives, phases with derived status, roadmap items (RMIs), lease-based work assignments, and delivery evidence"
+        },
+        {
+          "description": "One shared service layer powers both the `prismctl` Cobra CLI and an MCP server exposing 9 tools for Claude Code session integration"
+        },
+        {
+          "description": "Bidirectional ROADMAP.md sync, git commit ingestion for `Refs:` trailers, and JSONL snapshot export for portable backups"
+        }
+      ],
+      "added": [
+        {
+          "description": "Ent schema and generated code for Initiative, Phase, RoadmapItem, Assignment, DeliveryEvidence, Repository, and their dependency edges",
+          "commit": "db4d1eb"
+        },
+        {
+          "description": "Store interface with sub-interfaces for initiatives, phases, RMIs, assignments, evidence, and repositories, plus a MemStore in-memory fake, an Ent-backed DoltStore implementation (embedded and server modes), and typed error kinds in `pcerr`",
+          "commit": "5a5fd93"
+        },
+        {
+          "description": "Core domain packages: initiative lifecycle with phase status always derived from member RMIs, lease-based work assignments (claim/release/renew/complete), commit trailer parsing for `Refs:` and `Co-authored-by`, and RMI status/dependency tracking",
+          "commit": "acd03da"
+        },
+        {
+          "description": "ROADMAP.md parser, generator, and diff for bidirectional sync between markdown specs and the database; git commit ingestion for `Refs:` trailers and structured-changelog import; JSONL snapshot export with manifest for portable backups",
+          "commit": "ad376da"
+        },
+        {
+          "description": "Initiative report generation (markdown and JSON), dependency-ordered release planning, git repository scanning via gogit for commit attribution, and store-wide consistency validation (ID format, dangling dependencies, cycles, expired leases, status coherence, evidence coverage)",
+          "commit": "0832dfa"
+        },
+        {
+          "description": "Shared service layer called identically by the CLI and MCP adapters (initiative CRUD, phase management, RMI operations, work claims with lease enforcement, roadmap sync, ingestion, reports, validation, export) and an MCP server exposing 9 tools over stdio transport",
+          "commit": "c60ed09"
+        },
+        {
+          "description": "Root `prismcontrol` package as the importable SDK facade",
+          "commit": "0b62479"
+        },
+        {
+          "description": "Full `prismctl` Cobra CLI: database management (init, serve, create-views), a two-level dashboard (live server and static snapshot), registry, initiatives (CRUD, dependencies, program grouping), phases, RMIs (CRUD, dependencies, bulk status), work assignments (claim, release, renew, complete), roadmap sync, ingestion, reports, validation, export, and an MCP server launcher",
+          "commit": "64c1a4f"
+        }
+      ],
+      "fixed": [
+        {
+          "description": "Resolved all golangci-lint errors: gofmt formatting, `ReadHeaderTimeout` on the dashboard HTTP server (Slowloris mitigation), tightened `WriteFile` permissions to 0o600, gosec suppressions for a test helper exec and an intentional `safeHTML` template func, and removal of always-constant test helper parameters",
+          "commit": "0ba1916"
+        }
+      ],
+      "changed": [
+        {
+          "description": "Gated all doltstore-importing code behind a `dolt` build tag so `go build`, `go test`, and `golangci-lint run` work without CGO or ICU headers; full Dolt functionality now requires `-tags dolt`",
+          "commit": "d536cc5"
+        }
+      ],
+      "documentation": [
+        {
+          "description": "Added PRD, TRD, PLAN, ROADMAP, and WALKTHROUGH specs under `docs/specs/`",
+          "commit": "eb12bbd"
+        },
+        {
+          "description": "Added README, CLAUDE.md, and a 22-page MkDocs site (Material theme) covering getting started, user guide, CLI reference, MCP server, integrations, architecture, and case study",
+          "commit": "4f5d9a4"
+        },
+        {
+          "description": "Added status shields to README.md",
+          "commit": "db02034"
+        },
+        {
+          "description": "Documented the ICU build requirement and CI package exclusions in CLAUDE.md",
+          "commit": "d6c301f"
+        },
+        {
+          "description": "Added dashboard screenshot to README",
+          "commit": "f3a59f4"
+        }
+      ],
+      "dependencies": [
+        {
+          "description": "Bumped `dolthub/fslock` v0.0.4 to v0.0.5 and `vbauerster/mpb/v8` v8.12.1 to v8.13.0",
+          "commit": "55f93ea"
+        }
+      ],
+      "infrastructure": [
+        {
+          "description": "Excluded the doltstore and cmd/prismctl packages (which require ICU C headers unavailable on standard runners) from test, lint, and CodeQL workflows; dropped Windows from the test matrix, bumped actions to v7, and fixed checkout-before-setup-go ordering",
+          "commit": "ff62c8a"
+        }
+      ],
+      "internal": [
+        {
+          "description": "Added .gitignore and module definition (Go 1.26, Ent, Dolt driver, MCP SDK, Cobra)",
+          "commit": "f57aba7"
+        },
+        {
+          "description": "Set up standard CI workflow files, Dependabot configuration, and golangci-lint config",
+          "commit": "5d96e05"
+        },
+        {
+          "description": "Added LICENSE file",
+          "commit": "4348bf8"
+        }
+      ]
+    }
+  ]
+}
