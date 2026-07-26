@@ -37,6 +37,8 @@ func Run(ctx context.Context, svc *service.Service) error {
 }
 
 func registerTools(s *mcp.Server, svc *service.Service) {
+	s.AddTool(programListTool(), programListHandler(svc))
+	s.AddTool(programCreateTool(), programCreateHandler(svc))
 	s.AddTool(initiativeListTool(), initiativeListHandler(svc))
 	s.AddTool(initiativeGetTool(), initiativeGetHandler(svc))
 	s.AddTool(initiativeCreateTool(), initiativeCreateHandler(svc))
@@ -46,6 +48,64 @@ func registerTools(s *mcp.Server, svc *service.Service) {
 	s.AddTool(taskReleaseTool(), taskReleaseHandler(svc))
 	s.AddTool(taskUpdateTool(), taskUpdateHandler(svc))
 	s.AddTool(reportInitiativeTool(), reportInitiativeHandler(svc))
+}
+
+// ---------- program_list ----------
+
+func programListTool() *mcp.Tool {
+	return &mcp.Tool{
+		Name:        "program_list",
+		Description: "List all programs.",
+		InputSchema: json.RawMessage(`{"type":"object","properties":{}}`),
+	}
+}
+
+func programListHandler(svc *service.Service) mcp.ToolHandler {
+	return func(ctx context.Context, req *mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		progs, err := svc.ListPrograms(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return jsonResult(progs)
+	}
+}
+
+// ---------- program_create ----------
+
+func programCreateTool() *mcp.Tool {
+	return &mcp.Tool{
+		Name:        "program_create",
+		Description: "Create a new program for grouping related initiatives.",
+		InputSchema: json.RawMessage(`{
+			"type":"object",
+			"properties":{
+				"id":{"type":"string","description":"Program ID (e.g. PROG-DELIVERY)"},
+				"name":{"type":"string","description":"Human-readable program name"},
+				"organization":{"type":"string","description":"Organization name"},
+				"description":{"type":"string","description":"Program description"}
+			},
+			"required":["id","name","organization"]
+		}`),
+	}
+}
+
+func programCreateHandler(svc *service.Service) mcp.ToolHandler {
+	return func(ctx context.Context, req *mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		var args struct {
+			ID           string `json:"id"`
+			Name         string `json:"name"`
+			Organization string `json:"organization"`
+			Description  string `json:"description"`
+		}
+		if err := json.Unmarshal(req.Params.Arguments, &args); err != nil {
+			return nil, fmt.Errorf("parse arguments: %w", err)
+		}
+		prog, err := svc.CreateProgram(ctx, args.ID, args.Name, args.Organization, args.Description)
+		if err != nil {
+			return nil, err
+		}
+		return jsonResult(prog)
+	}
 }
 
 // ---------- initiative_list ----------
@@ -113,7 +173,8 @@ func initiativeCreateTool() *mcp.Tool {
 				"organization":{"type":"string","description":"Organization name"},
 				"title":{"type":"string","description":"Short title"},
 				"description":{"type":"string","description":"Full description"},
-				"priority":{"type":"string","description":"Priority level"}
+				"priority":{"type":"string","description":"Priority level"},
+				"program_id":{"type":"string","description":"Program ID to associate (e.g. PROG-DELIVERY)"}
 			},
 			"required":["id","organization","title"]
 		}`),
@@ -128,6 +189,7 @@ func initiativeCreateHandler(svc *service.Service) mcp.ToolHandler {
 			Title        string `json:"title"`
 			Description  string `json:"description"`
 			Priority     string `json:"priority"`
+			ProgramID    string `json:"program_id"`
 		}
 		if err := json.Unmarshal(req.Params.Arguments, &args); err != nil {
 			return nil, fmt.Errorf("parse arguments: %w", err)
@@ -135,6 +197,12 @@ func initiativeCreateHandler(svc *service.Service) mcp.ToolHandler {
 		init, err := svc.CreateInitiative(ctx, args.ID, args.Organization, args.Title, args.Description, args.Priority)
 		if err != nil {
 			return nil, err
+		}
+		if args.ProgramID != "" {
+			init.ProgramID = args.ProgramID
+			if err := svc.UpdateInitiative(ctx, init); err != nil {
+				return nil, err
+			}
 		}
 		return jsonResult(init)
 	}
