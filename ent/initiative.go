@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/ProductBuildersHQ/prism-control/ent/initiative"
+	"github.com/ProductBuildersHQ/prism-control/ent/program"
 )
 
 // Initiative is the model entity for the Initiative schema.
@@ -32,8 +33,6 @@ type Initiative struct {
 	HomeRepo string `json:"home_repo,omitempty"`
 	// Workspace holds the value of the "workspace" field.
 	Workspace string `json:"workspace,omitempty"`
-	// Program holds the value of the "program" field.
-	Program *string `json:"program,omitempty"`
 	// Specs holds the value of the "specs" field.
 	Specs map[string]string `json:"specs,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -52,8 +51,9 @@ type Initiative struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the InitiativeQuery when eager-loading is set.
-	Edges        InitiativeEdges `json:"edges"`
-	selectValues sql.SelectValues
+	Edges               InitiativeEdges `json:"edges"`
+	program_initiatives *string
+	selectValues        sql.SelectValues
 }
 
 // InitiativeEdges holds the relations/edges for other nodes in the graph.
@@ -62,9 +62,11 @@ type InitiativeEdges struct {
 	Phases []*Phase `json:"phases,omitempty"`
 	// RoadmapItems holds the value of the roadmap_items edge.
 	RoadmapItems []*RoadmapItem `json:"roadmap_items,omitempty"`
+	// Program holds the value of the program edge.
+	Program *Program `json:"program,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // PhasesOrErr returns the Phases value or an error if the edge
@@ -85,6 +87,17 @@ func (e InitiativeEdges) RoadmapItemsOrErr() ([]*RoadmapItem, error) {
 	return nil, &NotLoadedError{edge: "roadmap_items"}
 }
 
+// ProgramOrErr returns the Program value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e InitiativeEdges) ProgramOrErr() (*Program, error) {
+	if e.Program != nil {
+		return e.Program, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: program.Label}
+	}
+	return nil, &NotLoadedError{edge: "program"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Initiative) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -92,10 +105,12 @@ func (*Initiative) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case initiative.FieldSpecs:
 			values[i] = new([]byte)
-		case initiative.FieldID, initiative.FieldOrganization, initiative.FieldTitle, initiative.FieldDescription, initiative.FieldStatus, initiative.FieldPriority, initiative.FieldHomeRepo, initiative.FieldWorkspace, initiative.FieldProgram:
+		case initiative.FieldID, initiative.FieldOrganization, initiative.FieldTitle, initiative.FieldDescription, initiative.FieldStatus, initiative.FieldPriority, initiative.FieldHomeRepo, initiative.FieldWorkspace:
 			values[i] = new(sql.NullString)
 		case initiative.FieldCreatedAt, initiative.FieldPlannedAt, initiative.FieldExecutingAt, initiative.FieldDeliveryCompleteAt, initiative.FieldReleasedAt, initiative.FieldClosedAt, initiative.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
+		case initiative.ForeignKeys[0]: // program_initiatives
+			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -159,13 +174,6 @@ func (_m *Initiative) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Workspace = value.String
 			}
-		case initiative.FieldProgram:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field program", values[i])
-			} else if value.Valid {
-				_m.Program = new(string)
-				*_m.Program = value.String
-			}
 		case initiative.FieldSpecs:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field specs", values[i])
@@ -221,6 +229,13 @@ func (_m *Initiative) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
+		case initiative.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field program_initiatives", values[i])
+			} else if value.Valid {
+				_m.program_initiatives = new(string)
+				*_m.program_initiatives = value.String
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -242,6 +257,11 @@ func (_m *Initiative) QueryPhases() *PhaseQuery {
 // QueryRoadmapItems queries the "roadmap_items" edge of the Initiative entity.
 func (_m *Initiative) QueryRoadmapItems() *RoadmapItemQuery {
 	return NewInitiativeClient(_m.config).QueryRoadmapItems(_m)
+}
+
+// QueryProgram queries the "program" edge of the Initiative entity.
+func (_m *Initiative) QueryProgram() *ProgramQuery {
+	return NewInitiativeClient(_m.config).QueryProgram(_m)
 }
 
 // Update returns a builder for updating this Initiative.
@@ -287,11 +307,6 @@ func (_m *Initiative) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("workspace=")
 	builder.WriteString(_m.Workspace)
-	builder.WriteString(", ")
-	if v := _m.Program; v != nil {
-		builder.WriteString("program=")
-		builder.WriteString(*v)
-	}
 	builder.WriteString(", ")
 	builder.WriteString("specs=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Specs))

@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/ProductBuildersHQ/prism-control/ent/initiative"
 	"github.com/ProductBuildersHQ/prism-control/ent/phase"
+	"github.com/ProductBuildersHQ/prism-control/ent/program"
 	"github.com/ProductBuildersHQ/prism-control/ent/roadmapitem"
 )
 
@@ -92,20 +93,6 @@ func (_c *InitiativeCreate) SetWorkspace(v string) *InitiativeCreate {
 func (_c *InitiativeCreate) SetNillableWorkspace(v *string) *InitiativeCreate {
 	if v != nil {
 		_c.SetWorkspace(*v)
-	}
-	return _c
-}
-
-// SetProgram sets the "program" field.
-func (_c *InitiativeCreate) SetProgram(v string) *InitiativeCreate {
-	_c.mutation.SetProgram(v)
-	return _c
-}
-
-// SetNillableProgram sets the "program" field if the given value is not nil.
-func (_c *InitiativeCreate) SetNillableProgram(v *string) *InitiativeCreate {
-	if v != nil {
-		_c.SetProgram(*v)
 	}
 	return _c
 }
@@ -234,6 +221,25 @@ func (_c *InitiativeCreate) AddRoadmapItems(v ...*RoadmapItem) *InitiativeCreate
 	return _c.AddRoadmapItemIDs(ids...)
 }
 
+// SetProgramID sets the "program" edge to the Program entity by ID.
+func (_c *InitiativeCreate) SetProgramID(id string) *InitiativeCreate {
+	_c.mutation.SetProgramID(id)
+	return _c
+}
+
+// SetNillableProgramID sets the "program" edge to the Program entity by ID if the given value is not nil.
+func (_c *InitiativeCreate) SetNillableProgramID(id *string) *InitiativeCreate {
+	if id != nil {
+		_c = _c.SetProgramID(*id)
+	}
+	return _c
+}
+
+// SetProgram sets the "program" edge to the Program entity.
+func (_c *InitiativeCreate) SetProgram(v *Program) *InitiativeCreate {
+	return _c.SetProgramID(v.ID)
+}
+
 // Mutation returns the InitiativeMutation object of the builder.
 func (_c *InitiativeCreate) Mutation() *InitiativeMutation {
 	return _c.mutation
@@ -305,11 +311,6 @@ func (_c *InitiativeCreate) check() error {
 	if v, ok := _c.mutation.Workspace(); ok {
 		if err := initiative.WorkspaceValidator(v); err != nil {
 			return &ValidationError{Name: "workspace", err: fmt.Errorf(`ent: validator failed for field "Initiative.workspace": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.Program(); ok {
-		if err := initiative.ProgramValidator(v); err != nil {
-			return &ValidationError{Name: "program", err: fmt.Errorf(`ent: validator failed for field "Initiative.program": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
@@ -386,10 +387,6 @@ func (_c *InitiativeCreate) createSpec() (*Initiative, *sqlgraph.CreateSpec) {
 		_spec.SetField(initiative.FieldWorkspace, field.TypeString, value)
 		_node.Workspace = value
 	}
-	if value, ok := _c.mutation.Program(); ok {
-		_spec.SetField(initiative.FieldProgram, field.TypeString, value)
-		_node.Program = &value
-	}
 	if value, ok := _c.mutation.Specs(); ok {
 		_spec.SetField(initiative.FieldSpecs, field.TypeJSON, value)
 		_node.Specs = value
@@ -452,6 +449,23 @@ func (_c *InitiativeCreate) createSpec() (*Initiative, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ProgramIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   initiative.ProgramTable,
+			Columns: []string{initiative.ProgramColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(program.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.program_initiatives = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

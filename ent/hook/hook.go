@@ -69,6 +69,18 @@ func (f PhaseFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PhaseMutation", m)
 }
 
+// The ProgramFunc type is an adapter to allow the use of ordinary
+// function as Program mutator.
+type ProgramFunc func(context.Context, *ent.ProgramMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ProgramFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ProgramMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProgramMutation", m)
+}
+
 // The RMIDependencyFunc type is an adapter to allow the use of ordinary
 // function as RMIDependency mutator.
 type RMIDependencyFunc func(context.Context, *ent.RMIDependencyMutation) (ent.Value, error)

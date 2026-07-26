@@ -26,8 +26,6 @@ const (
 	FieldHomeRepo = "home_repo"
 	// FieldWorkspace holds the string denoting the workspace field in the database.
 	FieldWorkspace = "workspace"
-	// FieldProgram holds the string denoting the program field in the database.
-	FieldProgram = "program"
 	// FieldSpecs holds the string denoting the specs field in the database.
 	FieldSpecs = "specs"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
@@ -48,10 +46,14 @@ const (
 	EdgePhases = "phases"
 	// EdgeRoadmapItems holds the string denoting the roadmap_items edge name in mutations.
 	EdgeRoadmapItems = "roadmap_items"
+	// EdgeProgram holds the string denoting the program edge name in mutations.
+	EdgeProgram = "program"
 	// PhaseFieldID holds the string denoting the ID field of the Phase.
 	PhaseFieldID = "phase_id"
 	// RoadmapItemFieldID holds the string denoting the ID field of the RoadmapItem.
 	RoadmapItemFieldID = "rmi_id"
+	// ProgramFieldID holds the string denoting the ID field of the Program.
+	ProgramFieldID = "program_id"
 	// Table holds the table name of the initiative in the database.
 	Table = "initiatives"
 	// PhasesTable is the table that holds the phases relation/edge.
@@ -68,6 +70,13 @@ const (
 	RoadmapItemsInverseTable = "roadmap_items"
 	// RoadmapItemsColumn is the table column denoting the roadmap_items relation/edge.
 	RoadmapItemsColumn = "initiative_roadmap_items"
+	// ProgramTable is the table that holds the program relation/edge.
+	ProgramTable = "initiatives"
+	// ProgramInverseTable is the table name for the Program entity.
+	// It exists in this package in order to avoid circular dependency with the "program" package.
+	ProgramInverseTable = "programs"
+	// ProgramColumn is the table column denoting the program relation/edge.
+	ProgramColumn = "program_initiatives"
 )
 
 // Columns holds all SQL columns for initiative fields.
@@ -80,7 +89,6 @@ var Columns = []string{
 	FieldPriority,
 	FieldHomeRepo,
 	FieldWorkspace,
-	FieldProgram,
 	FieldSpecs,
 	FieldCreatedAt,
 	FieldPlannedAt,
@@ -91,10 +99,21 @@ var Columns = []string{
 	FieldUpdatedAt,
 }
 
+// ForeignKeys holds the SQL foreign-keys that are owned by the "initiatives"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"program_initiatives",
+}
+
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -114,8 +133,6 @@ var (
 	HomeRepoValidator func(string) error
 	// WorkspaceValidator is a validator for the "workspace" field. It is called by the builders before save.
 	WorkspaceValidator func(string) error
-	// ProgramValidator is a validator for the "program" field. It is called by the builders before save.
-	ProgramValidator func(string) error
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(string) error
 )
@@ -161,11 +178,6 @@ func ByHomeRepo(opts ...sql.OrderTermOption) OrderOption {
 // ByWorkspace orders the results by the workspace field.
 func ByWorkspace(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldWorkspace, opts...).ToFunc()
-}
-
-// ByProgram orders the results by the program field.
-func ByProgram(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldProgram, opts...).ToFunc()
 }
 
 // ByCreatedAt orders the results by the created_at field.
@@ -230,6 +242,13 @@ func ByRoadmapItems(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newRoadmapItemsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByProgramField orders the results by program field.
+func ByProgramField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newProgramStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newPhasesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -242,5 +261,12 @@ func newRoadmapItemsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(RoadmapItemsInverseTable, RoadmapItemFieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, RoadmapItemsTable, RoadmapItemsColumn),
+	)
+}
+func newProgramStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ProgramInverseTable, ProgramFieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, ProgramTable, ProgramColumn),
 	)
 }

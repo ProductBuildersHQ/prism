@@ -70,7 +70,6 @@ var (
 		{Name: "priority", Type: field.TypeString, Nullable: true, Size: 32},
 		{Name: "home_repo", Type: field.TypeString, Nullable: true, Size: 255},
 		{Name: "workspace", Type: field.TypeString, Nullable: true, Size: 128},
-		{Name: "program", Type: field.TypeString, Nullable: true, Size: 128},
 		{Name: "specs", Type: field.TypeJSON, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "planned_at", Type: field.TypeTime, Nullable: true},
@@ -79,12 +78,21 @@ var (
 		{Name: "released_at", Type: field.TypeTime, Nullable: true},
 		{Name: "closed_at", Type: field.TypeTime, Nullable: true},
 		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "program_initiatives", Type: field.TypeString, Nullable: true, Size: 64},
 	}
 	// InitiativesTable holds the schema information for the "initiatives" table.
 	InitiativesTable = &schema.Table{
 		Name:       "initiatives",
 		Columns:    InitiativesColumns,
 		PrimaryKey: []*schema.Column{InitiativesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "initiatives_programs_initiatives",
+				Columns:    []*schema.Column{InitiativesColumns[16]},
+				RefColumns: []*schema.Column{ProgramsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// InitiativeDependenciesColumns holds the columns for the "initiative_dependencies" table.
 	InitiativeDependenciesColumns = []*schema.Column{
@@ -127,6 +135,21 @@ var (
 				OnDelete:   schema.NoAction,
 			},
 		},
+	}
+	// ProgramsColumns holds the columns for the "programs" table.
+	ProgramsColumns = []*schema.Column{
+		{Name: "program_id", Type: field.TypeString, Size: 64},
+		{Name: "name", Type: field.TypeString, Size: 128},
+		{Name: "organization", Type: field.TypeString, Size: 128},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// ProgramsTable holds the schema information for the "programs" table.
+	ProgramsTable = &schema.Table{
+		Name:       "programs",
+		Columns:    ProgramsColumns,
+		PrimaryKey: []*schema.Column{ProgramsColumns[0]},
 	}
 	// RmiDependenciesColumns holds the columns for the "rmi_dependencies" table.
 	RmiDependenciesColumns = []*schema.Column{
@@ -237,6 +260,7 @@ var (
 		InitiativesTable,
 		InitiativeDependenciesTable,
 		PhasesTable,
+		ProgramsTable,
 		RmiDependenciesTable,
 		RepositoriesTable,
 		RepositoryDependenciesTable,
@@ -247,6 +271,7 @@ var (
 func init() {
 	AssignmentsTable.ForeignKeys[0].RefTable = RoadmapItemsTable
 	DeliveryEvidencesTable.ForeignKeys[0].RefTable = RoadmapItemsTable
+	InitiativesTable.ForeignKeys[0].RefTable = ProgramsTable
 	PhasesTable.ForeignKeys[0].RefTable = InitiativesTable
 	RoadmapItemsTable.ForeignKeys[0].RefTable = InitiativesTable
 	RoadmapItemsTable.ForeignKeys[1].RefTable = PhasesTable

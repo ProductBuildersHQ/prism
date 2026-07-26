@@ -100,11 +100,6 @@ func Workspace(v string) predicate.Initiative {
 	return predicate.Initiative(sql.FieldEQ(FieldWorkspace, v))
 }
 
-// Program applies equality check predicate on the "program" field. It's identical to ProgramEQ.
-func Program(v string) predicate.Initiative {
-	return predicate.Initiative(sql.FieldEQ(FieldProgram, v))
-}
-
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.Initiative {
 	return predicate.Initiative(sql.FieldEQ(FieldCreatedAt, v))
@@ -635,81 +630,6 @@ func WorkspaceContainsFold(v string) predicate.Initiative {
 	return predicate.Initiative(sql.FieldContainsFold(FieldWorkspace, v))
 }
 
-// ProgramEQ applies the EQ predicate on the "program" field.
-func ProgramEQ(v string) predicate.Initiative {
-	return predicate.Initiative(sql.FieldEQ(FieldProgram, v))
-}
-
-// ProgramNEQ applies the NEQ predicate on the "program" field.
-func ProgramNEQ(v string) predicate.Initiative {
-	return predicate.Initiative(sql.FieldNEQ(FieldProgram, v))
-}
-
-// ProgramIn applies the In predicate on the "program" field.
-func ProgramIn(vs ...string) predicate.Initiative {
-	return predicate.Initiative(sql.FieldIn(FieldProgram, vs...))
-}
-
-// ProgramNotIn applies the NotIn predicate on the "program" field.
-func ProgramNotIn(vs ...string) predicate.Initiative {
-	return predicate.Initiative(sql.FieldNotIn(FieldProgram, vs...))
-}
-
-// ProgramGT applies the GT predicate on the "program" field.
-func ProgramGT(v string) predicate.Initiative {
-	return predicate.Initiative(sql.FieldGT(FieldProgram, v))
-}
-
-// ProgramGTE applies the GTE predicate on the "program" field.
-func ProgramGTE(v string) predicate.Initiative {
-	return predicate.Initiative(sql.FieldGTE(FieldProgram, v))
-}
-
-// ProgramLT applies the LT predicate on the "program" field.
-func ProgramLT(v string) predicate.Initiative {
-	return predicate.Initiative(sql.FieldLT(FieldProgram, v))
-}
-
-// ProgramLTE applies the LTE predicate on the "program" field.
-func ProgramLTE(v string) predicate.Initiative {
-	return predicate.Initiative(sql.FieldLTE(FieldProgram, v))
-}
-
-// ProgramContains applies the Contains predicate on the "program" field.
-func ProgramContains(v string) predicate.Initiative {
-	return predicate.Initiative(sql.FieldContains(FieldProgram, v))
-}
-
-// ProgramHasPrefix applies the HasPrefix predicate on the "program" field.
-func ProgramHasPrefix(v string) predicate.Initiative {
-	return predicate.Initiative(sql.FieldHasPrefix(FieldProgram, v))
-}
-
-// ProgramHasSuffix applies the HasSuffix predicate on the "program" field.
-func ProgramHasSuffix(v string) predicate.Initiative {
-	return predicate.Initiative(sql.FieldHasSuffix(FieldProgram, v))
-}
-
-// ProgramIsNil applies the IsNil predicate on the "program" field.
-func ProgramIsNil() predicate.Initiative {
-	return predicate.Initiative(sql.FieldIsNull(FieldProgram))
-}
-
-// ProgramNotNil applies the NotNil predicate on the "program" field.
-func ProgramNotNil() predicate.Initiative {
-	return predicate.Initiative(sql.FieldNotNull(FieldProgram))
-}
-
-// ProgramEqualFold applies the EqualFold predicate on the "program" field.
-func ProgramEqualFold(v string) predicate.Initiative {
-	return predicate.Initiative(sql.FieldEqualFold(FieldProgram, v))
-}
-
-// ProgramContainsFold applies the ContainsFold predicate on the "program" field.
-func ProgramContainsFold(v string) predicate.Initiative {
-	return predicate.Initiative(sql.FieldContainsFold(FieldProgram, v))
-}
-
 // SpecsIsNil applies the IsNil predicate on the "specs" field.
 func SpecsIsNil() predicate.Initiative {
 	return predicate.Initiative(sql.FieldIsNull(FieldSpecs))
@@ -1088,6 +1008,29 @@ func HasRoadmapItems() predicate.Initiative {
 func HasRoadmapItemsWith(preds ...predicate.RoadmapItem) predicate.Initiative {
 	return predicate.Initiative(func(s *sql.Selector) {
 		step := newRoadmapItemsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasProgram applies the HasEdge predicate on the "program" edge.
+func HasProgram() predicate.Initiative {
+	return predicate.Initiative(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ProgramTable, ProgramColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasProgramWith applies the HasEdge predicate on the "program" edge with a given conditions (other predicates).
+func HasProgramWith(preds ...predicate.Program) predicate.Initiative {
+	return predicate.Initiative(func(s *sql.Selector) {
+		step := newProgramStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

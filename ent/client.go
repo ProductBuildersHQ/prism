@@ -20,6 +20,7 @@ import (
 	"github.com/ProductBuildersHQ/prism-control/ent/initiative"
 	"github.com/ProductBuildersHQ/prism-control/ent/initiativedependency"
 	"github.com/ProductBuildersHQ/prism-control/ent/phase"
+	"github.com/ProductBuildersHQ/prism-control/ent/program"
 	"github.com/ProductBuildersHQ/prism-control/ent/repository"
 	"github.com/ProductBuildersHQ/prism-control/ent/repositorydependency"
 	"github.com/ProductBuildersHQ/prism-control/ent/rmidependency"
@@ -41,6 +42,8 @@ type Client struct {
 	InitiativeDependency *InitiativeDependencyClient
 	// Phase is the client for interacting with the Phase builders.
 	Phase *PhaseClient
+	// Program is the client for interacting with the Program builders.
+	Program *ProgramClient
 	// RMIDependency is the client for interacting with the RMIDependency builders.
 	RMIDependency *RMIDependencyClient
 	// Repository is the client for interacting with the Repository builders.
@@ -65,6 +68,7 @@ func (c *Client) init() {
 	c.Initiative = NewInitiativeClient(c.config)
 	c.InitiativeDependency = NewInitiativeDependencyClient(c.config)
 	c.Phase = NewPhaseClient(c.config)
+	c.Program = NewProgramClient(c.config)
 	c.RMIDependency = NewRMIDependencyClient(c.config)
 	c.Repository = NewRepositoryClient(c.config)
 	c.RepositoryDependency = NewRepositoryDependencyClient(c.config)
@@ -166,6 +170,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Initiative:           NewInitiativeClient(cfg),
 		InitiativeDependency: NewInitiativeDependencyClient(cfg),
 		Phase:                NewPhaseClient(cfg),
+		Program:              NewProgramClient(cfg),
 		RMIDependency:        NewRMIDependencyClient(cfg),
 		Repository:           NewRepositoryClient(cfg),
 		RepositoryDependency: NewRepositoryDependencyClient(cfg),
@@ -194,6 +199,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Initiative:           NewInitiativeClient(cfg),
 		InitiativeDependency: NewInitiativeDependencyClient(cfg),
 		Phase:                NewPhaseClient(cfg),
+		Program:              NewProgramClient(cfg),
 		RMIDependency:        NewRMIDependencyClient(cfg),
 		Repository:           NewRepositoryClient(cfg),
 		RepositoryDependency: NewRepositoryDependencyClient(cfg),
@@ -228,7 +234,8 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Assignment, c.DeliveryEvidence, c.Initiative, c.InitiativeDependency, c.Phase,
-		c.RMIDependency, c.Repository, c.RepositoryDependency, c.RoadmapItem,
+		c.Program, c.RMIDependency, c.Repository, c.RepositoryDependency,
+		c.RoadmapItem,
 	} {
 		n.Use(hooks...)
 	}
@@ -239,7 +246,8 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Assignment, c.DeliveryEvidence, c.Initiative, c.InitiativeDependency, c.Phase,
-		c.RMIDependency, c.Repository, c.RepositoryDependency, c.RoadmapItem,
+		c.Program, c.RMIDependency, c.Repository, c.RepositoryDependency,
+		c.RoadmapItem,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -258,6 +266,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.InitiativeDependency.mutate(ctx, m)
 	case *PhaseMutation:
 		return c.Phase.mutate(ctx, m)
+	case *ProgramMutation:
+		return c.Program.mutate(ctx, m)
 	case *RMIDependencyMutation:
 		return c.RMIDependency.mutate(ctx, m)
 	case *RepositoryMutation:
@@ -709,6 +719,22 @@ func (c *InitiativeClient) QueryRoadmapItems(_m *Initiative) *RoadmapItemQuery {
 	return query
 }
 
+// QueryProgram queries the program edge of a Initiative.
+func (c *InitiativeClient) QueryProgram(_m *Initiative) *ProgramQuery {
+	query := (&ProgramClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(initiative.Table, initiative.FieldID, id),
+			sqlgraph.To(program.Table, program.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, initiative.ProgramTable, initiative.ProgramColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *InitiativeClient) Hooks() []Hook {
 	return c.hooks.Initiative
@@ -1029,6 +1055,155 @@ func (c *PhaseClient) mutate(ctx context.Context, m *PhaseMutation) (Value, erro
 		return (&PhaseDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Phase mutation op: %q", m.Op())
+	}
+}
+
+// ProgramClient is a client for the Program schema.
+type ProgramClient struct {
+	config
+}
+
+// NewProgramClient returns a client for the Program from the given config.
+func NewProgramClient(c config) *ProgramClient {
+	return &ProgramClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `program.Hooks(f(g(h())))`.
+func (c *ProgramClient) Use(hooks ...Hook) {
+	c.hooks.Program = append(c.hooks.Program, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `program.Intercept(f(g(h())))`.
+func (c *ProgramClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Program = append(c.inters.Program, interceptors...)
+}
+
+// Create returns a builder for creating a Program entity.
+func (c *ProgramClient) Create() *ProgramCreate {
+	mutation := newProgramMutation(c.config, OpCreate)
+	return &ProgramCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Program entities.
+func (c *ProgramClient) CreateBulk(builders ...*ProgramCreate) *ProgramCreateBulk {
+	return &ProgramCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ProgramClient) MapCreateBulk(slice any, setFunc func(*ProgramCreate, int)) *ProgramCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ProgramCreateBulk{err: fmt.Errorf("calling to ProgramClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ProgramCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ProgramCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Program.
+func (c *ProgramClient) Update() *ProgramUpdate {
+	mutation := newProgramMutation(c.config, OpUpdate)
+	return &ProgramUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ProgramClient) UpdateOne(_m *Program) *ProgramUpdateOne {
+	mutation := newProgramMutation(c.config, OpUpdateOne, withProgram(_m))
+	return &ProgramUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ProgramClient) UpdateOneID(id string) *ProgramUpdateOne {
+	mutation := newProgramMutation(c.config, OpUpdateOne, withProgramID(id))
+	return &ProgramUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Program.
+func (c *ProgramClient) Delete() *ProgramDelete {
+	mutation := newProgramMutation(c.config, OpDelete)
+	return &ProgramDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ProgramClient) DeleteOne(_m *Program) *ProgramDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ProgramClient) DeleteOneID(id string) *ProgramDeleteOne {
+	builder := c.Delete().Where(program.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ProgramDeleteOne{builder}
+}
+
+// Query returns a query builder for Program.
+func (c *ProgramClient) Query() *ProgramQuery {
+	return &ProgramQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeProgram},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Program entity by its id.
+func (c *ProgramClient) Get(ctx context.Context, id string) (*Program, error) {
+	return c.Query().Where(program.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ProgramClient) GetX(ctx context.Context, id string) *Program {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryInitiatives queries the initiatives edge of a Program.
+func (c *ProgramClient) QueryInitiatives(_m *Program) *InitiativeQuery {
+	query := (&InitiativeClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(program.Table, program.FieldID, id),
+			sqlgraph.To(initiative.Table, initiative.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, program.InitiativesTable, program.InitiativesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ProgramClient) Hooks() []Hook {
+	return c.hooks.Program
+}
+
+// Interceptors returns the client interceptors.
+func (c *ProgramClient) Interceptors() []Interceptor {
+	return c.inters.Program
+}
+
+func (c *ProgramClient) mutate(ctx context.Context, m *ProgramMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ProgramCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ProgramUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ProgramUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ProgramDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Program mutation op: %q", m.Op())
 	}
 }
 
@@ -1663,11 +1838,11 @@ func (c *RoadmapItemClient) mutate(ctx context.Context, m *RoadmapItemMutation) 
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Assignment, DeliveryEvidence, Initiative, InitiativeDependency, Phase,
+		Assignment, DeliveryEvidence, Initiative, InitiativeDependency, Phase, Program,
 		RMIDependency, Repository, RepositoryDependency, RoadmapItem []ent.Hook
 	}
 	inters struct {
-		Assignment, DeliveryEvidence, Initiative, InitiativeDependency, Phase,
+		Assignment, DeliveryEvidence, Initiative, InitiativeDependency, Phase, Program,
 		RMIDependency, Repository, RepositoryDependency, RoadmapItem []ent.Interceptor
 	}
 )

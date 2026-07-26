@@ -14,6 +14,7 @@ import (
 	"github.com/ProductBuildersHQ/prism-control/ent/initiative"
 	"github.com/ProductBuildersHQ/prism-control/ent/phase"
 	"github.com/ProductBuildersHQ/prism-control/ent/predicate"
+	"github.com/ProductBuildersHQ/prism-control/ent/program"
 	"github.com/ProductBuildersHQ/prism-control/ent/roadmapitem"
 )
 
@@ -149,26 +150,6 @@ func (_u *InitiativeUpdate) SetNillableWorkspace(v *string) *InitiativeUpdate {
 // ClearWorkspace clears the value of the "workspace" field.
 func (_u *InitiativeUpdate) ClearWorkspace() *InitiativeUpdate {
 	_u.mutation.ClearWorkspace()
-	return _u
-}
-
-// SetProgram sets the "program" field.
-func (_u *InitiativeUpdate) SetProgram(v string) *InitiativeUpdate {
-	_u.mutation.SetProgram(v)
-	return _u
-}
-
-// SetNillableProgram sets the "program" field if the given value is not nil.
-func (_u *InitiativeUpdate) SetNillableProgram(v *string) *InitiativeUpdate {
-	if v != nil {
-		_u.SetProgram(*v)
-	}
-	return _u
-}
-
-// ClearProgram clears the value of the "program" field.
-func (_u *InitiativeUpdate) ClearProgram() *InitiativeUpdate {
-	_u.mutation.ClearProgram()
 	return _u
 }
 
@@ -342,6 +323,25 @@ func (_u *InitiativeUpdate) AddRoadmapItems(v ...*RoadmapItem) *InitiativeUpdate
 	return _u.AddRoadmapItemIDs(ids...)
 }
 
+// SetProgramID sets the "program" edge to the Program entity by ID.
+func (_u *InitiativeUpdate) SetProgramID(id string) *InitiativeUpdate {
+	_u.mutation.SetProgramID(id)
+	return _u
+}
+
+// SetNillableProgramID sets the "program" edge to the Program entity by ID if the given value is not nil.
+func (_u *InitiativeUpdate) SetNillableProgramID(id *string) *InitiativeUpdate {
+	if id != nil {
+		_u = _u.SetProgramID(*id)
+	}
+	return _u
+}
+
+// SetProgram sets the "program" edge to the Program entity.
+func (_u *InitiativeUpdate) SetProgram(v *Program) *InitiativeUpdate {
+	return _u.SetProgramID(v.ID)
+}
+
 // Mutation returns the InitiativeMutation object of the builder.
 func (_u *InitiativeUpdate) Mutation() *InitiativeMutation {
 	return _u.mutation
@@ -387,6 +387,12 @@ func (_u *InitiativeUpdate) RemoveRoadmapItems(v ...*RoadmapItem) *InitiativeUpd
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveRoadmapItemIDs(ids...)
+}
+
+// ClearProgram clears the "program" edge to the Program entity.
+func (_u *InitiativeUpdate) ClearProgram() *InitiativeUpdate {
+	_u.mutation.ClearProgram()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -448,11 +454,6 @@ func (_u *InitiativeUpdate) check() error {
 			return &ValidationError{Name: "workspace", err: fmt.Errorf(`ent: validator failed for field "Initiative.workspace": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.Program(); ok {
-		if err := initiative.ProgramValidator(v); err != nil {
-			return &ValidationError{Name: "program", err: fmt.Errorf(`ent: validator failed for field "Initiative.program": %w`, err)}
-		}
-	}
 	return nil
 }
 
@@ -500,12 +501,6 @@ func (_u *InitiativeUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	}
 	if _u.mutation.WorkspaceCleared() {
 		_spec.ClearField(initiative.FieldWorkspace, field.TypeString)
-	}
-	if value, ok := _u.mutation.Program(); ok {
-		_spec.SetField(initiative.FieldProgram, field.TypeString, value)
-	}
-	if _u.mutation.ProgramCleared() {
-		_spec.ClearField(initiative.FieldProgram, field.TypeString)
 	}
 	if value, ok := _u.mutation.Specs(); ok {
 		_spec.SetField(initiative.FieldSpecs, field.TypeJSON, value)
@@ -632,6 +627,35 @@ func (_u *InitiativeUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(roadmapitem.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ProgramCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   initiative.ProgramTable,
+			Columns: []string{initiative.ProgramColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(program.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ProgramIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   initiative.ProgramTable,
+			Columns: []string{initiative.ProgramColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(program.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -778,26 +802,6 @@ func (_u *InitiativeUpdateOne) SetNillableWorkspace(v *string) *InitiativeUpdate
 // ClearWorkspace clears the value of the "workspace" field.
 func (_u *InitiativeUpdateOne) ClearWorkspace() *InitiativeUpdateOne {
 	_u.mutation.ClearWorkspace()
-	return _u
-}
-
-// SetProgram sets the "program" field.
-func (_u *InitiativeUpdateOne) SetProgram(v string) *InitiativeUpdateOne {
-	_u.mutation.SetProgram(v)
-	return _u
-}
-
-// SetNillableProgram sets the "program" field if the given value is not nil.
-func (_u *InitiativeUpdateOne) SetNillableProgram(v *string) *InitiativeUpdateOne {
-	if v != nil {
-		_u.SetProgram(*v)
-	}
-	return _u
-}
-
-// ClearProgram clears the value of the "program" field.
-func (_u *InitiativeUpdateOne) ClearProgram() *InitiativeUpdateOne {
-	_u.mutation.ClearProgram()
 	return _u
 }
 
@@ -971,6 +975,25 @@ func (_u *InitiativeUpdateOne) AddRoadmapItems(v ...*RoadmapItem) *InitiativeUpd
 	return _u.AddRoadmapItemIDs(ids...)
 }
 
+// SetProgramID sets the "program" edge to the Program entity by ID.
+func (_u *InitiativeUpdateOne) SetProgramID(id string) *InitiativeUpdateOne {
+	_u.mutation.SetProgramID(id)
+	return _u
+}
+
+// SetNillableProgramID sets the "program" edge to the Program entity by ID if the given value is not nil.
+func (_u *InitiativeUpdateOne) SetNillableProgramID(id *string) *InitiativeUpdateOne {
+	if id != nil {
+		_u = _u.SetProgramID(*id)
+	}
+	return _u
+}
+
+// SetProgram sets the "program" edge to the Program entity.
+func (_u *InitiativeUpdateOne) SetProgram(v *Program) *InitiativeUpdateOne {
+	return _u.SetProgramID(v.ID)
+}
+
 // Mutation returns the InitiativeMutation object of the builder.
 func (_u *InitiativeUpdateOne) Mutation() *InitiativeMutation {
 	return _u.mutation
@@ -1016,6 +1039,12 @@ func (_u *InitiativeUpdateOne) RemoveRoadmapItems(v ...*RoadmapItem) *Initiative
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveRoadmapItemIDs(ids...)
+}
+
+// ClearProgram clears the "program" edge to the Program entity.
+func (_u *InitiativeUpdateOne) ClearProgram() *InitiativeUpdateOne {
+	_u.mutation.ClearProgram()
+	return _u
 }
 
 // Where appends a list predicates to the InitiativeUpdate builder.
@@ -1090,11 +1119,6 @@ func (_u *InitiativeUpdateOne) check() error {
 			return &ValidationError{Name: "workspace", err: fmt.Errorf(`ent: validator failed for field "Initiative.workspace": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.Program(); ok {
-		if err := initiative.ProgramValidator(v); err != nil {
-			return &ValidationError{Name: "program", err: fmt.Errorf(`ent: validator failed for field "Initiative.program": %w`, err)}
-		}
-	}
 	return nil
 }
 
@@ -1159,12 +1183,6 @@ func (_u *InitiativeUpdateOne) sqlSave(ctx context.Context) (_node *Initiative, 
 	}
 	if _u.mutation.WorkspaceCleared() {
 		_spec.ClearField(initiative.FieldWorkspace, field.TypeString)
-	}
-	if value, ok := _u.mutation.Program(); ok {
-		_spec.SetField(initiative.FieldProgram, field.TypeString, value)
-	}
-	if _u.mutation.ProgramCleared() {
-		_spec.ClearField(initiative.FieldProgram, field.TypeString)
 	}
 	if value, ok := _u.mutation.Specs(); ok {
 		_spec.SetField(initiative.FieldSpecs, field.TypeJSON, value)
@@ -1291,6 +1309,35 @@ func (_u *InitiativeUpdateOne) sqlSave(ctx context.Context) (_node *Initiative, 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(roadmapitem.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ProgramCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   initiative.ProgramTable,
+			Columns: []string{initiative.ProgramColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(program.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ProgramIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   initiative.ProgramTable,
+			Columns: []string{initiative.ProgramColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(program.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

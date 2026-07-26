@@ -21,7 +21,6 @@ func (Initiative) Fields() []ent.Field {
 		field.String("priority").MaxLen(32).Optional(),
 		field.String("home_repo").MaxLen(255).Optional(),
 		field.String("workspace").MaxLen(128).Optional(),
-		field.String("program").MaxLen(128).Optional().Nillable(),
 		field.JSON("specs", map[string]string{}).Optional(),
 		field.Time("created_at"),
 		field.Time("planned_at").Optional().Nillable(),
@@ -37,5 +36,6 @@ func (Initiative) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("phases", Phase.Type),
 		edge.To("roadmap_items", RoadmapItem.Type),
+		edge.From("program", Program.Type).Ref("initiatives").Unique(),
 	}
 }

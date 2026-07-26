@@ -21,6 +21,9 @@ type InitiativeDependency func(*sql.Selector)
 // Phase is the predicate function for phase builders.
 type Phase func(*sql.Selector)
 
+// Program is the predicate function for program builders.
+type Program func(*sql.Selector)
+
 // RMIDependency is the predicate function for rmidependency builders.
 type RMIDependency func(*sql.Selector)
 

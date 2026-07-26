@@ -17,6 +17,7 @@ import (
 	"github.com/ProductBuildersHQ/prism-control/ent/initiative"
 	"github.com/ProductBuildersHQ/prism-control/ent/initiativedependency"
 	"github.com/ProductBuildersHQ/prism-control/ent/phase"
+	"github.com/ProductBuildersHQ/prism-control/ent/program"
 	"github.com/ProductBuildersHQ/prism-control/ent/repository"
 	"github.com/ProductBuildersHQ/prism-control/ent/repositorydependency"
 	"github.com/ProductBuildersHQ/prism-control/ent/rmidependency"
@@ -86,6 +87,7 @@ func checkColumn(t, c string) error {
 			initiative.Table:           initiative.ValidColumn,
 			initiativedependency.Table: initiativedependency.ValidColumn,
 			phase.Table:                phase.ValidColumn,
+			program.Table:              program.ValidColumn,
 			rmidependency.Table:        rmidependency.ValidColumn,
 			repository.Table:           repository.ValidColumn,
 			repositorydependency.Table: repositorydependency.ValidColumn,

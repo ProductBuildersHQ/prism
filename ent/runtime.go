@@ -8,6 +8,7 @@ import (
 	"github.com/ProductBuildersHQ/prism-control/ent/initiative"
 	"github.com/ProductBuildersHQ/prism-control/ent/initiativedependency"
 	"github.com/ProductBuildersHQ/prism-control/ent/phase"
+	"github.com/ProductBuildersHQ/prism-control/ent/program"
 	"github.com/ProductBuildersHQ/prism-control/ent/repository"
 	"github.com/ProductBuildersHQ/prism-control/ent/repositorydependency"
 	"github.com/ProductBuildersHQ/prism-control/ent/rmidependency"
@@ -85,10 +86,6 @@ func init() {
 	initiativeDescWorkspace := initiativeFields[7].Descriptor()
 	// initiative.WorkspaceValidator is a validator for the "workspace" field. It is called by the builders before save.
 	initiative.WorkspaceValidator = initiativeDescWorkspace.Validators[0].(func(string) error)
-	// initiativeDescProgram is the schema descriptor for program field.
-	initiativeDescProgram := initiativeFields[8].Descriptor()
-	// initiative.ProgramValidator is a validator for the "program" field. It is called by the builders before save.
-	initiative.ProgramValidator = initiativeDescProgram.Validators[0].(func(string) error)
 	// initiativeDescID is the schema descriptor for id field.
 	initiativeDescID := initiativeFields[0].Descriptor()
 	// initiative.IDValidator is a validator for the "id" field. It is called by the builders before save.
@@ -121,6 +118,20 @@ func init() {
 	phaseDescID := phaseFields[0].Descriptor()
 	// phase.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	phase.IDValidator = phaseDescID.Validators[0].(func(string) error)
+	programFields := schema.Program{}.Fields()
+	_ = programFields
+	// programDescName is the schema descriptor for name field.
+	programDescName := programFields[1].Descriptor()
+	// program.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	program.NameValidator = programDescName.Validators[0].(func(string) error)
+	// programDescOrganization is the schema descriptor for organization field.
+	programDescOrganization := programFields[2].Descriptor()
+	// program.OrganizationValidator is a validator for the "organization" field. It is called by the builders before save.
+	program.OrganizationValidator = programDescOrganization.Validators[0].(func(string) error)
+	// programDescID is the schema descriptor for id field.
+	programDescID := programFields[0].Descriptor()
+	// program.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	program.IDValidator = programDescID.Validators[0].(func(string) error)
 	rmidependencyFields := schema.RMIDependency{}.Fields()
 	_ = rmidependencyFields
 	// rmidependencyDescSourceRmiID is the schema descriptor for source_rmi_id field.

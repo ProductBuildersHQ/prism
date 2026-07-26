@@ -22,6 +22,8 @@ type Tx struct {
 	InitiativeDependency *InitiativeDependencyClient
 	// Phase is the client for interacting with the Phase builders.
 	Phase *PhaseClient
+	// Program is the client for interacting with the Program builders.
+	Program *ProgramClient
 	// RMIDependency is the client for interacting with the RMIDependency builders.
 	RMIDependency *RMIDependencyClient
 	// Repository is the client for interacting with the Repository builders.
@@ -166,6 +168,7 @@ func (tx *Tx) init() {
 	tx.Initiative = NewInitiativeClient(tx.config)
 	tx.InitiativeDependency = NewInitiativeDependencyClient(tx.config)
 	tx.Phase = NewPhaseClient(tx.config)
+	tx.Program = NewProgramClient(tx.config)
 	tx.RMIDependency = NewRMIDependencyClient(tx.config)
 	tx.Repository = NewRepositoryClient(tx.config)
 	tx.RepositoryDependency = NewRepositoryDependencyClient(tx.config)

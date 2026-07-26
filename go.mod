@@ -64,6 +64,7 @@ require (
 	github.com/bmatcuk/doublestar v1.3.4 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
+	github.com/clipperhouse/displaywidth v0.11.0 // indirect
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/cncf/xds/go v0.0.0-20260202195803-dba9d589def2 // indirect
 	github.com/denisbrodbeck/machineid v1.0.1 // indirect
@@ -193,7 +194,9 @@ require (
 
 // fslock v0.0.5 breaks dolthub/dolt/go — fslock.New signature changed.
 // mpb/v8 v8.13.0 breaks dolthub/dolt/go — cwriter.New signature changed.
+// displaywidth v0.6.2 breaks with Go 1.26 — generics Iterator type change.
 exclude (
+	github.com/clipperhouse/displaywidth v0.6.2
 	github.com/dolthub/fslock v0.0.5
 	github.com/vbauerster/mpb/v8 v8.13.0
 )
