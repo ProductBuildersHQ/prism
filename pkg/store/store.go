@@ -13,6 +13,7 @@ import (
 // Every mutating method runs inside a UnitOfWork; reads may be called directly.
 type Store interface {
 	InitiativeStore
+	ProgramStore
 	PhaseStore
 	RMIStore
 	AssignmentStore
@@ -39,7 +40,7 @@ type Initiative struct {
 	Priority           string
 	HomeRepo           string
 	Workspace          string
-	Program            string
+	ProgramID          string
 	Specs              map[string]string
 	CreatedAt          time.Time
 	PlannedAt          *time.Time
@@ -140,12 +141,30 @@ type Repository struct {
 	IngestHighWater string // last scanned commit SHA
 }
 
+// Program is an organizational grouping of related initiatives.
+type Program struct {
+	ID           string
+	Name         string
+	Organization string
+	Description  string
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+}
+
 // RepositoryDependency is a directed edge between two repositories
 // derived from go.mod dependency analysis.
 type RepositoryDependency struct {
 	SourceRepositoryID string
 	TargetRepositoryID string
 	DependencyType     string // "go_module"
+}
+
+// ProgramStore defines persistence for programs.
+type ProgramStore interface {
+	CreateProgram(ctx context.Context, prog *Program) error
+	GetProgram(ctx context.Context, id string) (*Program, error)
+	ListPrograms(ctx context.Context) ([]*Program, error)
+	UpdateProgram(ctx context.Context, prog *Program) error
 }
 
 // InitiativeStore defines persistence for initiatives.
