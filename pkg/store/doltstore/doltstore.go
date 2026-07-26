@@ -151,8 +151,8 @@ func entInitiativeToStore(e *ent.Initiative) *store.Initiative {
 		ClosedAt:           e.ClosedAt,
 		UpdatedAt:          e.UpdatedAt,
 	}
-	if e.Program != nil {
-		si.Program = *e.Program
+	if prog, err := e.Edges.ProgramOrErr(); err == nil {
+		si.ProgramID = prog.ID
 	}
 	return si
 }
@@ -177,8 +177,8 @@ func (d *DoltStore) CreateInitiative(ctx context.Context, init *store.Initiative
 	if init.Workspace != "" {
 		b.SetWorkspace(init.Workspace)
 	}
-	if init.Program != "" {
-		b.SetProgram(init.Program)
+	if init.ProgramID != "" {
+		b.SetProgramID(init.ProgramID)
 	}
 	if len(init.Specs) > 0 {
 		b.SetSpecs(init.Specs)
@@ -196,7 +196,10 @@ func (d *DoltStore) CreateInitiative(ctx context.Context, init *store.Initiative
 }
 
 func (d *DoltStore) GetInitiative(ctx context.Context, id string) (*store.Initiative, error) {
-	e, err := d.client.Initiative.Get(ctx, id)
+	e, err := d.client.Initiative.Query().
+		Where(initiativeEnt.IDEQ(id)).
+		WithProgram().
+		Only(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("get initiative %s: %w", id, err)
 	}
@@ -204,7 +207,7 @@ func (d *DoltStore) GetInitiative(ctx context.Context, id string) (*store.Initia
 }
 
 func (d *DoltStore) ListInitiatives(ctx context.Context) ([]*store.Initiative, error) {
-	rows, err := d.client.Initiative.Query().All(ctx)
+	rows, err := d.client.Initiative.Query().WithProgram().All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("list initiatives: %w", err)
 	}
@@ -241,8 +244,8 @@ func (d *DoltStore) UpdateInitiative(ctx context.Context, init *store.Initiative
 	} else {
 		b.ClearWorkspace()
 	}
-	if init.Program != "" {
-		b.SetProgram(init.Program)
+	if init.ProgramID != "" {
+		b.SetProgramID(init.ProgramID)
 	} else {
 		b.ClearProgram()
 	}
@@ -834,6 +837,75 @@ func (d *DoltStore) ListAllEvidence(ctx context.Context) ([]*store.DeliveryEvide
 		result[i] = entEvidenceToStore(e)
 	}
 	return result, nil
+}
+
+// ---------------------------------------------------------------------------
+// Program CRUD (Ent-backed)
+// ---------------------------------------------------------------------------
+
+func entProgramToStore(e *ent.Program) *store.Program {
+	return &store.Program{
+		ID:           e.ID,
+		Name:         e.Name,
+		Organization: e.Organization,
+		Description:  e.Description,
+		CreatedAt:    e.CreatedAt,
+		UpdatedAt:    e.UpdatedAt,
+	}
+}
+
+func (d *DoltStore) CreateProgram(ctx context.Context, prog *store.Program) error {
+	b := d.client.Program.Create().
+		SetID(prog.ID).
+		SetName(prog.Name).
+		SetOrganization(prog.Organization).
+		SetCreatedAt(prog.CreatedAt).
+		SetUpdatedAt(prog.UpdatedAt)
+	if prog.Description != "" {
+		b.SetDescription(prog.Description)
+	}
+	_, err := b.Save(ctx)
+	if err != nil {
+		return fmt.Errorf("create program: %w", err)
+	}
+	return nil
+}
+
+func (d *DoltStore) GetProgram(ctx context.Context, id string) (*store.Program, error) {
+	e, err := d.client.Program.Get(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("get program %s: %w", id, err)
+	}
+	return entProgramToStore(e), nil
+}
+
+func (d *DoltStore) ListPrograms(ctx context.Context) ([]*store.Program, error) {
+	rows, err := d.client.Program.Query().All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("list programs: %w", err)
+	}
+	result := make([]*store.Program, len(rows))
+	for i, e := range rows {
+		result[i] = entProgramToStore(e)
+	}
+	return result, nil
+}
+
+func (d *DoltStore) UpdateProgram(ctx context.Context, prog *store.Program) error {
+	b := d.client.Program.UpdateOneID(prog.ID).
+		SetName(prog.Name).
+		SetOrganization(prog.Organization).
+		SetUpdatedAt(prog.UpdatedAt)
+	if prog.Description != "" {
+		b.SetDescription(prog.Description)
+	} else {
+		b.ClearDescription()
+	}
+	_, err := b.Save(ctx)
+	if err != nil {
+		return fmt.Errorf("update program %s: %w", prog.ID, err)
+	}
+	return nil
 }
 
 // ---------------------------------------------------------------------------
