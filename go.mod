@@ -6,7 +6,7 @@ require (
 	entgo.io/ent v0.14.6
 	github.com/dolthub/driver v1.88.1
 	github.com/go-sql-driver/mysql v1.10.0
-	github.com/grokify/gogit v0.6.0
+	github.com/grokify/gogit v0.7.0
 	github.com/modelcontextprotocol/go-sdk v1.6.1
 	github.com/spf13/cobra v1.10.2
 )
@@ -64,7 +64,6 @@ require (
 	github.com/bmatcuk/doublestar v1.3.4 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/clipperhouse/displaywidth v0.11.0 // indirect
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/cncf/xds/go v0.0.0-20260202195803-dba9d589def2 // indirect
 	github.com/denisbrodbeck/machineid v1.0.1 // indirect
