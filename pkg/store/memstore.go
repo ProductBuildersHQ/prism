@@ -10,6 +10,7 @@ import (
 // It is safe for concurrent use.
 type MemStore struct {
 	mu           sync.RWMutex
+	programs     map[string]*Program
 	initiatives  map[string]*Initiative
 	phases       map[string]*Phase
 	rmis         map[string]*RoadmapItem
@@ -24,6 +25,7 @@ type MemStore struct {
 // NewMemStore creates a new in-memory store.
 func NewMemStore() *MemStore {
 	return &MemStore{
+		programs:     make(map[string]*Program),
 		initiatives:  make(map[string]*Initiative),
 		phases:       make(map[string]*Phase),
 		rmis:         make(map[string]*RoadmapItem),
@@ -31,6 +33,46 @@ func NewMemStore() *MemStore {
 		evidence:     make(map[string]*DeliveryEvidence),
 		repositories: make(map[string]*Repository),
 	}
+}
+
+func (m *MemStore) CreateProgram(_ context.Context, prog *Program) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if _, exists := m.programs[prog.ID]; exists {
+		return fmt.Errorf("program %s already exists", prog.ID)
+	}
+	m.programs[prog.ID] = prog
+	return nil
+}
+
+func (m *MemStore) GetProgram(_ context.Context, id string) (*Program, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	prog, ok := m.programs[id]
+	if !ok {
+		return nil, fmt.Errorf("program %s not found", id)
+	}
+	return prog, nil
+}
+
+func (m *MemStore) ListPrograms(_ context.Context) ([]*Program, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	result := make([]*Program, 0, len(m.programs))
+	for _, v := range m.programs {
+		result = append(result, v)
+	}
+	return result, nil
+}
+
+func (m *MemStore) UpdateProgram(_ context.Context, prog *Program) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if _, exists := m.programs[prog.ID]; !exists {
+		return fmt.Errorf("program %s not found", prog.ID)
+	}
+	m.programs[prog.ID] = prog
+	return nil
 }
 
 func (m *MemStore) CreateInitiative(_ context.Context, init *Initiative) error {
