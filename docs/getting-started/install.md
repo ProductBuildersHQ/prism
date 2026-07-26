@@ -56,7 +56,7 @@ prismctl validate
 
 ## Configuration
 
-prismctl stores configuration at `~/.productbuildershq/prism/config.json`. The `db serve` command writes the DSN automatically; you can also manage it manually:
+prismctl stores configuration at `~/.productbuildershq/prism/config.json`. The `db start` and `db serve` commands write the DSN automatically; you can also manage it manually:
 
 ```bash
 prismctl config show                    # display config and resolved DSN

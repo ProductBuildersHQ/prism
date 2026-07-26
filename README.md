@@ -91,12 +91,21 @@ PRISMCTL_DATA=/path/to/data prismctl initiative list
 Start a Dolt SQL server for concurrent access:
 
 ```bash
-# Terminal 1: start the server (auto-saves DSN to config)
-prismctl db serve --port 13306
+# Start the server in the background (auto-saves DSN to config)
+prismctl db start --port 13306
+
+# Check status
+prismctl db status
 
 # Terminal 2+: prismctl reads the DSN from config automatically
 prismctl initiative list
+
+# Restart or stop
+prismctl db restart
+prismctl db stop
 ```
+
+For foreground operation (e.g., in a dedicated terminal), use `prismctl db serve --port 13306` instead.
 
 Use `prismctl config show` to see the resolved DSN, or `prismctl config set dsn <value>` to set it manually.
 
@@ -201,7 +210,9 @@ The dashboard groups initiatives by program and shows initiative dependency edge
 
 ```
 prismctl db init                        Initialize database and run migration
-prismctl db serve                       Start a Dolt SQL server (server mode)
+prismctl db serve                       Start a Dolt SQL server (foreground)
+prismctl db start|stop|restart          Background server lifecycle management
+prismctl db status                      Check server status (PID, port, DSN)
 prismctl db create-views                Create read-only SQL views for consumers
 
 prismctl dashboard                      Two-level web dashboard (summary + drill-down)

@@ -54,12 +54,21 @@ prismctl supports two database modes:
 ### Starting Server Mode
 
 ```bash
-# Terminal 1: start the server (auto-saves DSN to ~/.productbuildershq/prism/config.json)
-prismctl db serve --port 13306
+# Start the server in the background (auto-saves DSN to config)
+prismctl db start --port 13306
+
+# Check server status
+prismctl db status
 
 # Terminal 2+: prismctl reads the DSN from config automatically
 prismctl initiative list   # connects to the server
+
+# Restart or stop
+prismctl db restart
+prismctl db stop
 ```
+
+For foreground operation, use `prismctl db serve --port 13306` instead.
 
 DSN resolution order: `--dsn` flag > `$PRISMCTL_DSN` env > config file > embedded default. Use `prismctl config show` to see the resolved value, or `prismctl config set dsn <value>` to set it manually.
 

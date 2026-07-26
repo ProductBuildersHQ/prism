@@ -21,7 +21,11 @@ All commands accept global flags:
 | Command | Description |
 |---------|-------------|
 | `db init` | Initialize database and run schema migration |
-| `db serve [--port N]` | Start a Dolt SQL server for concurrent access |
+| `db serve [--port N]` | Start a Dolt SQL server in the foreground |
+| `db start [--port N]` | Start the Dolt SQL server in the background (default port 13306) |
+| `db stop` | Stop the background Dolt SQL server |
+| `db restart [--port N]` | Restart the background Dolt SQL server |
+| `db status` | Check server status (PID, port, DSN) |
 | `db create-views` | Create read-only SQL views for VisionStudio and other consumers |
 
 ## Dashboard

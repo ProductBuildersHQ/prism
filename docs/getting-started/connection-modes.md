@@ -23,11 +23,20 @@ Multi-session access. Start a Dolt SQL server in one terminal, connect from any 
 ### Starting the Server
 
 ```bash
-# Terminal 1: start the server (runs in foreground)
-prismctl db serve --port 13306
+# Start the server in the background
+prismctl db start --port 13306
+
+# Check status
+prismctl db status
+
+# Restart or stop
+prismctl db restart
+prismctl db stop
 ```
 
-On startup, `db serve` automatically saves the DSN to `~/.productbuildershq/prism/config.json`. All other `prismctl` sessions pick it up immediately — no environment variables needed.
+On startup, `db start` automatically saves the DSN to `~/.productbuildershq/prism/config.json` and writes a PID file for lifecycle management. All other `prismctl` sessions pick up the DSN immediately — no environment variables needed.
+
+For foreground operation (e.g., in a dedicated terminal), use `prismctl db serve --port 13306` instead.
 
 ### Connecting
 
