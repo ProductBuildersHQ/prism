@@ -566,6 +566,7 @@ const summaryHTML = `<!DOCTYPE html>
   <h2 class="section-title">
     <a href="/program/{{ .ID }}">{{ .Name }}</a>
     <span class="program-pill">{{ len .Initiatives }} initiatives</span>
+    <span class="init-card-id" style="margin-left:8px;vertical-align:middle">{{ .ID }}</span>
   </h2>
   <div class="init-cards">
     {{- range .Initiatives }}
@@ -689,7 +690,8 @@ const detailHTML = `<!DOCTYPE html>
       <span>Home: {{ shortRepo .Init.Initiative.HomeRepo }}</span>
       {{- end }}
       {{- if .Init.Initiative.ProgramID }}
-      <span class="program-pill">{{ .Init.ProgramName }}</span>
+      <span class="program-pill"><a href="/program/{{ .Init.Initiative.ProgramID }}" style="color:inherit">{{ .Init.ProgramName }}</a></span>
+      <span class="init-card-id">{{ .Init.Initiative.ProgramID }}</span>
       {{- end }}
       {{- if .Init.Initiative.Workspace }}
       <span class="workspace-pill">{{ .Init.Initiative.Workspace }}</span>
@@ -812,7 +814,8 @@ const programHTML = `<!DOCTYPE html>
 
 <div class="breadcrumb"><a href="/">Dashboard</a> / {{ .Program.Name }}</div>
 
-<h1>{{ .Program.Name }} <span class="init-meta">{{ .Program.ID }}</span></h1>
+<h1>{{ .Program.Name }}</h1>
+<div class="init-card-id" style="margin-bottom:4px">{{ .Program.ID }}</div>
 <p class="subtitle">{{ len .Program.Initiatives }} initiatives in this program</p>
 
 {{- $totalRMIs := 0 }}
