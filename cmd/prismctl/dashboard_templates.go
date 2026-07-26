@@ -564,7 +564,7 @@ const summaryHTML = `<!DOCTYPE html>
 {{- range .Programs }}
 <div style="margin-bottom:32px">
   <h2 class="section-title">
-    <a href="/program/{{ urlEncode .Name }}">{{ .Name }}</a>
+    <a href="/program/{{ .ID }}">{{ .Name }}</a>
     <span class="program-pill">{{ len .Initiatives }} initiatives</span>
   </h2>
   <div class="init-cards">
@@ -673,7 +673,7 @@ const detailHTML = `<!DOCTYPE html>
 <body>
 
 <div class="breadcrumb"><a href="/">Dashboard</a>
-{{- if .Init.Initiative.Program }} / <a href="/program/{{ urlEncode .Init.Initiative.Program }}">{{ .Init.Initiative.Program }}</a>{{ end }}
+{{- if .Init.Initiative.ProgramID }} / <a href="/program/{{ .Init.Initiative.ProgramID }}">{{ .Init.ProgramName }}</a>{{ end }}
  / {{ .Init.Initiative.ID }}</div>
 
 <div class="initiative">
@@ -688,8 +688,8 @@ const detailHTML = `<!DOCTYPE html>
       {{- if .Init.Initiative.HomeRepo }}
       <span>Home: {{ shortRepo .Init.Initiative.HomeRepo }}</span>
       {{- end }}
-      {{- if .Init.Initiative.Program }}
-      <span class="program-pill">{{ .Init.Initiative.Program }}</span>
+      {{- if .Init.Initiative.ProgramID }}
+      <span class="program-pill">{{ .Init.ProgramName }}</span>
       {{- end }}
       {{- if .Init.Initiative.Workspace }}
       <span class="workspace-pill">{{ .Init.Initiative.Workspace }}</span>
@@ -812,7 +812,7 @@ const programHTML = `<!DOCTYPE html>
 
 <div class="breadcrumb"><a href="/">Dashboard</a> / {{ .Program.Name }}</div>
 
-<h1>{{ .Program.Name }}</h1>
+<h1>{{ .Program.Name }} <span class="init-meta">{{ .Program.ID }}</span></h1>
 <p class="subtitle">{{ len .Program.Initiatives }} initiatives in this program</p>
 
 {{- $totalRMIs := 0 }}

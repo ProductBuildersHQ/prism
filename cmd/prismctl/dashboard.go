@@ -129,13 +129,8 @@ func runDashboardServer(cmd *cobra.Command, port int) error {
 	})
 
 	mux.HandleFunc("/program/", func(w http.ResponseWriter, r *http.Request) {
-		name := strings.TrimPrefix(r.URL.Path, "/program/")
-		decoded, err := url.PathUnescape(name)
-		if err != nil {
-			http.Error(w, "bad program name", http.StatusBadRequest)
-			return
-		}
-		if decoded == "" {
+		id := strings.TrimPrefix(r.URL.Path, "/program/")
+		if id == "" {
 			http.Redirect(w, r, "/", http.StatusFound)
 			return
 		}
@@ -144,7 +139,7 @@ func runDashboardServer(cmd *cobra.Command, port int) error {
 			if err != nil {
 				return nil, err
 			}
-			return renderProgramDetail(data, decoded)
+			return renderProgramDetail(data, id)
 		})
 	})
 
@@ -199,6 +194,7 @@ type repoCount struct {
 
 type initData struct {
 	Initiative    *store.Initiative
+	ProgramName   string
 	Phases        []phaseData
 	Repos         []repoCount
 	TotalRMIs     int
@@ -206,6 +202,7 @@ type initData struct {
 }
 
 type programData struct {
+	ID          string
 	Name        string
 	Initiatives []initData
 }
@@ -326,19 +323,42 @@ func loadDashboardData(ctx context.Context, svc *service.Service) (*dashboardDat
 		return nil, fmt.Errorf("list initiative dependencies: %w", err)
 	}
 
-	programMap := map[string][]initData{}
+	progs, err := svc.Store.ListPrograms(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("list programs: %w", err)
+	}
+	programByID := map[string]*store.Program{}
+	for _, p := range progs {
+		programByID[p.ID] = p
+	}
+
+	for i := range allInits {
+		if pid := allInits[i].Initiative.ProgramID; pid != "" {
+			if p, ok := programByID[pid]; ok {
+				allInits[i].ProgramName = p.Name
+			} else {
+				allInits[i].ProgramName = pid
+			}
+		}
+	}
+
+	progInitMap := map[string][]initData{}
 	var standalone []initData
 	for _, id := range allInits {
-		if id.Initiative.Program != "" {
-			programMap[id.Initiative.Program] = append(programMap[id.Initiative.Program], id)
+		if id.Initiative.ProgramID != "" {
+			progInitMap[id.Initiative.ProgramID] = append(progInitMap[id.Initiative.ProgramID], id)
 		} else {
 			standalone = append(standalone, id)
 		}
 	}
 
 	var programs []programData
-	for name, inits := range programMap {
-		programs = append(programs, programData{Name: name, Initiatives: inits})
+	for pid, inits := range progInitMap {
+		name := pid
+		if p, ok := programByID[pid]; ok {
+			name = p.Name
+		}
+		programs = append(programs, programData{ID: pid, Name: name, Initiatives: inits})
 	}
 	sort.Slice(programs, func(i, j int) bool {
 		return programs[i].Name < programs[j].Name
@@ -554,16 +574,16 @@ func renderInitiativeDetail(data *dashboardData, id string) ([]byte, error) {
 	return []byte(buf.String()), nil
 }
 
-func renderProgramDetail(data *dashboardData, name string) ([]byte, error) {
+func renderProgramDetail(data *dashboardData, id string) ([]byte, error) {
 	var target *programData
 	for i := range data.Programs {
-		if data.Programs[i].Name == name {
+		if data.Programs[i].ID == id {
 			target = &data.Programs[i]
 			break
 		}
 	}
 	if target == nil {
-		return nil, fmt.Errorf("program %q not found", name)
+		return nil, fmt.Errorf("program %q not found", id)
 	}
 
 	initIDs := map[string]bool{}
