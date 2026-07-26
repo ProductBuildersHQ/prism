@@ -2,31 +2,65 @@
 
 ## Programs
 
-A program is an optional grouping of related initiatives. Some initiatives are part of a program; others are standalone.
+A program is a first-class entity that groups related initiatives. Programs have their own IDs (`PROG-<SLUG>`), names, descriptions, and organization membership. Some initiatives belong to a program; others are standalone.
 
-### Assigning a Program
+### Creating a Program
 
-Set the program when creating or updating an initiative:
+```bash
+prismctl program create \
+  --id PROG-PLATFORM \
+  --name "Platform Modernization" \
+  --org ProductBuildersHQ \
+  --description "Cross-cutting platform upgrades"
+```
+
+### Managing Programs
+
+```bash
+# List all programs
+prismctl program list
+
+# Get program detail
+prismctl program get PROG-PLATFORM
+
+# Update a program
+prismctl program update PROG-PLATFORM --name "Platform Modernization v2"
+```
+
+### Assigning Initiatives to Programs
+
+Set the program ID when creating or updating an initiative:
 
 ```bash
 # On create
 prismctl initiative create \
   --id INIT-X-001 \
   --title "Core Platform" \
-  --program "Platform Modernization"
+  --program PROG-PLATFORM
 
 # On update
-prismctl initiative update INIT-X-001 --program "Platform Modernization"
+prismctl initiative update INIT-X-001 --program PROG-PLATFORM
 ```
+
+### Migrating Free-Text Programs
+
+If you have initiatives with free-text program strings from before the entity promotion, convert them to proper Program entities:
+
+```bash
+prismctl program migrate-strings
+```
+
+This slugifies existing program name strings into `PROG-<SLUG>` IDs, creates the corresponding Program entities, and updates initiative references.
 
 ### Viewing Programs
 
 Programs appear in several places:
 
-- **`initiative list`** — PROGRAM column in the table
-- **`initiative get`** — Program field in detail output
+- **`program list`** — all programs with ID, name, and organization
+- **`initiative list`** — PROGRAM column shows program ID
+- **`initiative get`** — Program ID in detail output
 - **Dashboard summary** — initiative cards grouped under program headings
-- **Dashboard program view** — `/program/<name>` shows all initiatives in a program
+- **Dashboard program view** — `/program/<id>` shows all initiatives in a program
 
 ## Initiative Dependencies
 
@@ -70,5 +104,5 @@ prismctl initiative dep list INIT-X-001
 The dashboard shows initiative dependency edges:
 
 - **Summary page** — all initiative dependencies in a dedicated section
-- **Program view** — dependencies between initiatives in the program
+- **Program view** (`/program/<id>`) — dependencies between initiatives in the program
 - **Initiative detail** — dependencies involving the specific initiative

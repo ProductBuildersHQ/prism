@@ -36,9 +36,11 @@ For server mode (concurrent access):
 
 | Tool | Description |
 |------|-------------|
+| `program_list` | List all programs |
+| `program_create` | Create a new program |
 | `initiative_list` | List all initiatives |
 | `initiative_get` | Get initiative detail with phase status |
-| `initiative_create` | Create a new initiative |
+| `initiative_create` | Create a new initiative (optional `program_id`) |
 | `rmi_create` | Create a new roadmap item |
 | `work_ready` | Find ready, unblocked, unclaimed work |
 | `task_claim` | Claim an RMI with a lease |

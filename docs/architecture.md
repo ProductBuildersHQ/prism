@@ -15,7 +15,7 @@ prism-control/
 │   ├── ingest/            Git commit + changelog ingestion
 │   ├── report/            Initiative report generation
 │   ├── validate/          Consistency checks
-│   ├── mcpserver/         MCP server (9 tools, stdio transport)
+│   ├── mcpserver/         MCP server (11 tools, stdio transport)
 │   ├── export/            JSONL snapshots
 │   ├── release/           Dependency-ordered release plans
 │   ├── reposcan/          Git repo scanning (via gogit)
@@ -38,6 +38,7 @@ All behavior lives in `pkg/*`. The CLI (`cmd/prismctl`) and MCP server (`pkg/mcp
 
 Domain logic depends only on `pkg/store.Store`, an interface with sub-interfaces:
 
+- `ProgramStore` — program entities
 - `InitiativeStore` — initiatives + initiative dependencies
 - `PhaseStore` — phases within initiatives
 - `RMIStore` — roadmap items + RMI dependencies
@@ -65,16 +66,18 @@ Phase status is always computed from member RMIs, never stored directly. This el
 ## Data Model
 
 ```
-Initiative (1) ──── (N) Phase (1) ──── (N) RoadmapItem
-     │                                        │
-     │                                        │
-     ├── InitiativeDependency                 ├── RMIDependency
-     │   (source → target)                    │   (source → target)
-     │                                        │
-     └── Program (optional grouping)          ├── Assignment (lease)
-                                              │
-                                              └── DeliveryEvidence
-                                                  (commit, PR, release, changelog)
+Program (1) ──── (N) Initiative (1) ──── (N) Phase (1) ──── (N) RoadmapItem
+                          │                                        │
+                          │                                        │
+                          ├── InitiativeDependency                 ├── RMIDependency
+                          │   (source → target)                    │   (source → target)
+                          │                                        │
+                          │                                        ├── Assignment (lease)
+                          │                                        │
+                          │                                        └── DeliveryEvidence
+                          │                                            (commit, PR, release, changelog)
+                          │
+                          └── Repository (home repo)
 ```
 
 ## Integration Points

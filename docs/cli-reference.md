@@ -41,14 +41,24 @@ All commands accept global flags:
 | `registry deps` | Show topological dependency order |
 | `registry unpushed` | List repos with uncommitted or unpushed work |
 
+## Programs
+
+| Command | Description |
+|---------|-------------|
+| `program create --id ID --name N --org O [--description D]` | Create a program |
+| `program list` | List all programs |
+| `program get <id>` | Show program detail |
+| `program update <id> [--name N] [--description D]` | Update a program |
+| `program migrate-strings` | Convert free-text program values to Program entities |
+
 ## Initiatives
 
 | Command | Description |
 |---------|-------------|
-| `initiative create --id ID --title T [--org O] [--program P] [--priority P] [--home-repo R] [--workspace W] [--spec K=V]` | Create an initiative |
+| `initiative create --id ID --title T [--org O] [--program PROG-ID] [--priority P] [--home-repo R] [--workspace W] [--spec K=V]` | Create an initiative |
 | `initiative list` | List all initiatives |
 | `initiative get <id>` | Show initiative detail with phase status |
-| `initiative update <id> [--workspace W] [--home-repo R] [--program P] [--description D] [--priority P]` | Update initiative fields |
+| `initiative update <id> [--workspace W] [--home-repo R] [--program PROG-ID] [--description D] [--priority P]` | Update initiative fields |
 | `initiative transition <id> <status>` | Transition initiative lifecycle status |
 | `initiative dep add --source S --target T [--relationship R]` | Add initiative dependency |
 | `initiative dep list [id]` | List initiative dependencies |

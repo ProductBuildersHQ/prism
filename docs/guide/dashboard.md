@@ -50,8 +50,9 @@ Click an initiative card to drill down (`/initiative/<id>`):
 
 ## Program View
 
-Click a program name to see all initiatives in that program (`/program/<name>`):
+Click a program name to see all initiatives in that program (`/program/<id>`):
 
+- Program ID and name
 - Program-level stats (initiatives, phases, RMIs, completion)
 - Initiative dependency graph within the program
 - Full phase/RMI detail for every initiative, with collapsible phases

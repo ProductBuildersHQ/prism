@@ -13,7 +13,7 @@ PRISM Control is headless and library-first. It coordinates work across reposito
 | Concept | Description |
 |---------|-------------|
 | **Initiative** | A cross-repository project tracked through a lifecycle (proposed → planned → executing → delivery_complete → released → closed) |
-| **Program** | An optional grouping of related initiatives with dependency ordering |
+| **Program** | A first-class entity (`PROG-<SLUG>`) grouping related initiatives |
 | **Phase** | A themed grouping of RMIs within an initiative; status derived from member RMIs |
 | **RMI** | A Roadmap Item — a single deliverable within one repository |
 | **Assignment** | A lease-based work claim by an agent session on an RMI |

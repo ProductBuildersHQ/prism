@@ -172,11 +172,19 @@ The landing page shows initiative cards grouped by program, progress bars, and R
 
 ## Programs and Initiative Dependencies
 
-Group related initiatives into a program:
+Programs are first-class entities that group related initiatives:
 
 ```bash
-prismctl initiative create --id INIT-X-001 --title "..." --program "My Program"
-prismctl initiative update INIT-X-001 --program "My Program"
+# Create a program
+prismctl program create --id PROG-PLATFORM --name "Platform Modernization" --org default
+
+# Assign initiatives to a program
+prismctl initiative create --id INIT-X-001 --title "..." --program PROG-PLATFORM
+prismctl initiative update INIT-X-001 --program PROG-PLATFORM
+
+# List and inspect programs
+prismctl program list
+prismctl program get PROG-PLATFORM
 ```
 
 Define ordering between initiatives:
@@ -200,6 +208,9 @@ prismctl dashboard                      Two-level web dashboard (summary + drill
 
 prismctl registry add|list|scan         Repository catalog
 prismctl registry deps|unpushed         Dependency analysis and dirty-repo detection
+
+prismctl program create|list|get|update  Program management
+prismctl program migrate-strings        Convert free-text programs to entities
 
 prismctl initiative create|list|get     Initiative lifecycle management
 prismctl initiative update|transition
@@ -247,7 +258,7 @@ Register in your project's `.mcp.json` for agent sessions:
 }
 ```
 
-Tools: `initiative_list`, `initiative_get`, `initiative_create`, `rmi_create`, `work_ready`, `task_claim`, `task_release`, `task_update`, `report_initiative`.
+Tools: `program_list`, `program_create`, `initiative_list`, `initiative_get`, `initiative_create`, `rmi_create`, `work_ready`, `task_claim`, `task_release`, `task_update`, `report_initiative`.
 
 ## Product Repo Setup
 
@@ -276,7 +287,7 @@ prism-control/
 │   ├── ingest/            Git commit + changelog ingestion
 │   ├── report/            Initiative report generation
 │   ├── validate/          Consistency checks
-│   ├── mcpserver/         MCP server (9 tools, stdio transport)
+│   ├── mcpserver/         MCP server (11 tools, stdio transport)
 │   ├── export/            JSONL snapshots
 │   ├── release/           Dependency-ordered release plans
 │   ├── reposcan/          Git repo scanning (via gogit)
