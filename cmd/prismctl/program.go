@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"os"
 	"strings"
@@ -159,10 +160,20 @@ func programUpdateCmd() *cobra.Command {
 	return cmd
 }
 
+// rawDBAccessor is implemented by store backends that expose *sql.DB.
+type rawDBAccessor interface {
+	DB() *sql.DB
+}
+
 func programMigrateCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "migrate-strings",
 		Short: "Convert free-text program strings on initiatives to Program entities",
+		Long: `Read the legacy 'program' text column from the initiatives table, create
+Program entities for each distinct value, and set the program_initiatives FK.
+
+This is a one-time migration for databases created before Program was promoted
+to a first-class entity.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			svc, cleanup, err := connectService(cmd)
 			if err != nil {
@@ -170,48 +181,86 @@ func programMigrateCmd() *cobra.Command {
 			}
 			defer cleanup()
 
-			inits, err := svc.ListInitiatives(cmd.Context())
+			accessor, ok := svc.Store.(rawDBAccessor)
+			if !ok {
+				return fmt.Errorf("migrate-strings requires a database-backed store (not in-memory)")
+			}
+			db := accessor.DB()
+
+			rows, err := db.QueryContext(cmd.Context(),
+				"SELECT initiative_id, program FROM initiatives WHERE program IS NOT NULL AND program != ''")
 			if err != nil {
-				return err
+				return fmt.Errorf("query legacy program column: %w", err)
 			}
+			defer rows.Close()
 
-			seen := map[string]bool{}
-			for _, init := range inits {
-				if init.ProgramID != "" && !strings.HasPrefix(init.ProgramID, "PROG-") {
-					seen[init.ProgramID] = true
+			type legacyRow struct {
+				initID  string
+				program string
+			}
+			var legacy []legacyRow
+			for rows.Next() {
+				var r legacyRow
+				if err := rows.Scan(&r.initID, &r.program); err != nil {
+					return fmt.Errorf("scan row: %w", err)
 				}
+				legacy = append(legacy, r)
+			}
+			if err := rows.Err(); err != nil {
+				return fmt.Errorf("iterate rows: %w", err)
 			}
 
-			if len(seen) == 0 {
-				cmd.Println("No free-text program values to migrate.")
+			if len(legacy) == 0 {
+				cmd.Println("No legacy program values to migrate.")
 				return nil
 			}
 
 			nameToID := map[string]string{}
-			for name := range seen {
-				slug := strings.ToUpper(strings.ReplaceAll(
-					strings.ReplaceAll(name, " ", "-"), "_", "-"))
-				id := "PROG-" + slug
-				_, err := svc.CreateProgram(cmd.Context(), id, name, "default", "")
-				if err != nil {
-					cmd.PrintErrf("Warning: could not create program %s: %v\n", id, err)
+			for _, r := range legacy {
+				if _, exists := nameToID[r.program]; exists {
 					continue
 				}
-				nameToID[name] = id
-				cmd.Printf("Created program: %s -> %s\n", name, id)
+				slug := strings.ToUpper(strings.ReplaceAll(
+					strings.ReplaceAll(r.program, " ", "-"), "_", "-"))
+				id := "PROG-" + slug
+				_, createErr := svc.CreateProgram(cmd.Context(), id, r.program, "default", "")
+				if createErr != nil {
+					if _, getErr := svc.GetProgram(cmd.Context(), id); getErr == nil {
+						nameToID[r.program] = id
+						cmd.Printf("Program already exists: %s (%s)\n", id, r.program)
+						continue
+					}
+					cmd.PrintErrf("Warning: could not create program %s: %v\n", id, createErr)
+					continue
+				}
+				nameToID[r.program] = id
+				cmd.Printf("Created program: %s -> %s\n", r.program, id)
 			}
 
-			for _, init := range inits {
-				if newID, ok := nameToID[init.ProgramID]; ok {
-					init.ProgramID = newID
-					if err := svc.UpdateInitiative(cmd.Context(), init); err != nil {
-						cmd.PrintErrf("Warning: could not update initiative %s: %v\n", init.ID, err)
-					} else {
-						cmd.Printf("Updated initiative %s -> program %s\n", init.ID, newID)
-					}
+			for _, r := range legacy {
+				newID, ok := nameToID[r.program]
+				if !ok {
+					continue
+				}
+				init, getErr := svc.Store.GetInitiative(cmd.Context(), r.initID)
+				if getErr != nil {
+					cmd.PrintErrf("Warning: could not get initiative %s: %v\n", r.initID, getErr)
+					continue
+				}
+				if init.ProgramID == newID {
+					cmd.Printf("Initiative %s already assigned to %s\n", r.initID, newID)
+					continue
+				}
+				init.ProgramID = newID
+				if err := svc.UpdateInitiative(cmd.Context(), init); err != nil {
+					cmd.PrintErrf("Warning: could not update initiative %s: %v\n", r.initID, err)
+				} else {
+					cmd.Printf("Updated initiative %s -> program %s\n", r.initID, newID)
 				}
 			}
 
+			cmd.Println("\nMigration complete. You can drop the legacy column with:")
+			cmd.Println("  mysql -h 127.0.0.1 -P 13306 prismcontrol -e \"ALTER TABLE initiatives DROP COLUMN program;\"")
 			return nil
 		},
 	}

@@ -68,6 +68,11 @@ func (d *DoltStore) ExecSQL(ctx context.Context, query string) error {
 	return nil
 }
 
+// DB returns the underlying *sql.DB for raw queries (e.g. migration utilities).
+func (d *DoltStore) DB() *sql.DB {
+	return d.db
+}
+
 func ensureParseTime(dsn string) string {
 	if strings.Contains(dsn, "parseTime") {
 		return dsn
