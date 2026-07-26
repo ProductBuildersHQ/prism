@@ -79,7 +79,7 @@ func initiativeCreateCmd() *cobra.Command {
 			if homeRepo != "" || workspace != "" || program != "" || len(specs) > 0 {
 				init.HomeRepo = homeRepo
 				init.Workspace = workspace
-				init.Program = program
+				init.ProgramID = program
 				init.Specs = specs
 				if err := svc.UpdateInitiative(cmd.Context(), init); err != nil {
 					return err
@@ -97,7 +97,7 @@ func initiativeCreateCmd() *cobra.Command {
 	cmd.Flags().String("priority", "", "Priority (high, medium, low)")
 	cmd.Flags().String("home-repo", "", "Home repository ID (where specs live)")
 	cmd.Flags().String("workspace", "", "Workspace identifier (e.g. tmux session name)")
-	cmd.Flags().String("program", "", "Program name for grouping related initiatives")
+	cmd.Flags().String("program", "", "Program ID (e.g. PROG-DELIVERY)")
 	cmd.Flags().StringSlice("spec", nil, "Spec reference as key=path (repeatable, e.g. --spec prd=docs/specs/PRD.md)")
 	return cmd
 }
@@ -130,7 +130,7 @@ func initiativeListCmd() *cobra.Command {
 				if ws == "" {
 					ws = "-"
 				}
-				prog := i.Program
+				prog := i.ProgramID
 				if prog == "" {
 					prog = "-"
 				}
@@ -174,8 +174,8 @@ func initiativeGetCmd() *cobra.Command {
 			if init.Workspace != "" {
 				cmd.Printf("Workspace:  %s\n", init.Workspace)
 			}
-			if init.Program != "" {
-				cmd.Printf("Program:    %s\n", init.Program)
+			if init.ProgramID != "" {
+				cmd.Printf("Program:    %s\n", init.ProgramID)
 			}
 			if len(init.Specs) > 0 {
 				cmd.Println("Specs:")
@@ -272,7 +272,7 @@ func initiativeUpdateCmd() *cobra.Command {
 				init.Priority, _ = cmd.Flags().GetString("priority")
 			}
 			if cmd.Flags().Changed("program") {
-				init.Program, _ = cmd.Flags().GetString("program")
+				init.ProgramID, _ = cmd.Flags().GetString("program")
 			}
 
 			if err := svc.UpdateInitiative(cmd.Context(), init); err != nil {
@@ -290,7 +290,7 @@ func initiativeUpdateCmd() *cobra.Command {
 	cmd.Flags().String("home-repo", "", "Home repository ID")
 	cmd.Flags().String("description", "", "Description")
 	cmd.Flags().String("priority", "", "Priority (high, medium, low)")
-	cmd.Flags().String("program", "", "Program name for grouping related initiatives")
+	cmd.Flags().String("program", "", "Program ID (e.g. PROG-DELIVERY)")
 	return cmd
 }
 

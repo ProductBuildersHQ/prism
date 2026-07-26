@@ -36,6 +36,7 @@ func rootCmd() *cobra.Command {
 		configCmd(),
 		dbCmd(),
 		registryCmd(),
+		programCmd(),
 		initiativeCmd(),
 		phaseCmd(),
 		rmiCmd(),
