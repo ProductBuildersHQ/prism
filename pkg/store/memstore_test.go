@@ -57,6 +57,54 @@ func TestMemStoreInitiativeCRUD(t *testing.T) {
 	}
 }
 
+func TestMemStoreProgramCRUD(t *testing.T) {
+	ctx := context.Background()
+	s := NewMemStore()
+	now := time.Now()
+
+	prog := &Program{
+		ID:           "PROG-DELIVERY",
+		Name:         "Product Delivery",
+		Organization: "default",
+		CreatedAt:    now,
+		UpdatedAt:    now,
+	}
+
+	if err := s.CreateProgram(ctx, prog); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := s.CreateProgram(ctx, prog); err == nil {
+		t.Fatal("expected error on duplicate")
+	}
+
+	got, err := s.GetProgram(ctx, "PROG-DELIVERY")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Name != "Product Delivery" {
+		t.Fatalf("expected name 'Product Delivery', got %q", got.Name)
+	}
+
+	_, err = s.GetProgram(ctx, "PROG-NOPE")
+	if err == nil {
+		t.Fatal("expected not found error")
+	}
+
+	got.Description = "Updated description"
+	if err := s.UpdateProgram(ctx, got); err != nil {
+		t.Fatal(err)
+	}
+
+	list, err := s.ListPrograms(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(list) != 1 || list[0].Description != "Updated description" {
+		t.Fatalf("unexpected list result: %+v", list)
+	}
+}
+
 func TestMemStoreAssignmentActiveQuery(t *testing.T) {
 	ctx := context.Background()
 	s := NewMemStore()
