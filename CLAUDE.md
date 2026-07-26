@@ -178,6 +178,142 @@ prismctl rmi update-phase INIT-X-001/phase-3 --status ready
 prismctl rmi update-phase INIT-X-001/phase-3 --status ready --from proposed
 ```
 
+## Development Guide
+
+This section covers patterns for extending prism-control itself — adding entities, CLI commands, MCP tools, and dashboard views.
+
+### Architecture Layers
+
+Every feature touches these layers in order. When adding a new entity (like Program was added), work top-down:
+
+| Layer | Files | Purpose |
+|-------|-------|---------|
+| 1. Ent schema | `ent/schema/<entity>.go` | Define fields, edges, storage keys |
+| 2. Ent codegen | `ent/` (generated) | Run `go generate ./ent` |
+| 3. Store interface | `pkg/store/store.go` | Domain struct + sub-interface (CRUD methods) |
+| 4. MemStore | `pkg/store/memstore.go` | In-memory fake (map-based, mutex-guarded) |
+| 5. DoltStore | `pkg/store/doltstore/doltstore.go` | Ent-backed production impl |
+| 6. Service | `pkg/service/<entity>.go` | Business logic, timestamp management |
+| 7. CLI | `cmd/prismctl/<entity>.go` | Cobra commands (thin adapter over service) |
+| 8. Dashboard | `cmd/prismctl/dashboard.go` + `dashboard_templates.go` | Data loading + Go HTML templates |
+| 9. MCP | `pkg/mcpserver/server.go` | Tool definition + handler |
+| 10. Tests | `pkg/store/memstore_test.go`, `pkg/service/<entity>_test.go` | MemStore CRUD + service-layer tests |
+
+### Ent Schema Conventions
+
+Schemas live in `ent/schema/`. Key patterns:
+
+- **ID field:** `field.String("id").StorageKey("<entity>_id").MaxLen(64)` — the StorageKey sets the DB column name
+- **Edges:** `edge.To` (has-many), `edge.From` (belongs-to with `.Ref().Unique()`)
+- **Timestamps:** `field.Time("created_at")`, `field.Time("updated_at")` — managed by the service layer, not Ent defaults
+
+After any schema change, regenerate:
+
+```bash
+go generate ./ent
+```
+
+**Known issue:** Ent's transitive dependency `clipperhouse/displaywidth@v0.6.2` is broken with Go 1.26. The `go.mod` has an `exclude` directive for it — do not remove it.
+
+### Store Interface Pattern
+
+`pkg/store/store.go` defines the domain types and a composite interface:
+
+```go
+type Store interface {
+    ProgramStore
+    InitiativeStore
+    PhaseStore
+    RMIStore
+    AssignmentStore
+    EvidenceStore
+    RepositoryStore
+}
+```
+
+When adding a new entity:
+
+1. Add the domain struct (e.g., `Program`) with plain Go types (no Ent imports)
+2. Add a sub-interface (e.g., `ProgramStore`) with CRUD methods
+3. Embed the sub-interface in `Store`
+4. Implement in both `MemStore` and `DoltStore` — they must stay in sync
+
+**MemStore pattern:** `map[string]*Entity`, `sync.RWMutex`, check-then-insert. Copy on read to prevent aliasing.
+
+**DoltStore pattern:** `entEntityToStore` converter function, Ent client queries. Eager-load edges with `.WithEdgeName()` on Get/List.
+
+### Build Tags
+
+DoltStore and CLI commands that import it require ICU C headers (via `dolthub/go-icu-regex`). Files are split by build tag:
+
+| Tag | Files | Purpose |
+|-----|-------|---------|
+| `//go:build dolt` | `db_dolt.go`, `registry_dolt.go`, `helpers_dolt.go` | Production code needing DoltStore |
+| `//go:build !dolt` | `db_nodolt.go`, `registry_nodolt.go` | Stubs (empty functions) for CI/test without ICU |
+
+CI runs `go test ./pkg/...` (no dolt tag) — all domain logic is tested via MemStore. Local full builds use: `go build -tags dolt ./cmd/prismctl/`.
+
+### ID Conventions
+
+| Entity | Format | Example |
+|--------|--------|---------|
+| Program | `PROG-<SLUG>` | `PROG-MARKET-SPEC` |
+| Initiative | `INIT-<REPOSLUG>-<NNN>` | `INIT-PRISMCONTROL-001` |
+| Phase | `<INIT-ID>/phase-<N>` | `INIT-PRISMCONTROL-001/phase-3` |
+| RMI | `RMI-<REPOSLUG>-<NNN>` | `RMI-PRISMCONTROL-042` |
+| Assignment | `ASSIGN-<UUID>` | auto-generated |
+| Repository | `github.com/<org>/<repo>` | `github.com/ProductBuildersHQ/prism-control` |
+
+### CLI Command Pattern
+
+Each entity gets a file in `cmd/prismctl/` with a parent command and subcommands:
+
+```go
+func entityCmd() *cobra.Command {
+    cmd := &cobra.Command{Use: "entity", Short: "Manage entities"}
+    cmd.AddCommand(entityCreateCmd(), entityListCmd(), entityGetCmd(), entityUpdateCmd())
+    return cmd
+}
+```
+
+Register in `rootCmd()` in `main.go`. Commands call `connectService(cmd)` to get a `*service.Service`, then delegate to service methods. Use `tabwriter` for list output.
+
+### MCP Tool Pattern
+
+Tools are registered in `pkg/mcpserver/server.go`. Each tool is a pair of functions:
+
+```go
+func entityListTool() *mcp.Tool {
+    return &mcp.Tool{
+        Name:        "entity_list",
+        Description: "List all entities.",
+        InputSchema: json.RawMessage(`{"type":"object","properties":{}}`),
+    }
+}
+
+func entityListHandler(svc *service.Service) mcp.ToolHandler {
+    return func(ctx context.Context, req *mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+        // call svc methods, marshal to JSON, return as text content
+    }
+}
+```
+
+Register both in `registerTools()`. The handler calls the same service methods as the CLI.
+
+### Dashboard Pattern
+
+- **Data structs** in `dashboard.go`: `initData`, `phaseData`, `rmiData`, `programData` wrap store types with computed fields (progress counts, display names)
+- **Data loading** in `loadDashboardData()`: queries the store, builds maps, groups by program
+- **Templates** in `dashboard_templates.go`: Go `html/template` strings (`summaryHTML`, `detailHTML`, `programHTML`) with inline CSS/JS
+- **Routes**: `/` (summary), `/initiative/<id>` (detail), `/program/<id>` (program view)
+
+### Test Strategy
+
+- **Unit tests** (`pkg/store/memstore_test.go`, `pkg/service/*_test.go`): use `NewMemStore()` — no DB, no build tags, runs in CI
+- **DoltStore integration**: guarded by `//go:build dolt`, excluded from CI. Run locally with ICU flags
+- **Service tests**: use a `newTestService()` helper that wraps MemStore
+- **Test pattern**: create entity → verify fields → test duplicate error → update → list → verify
+
 ### Product Repo Pointer
 
 Product repos that participate in PRISM-tracked initiatives add this block to their `CLAUDE.md`:
