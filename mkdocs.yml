@@ -1,28 +1,41 @@
 site_name: PRISM Control
 site_description: Product Delivery Control Plane — cross-repository initiatives, RMIs, lease-based assignments, and delivery evidence
+site_url: https://productbuildershq.com/prism
 repo_url: https://github.com/ProductBuildersHQ/prism-control
+repo_name: ProductBuildersHQ/prism-control
 
 theme:
   name: material
+  custom_dir: docs/overrides
   palette:
-    - scheme: slate
-      primary: blue
-      accent: blue
-      toggle:
-        icon: material/brightness-4
-        name: Switch to light mode
+    # Light mode first (ProductBuildersHQ default)
     - scheme: default
-      primary: blue
-      accent: blue
+      primary: custom
+      accent: custom
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
+    - scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
   features:
     - navigation.sections
     - navigation.expand
     - navigation.top
+    - search.highlight
     - content.code.copy
     - toc.follow
+
+# ProductBuildersHQ Theme Assets (served from main site)
+extra_css:
+  - https://productbuildershq.com/css/productbuildershq-mkdocs.css
+
+extra_javascript:
+  - https://productbuildershq.com/js/site-nav.min.js
+  - https://productbuildershq.com/js/pbhq-nav.js
 
 markdown_extensions:
   - admonition
@@ -30,6 +43,9 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.tabbed:
       alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
   - tables
   - toc:
       permalink: true
@@ -63,3 +79,8 @@ nav:
   - Releases:
     - v0.1.0: releases/v0.1.0.md
   - Case Study: case-study.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/ProductBuildersHQ/prism-control
