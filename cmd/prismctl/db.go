@@ -297,12 +297,16 @@ func dbRestartCmd() *cobra.Command {
 				port = 13306
 			}
 
-			cmd.Flags().Set("port", fmt.Sprintf("%d", port))
+			if err := cmd.Flags().Set("port", fmt.Sprintf("%d", port)); err != nil {
+				return fmt.Errorf("set port flag: %w", err)
+			}
 
 			startCmd := dbStartCmd()
 			startCmd.SetOut(cmd.OutOrStdout())
 			startCmd.SetErr(cmd.ErrOrStderr())
-			startCmd.Flags().Set("port", fmt.Sprintf("%d", port))
+			if err := startCmd.Flags().Set("port", fmt.Sprintf("%d", port)); err != nil {
+				return fmt.Errorf("set port flag: %w", err)
+			}
 			return startCmd.RunE(startCmd, nil)
 		},
 	}
