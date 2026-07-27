@@ -22,16 +22,16 @@ PRISM Control is headless and library-first. It coordinates work across reposito
 ## How It Works
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    prism-control (Dolt)                   │
-│  initiatives → phases → RMIs → assignments → evidence    │
-└────────────┬──────────────┬──────────────┬───────────────┘
-             │              │              │
-     ┌───────▼──────┐ ┌────▼─────┐ ┌──────▼──────┐
+┌────────────────────────────────────────────────────────┐
+│                    prism-control (Dolt)                │
+│  initiatives → phases → RMIs → assignments → evidence  │
+└────────────┬──────────────┬─────────────┬──────────────┘
+             │              │             │
+     ┌───────▼──────┐ ┌─────▼────┐ ┌──────▼──────┐
      │  prismctl    │ │ MCP      │ │ SQL views   │
      │  CLI         │ │ server   │ │ (read-only) │
-     └───────┬──────┘ └────┬─────┘ └──────┬──────┘
-             │              │              │
+     └───────┬──────┘ └─────┬────┘ └──────┬──────┘
+             │              │             │
      Agent sessions    Agent sessions  VisionStudio
      (Claude Code)     (Claude Code)   dashboards
 ```
