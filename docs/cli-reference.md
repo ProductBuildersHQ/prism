@@ -124,6 +124,12 @@ All commands accept global flags:
 | `validate [--format text\|json]` | Consistency checks across the store |
 | `export [--dir D]` | JSONL snapshots of all tables |
 
+## General
+
+| Command | Description |
+|---------|-------------|
+| `version` | Print the prismctl version |
+
 ## MCP Server
 
 | Command | Description |

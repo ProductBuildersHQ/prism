@@ -4,6 +4,11 @@
 **Repository:** `github.com/ProductBuildersHQ/prism-control`
 **Status:** All 6 phases completed (delivery_complete)
 
+Follow-on work is tracked as separate initiatives under `PROG-PRISM-CONTROL`:
+
+- `INIT-PRISMCONTROL-002` — Deterministic Context Assembly ([ROADMAP-CONTEXT-ASSEMBLY.md](ROADMAP-CONTEXT-ASSEMBLY.md), TRD §15)
+- `INIT-TOKENATTRIB-001` — Token Attribution & Portfolio Reporting ([ROADMAP-TOKEN-ATTRIBUTION.md](ROADMAP-TOKEN-ATTRIBUTION.md), TRD §16)
+
 > RMI IDs are stable and permanent. Commits implementing an item carry the trailer `Refs: RMI-PRISMCONTROL-NNN`. Phase status is derived from member RMIs — a phase is complete only when all its required RMIs are complete. This file migrates into the running PRISM Control system in Phase 5 (dogfood).
 
 ## Phase 1 — Foundation & Storage
@@ -86,6 +91,8 @@
 - [x] `RMI-PRISMCONTROL-029` Phase-level batch commands: `claim-phase` and `complete-phase`
   - `work claim-phase <phase-id>` claims all ready RMIs; `work complete-phase <phase-id>` completes all in-progress RMIs
   - Depends on: `RMI-PRISMCONTROL-028`
+- [ ] `RMI-PRISMCONTROL-042` Replanning tooling: `rmi move` (re-parent to another initiative/phase) and `rmi update --required`
+  - Also `phase remove` for empty phases; friction found while splitting follow-on work into `INIT-PRISMCONTROL-002` and `INIT-TOKENATTRIB-001`
 
 ## Phase 6 — Ecosystem Integrations (post-v1)
 
@@ -97,3 +104,4 @@
 - [x] `RMI-PRISMCONTROL-025` devfolio initiative dimension; structured-changelog RMI-ref schema extension
 - [x] `RMI-PRISMCONTROL-026` Release sets + dependency-ordered release planning (topological stages)
 - [x] `RMI-PRISMCONTROL-027` `ROADMAP.json`/`ROADMAP.md` projections into product repos
+

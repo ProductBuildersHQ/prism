@@ -251,6 +251,8 @@ prismctl validate                       Consistency checks across the store
 prismctl export                         JSONL snapshots of all tables
 
 prismctl mcp                            MCP server (stdio transport)
+
+prismctl version                        Print version
 ```
 
 ## MCP Server

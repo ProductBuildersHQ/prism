@@ -71,7 +71,7 @@ It is **not** an execution engine, an issue tracker, a metrics computation engin
 - Beads integration (deferred; RMI model must not depend on it).
 - Web UI (VisionStudio is the UI; a hosted multi-tenant web app is a future consumer, enabled by keeping `organization` scoping in the schema).
 - Release orchestration/execution (release *plan* data lands in a later phase; executing releases stays in existing skills/workflows).
-- Metrics computation (omnidevx and devfolio own this; PRISM Control contributes the initiative dimension and stable IDs only).
+- Metrics computation (omnidevx and devfolio own developer-experience metrics, collection, and pricing; PRISM Control contributes the initiative dimension and stable IDs, and computes only initiative-scoped token *attribution* — Phase 8, FR13).
 - `ROADMAP.json`/`ROADMAP.md` projections pushed into product repos (later phase).
 - Alignment with existing `prism-*` spec repositories (incorporated later; they are not yet tied to the development workflow).
 - Multi-user auth/tenancy (schema-ready via `organization` columns, not implemented).
@@ -91,6 +91,8 @@ It is **not** an execution engine, an issue tracker, a metrics computation engin
 - **FR9** — JSONL export snapshots committed to git (backup, offline agent context, portability).
 - **FR10** — Interfaces: Go SDK (root package facade), `prismctl` CLI, `prismctl mcp` stdio MCP server — all over one shared service layer.
 - **FR11** — Validation: trailer↔RMI consistency, dangling dependencies, expired leases, phase/RMI status coherence.
+- **FR12** *(Phase 7)* — Deterministic context assembly: a context package for any phase or RMI, built from the execution graph, derived repository set, spec-file references, and prerequisite phase handoffs — reproducible (byte-identical at fixed revisions) so agent sessions start from authoritative state instead of conversation history.
+- **FR13** *(Phase 8)* — Token attribution reporting: token spend joined to assignments/RMIs/initiatives (session + time window, workspace fallback, explicit unattributed residual) with initiative and quarterly report modes — initiatives → RMIs → tokens by category and cost by model. PRISM's figures are a consistent subset of devfolio's overall spend (same omnidevx events, same pricing — never a local pricing table); period reports state coverage of overall spend explicitly (TRD §16).
 
 ### Non-Functional
 
@@ -115,3 +117,5 @@ It is **not** an execution engine, an issue tracker, a metrics computation engin
 - Deterministic `ROADMAP.json`/`ROADMAP.md` projections into product repos.
 - devfolio initiative-dimension reports; omnidevx per-initiative token/cost joins.
 - Alignment with `prism-roadmap` specification IRs.
+- Provider cache adapters (Claude cache breakpoints, CacheLane-style lanes) over context packages — evaluate only after Phase 7 deterministic assembly ships.
+- Session-scope recommendations (continue/compact/fork) derived from ingested commit evidence overlap.

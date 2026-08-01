@@ -76,6 +76,61 @@ DSN resolution order: `--dsn` flag > `$PRISMCTL_DSN` env > config file > embedde
 
 Claude Code sessions are first-class users of PRISM Control. Every session that implements work follows this four-step protocol. The same service layer backs both the MCP tools (`prismctl mcp`) and the CLI (`prismctl`), so the two are interchangeable.
 
+### Context Assembly
+
+**Specs are the cache, not the chat.** At phase or RMI start, assemble working context deterministically from the PRISM graph and repository specs — don't rely on accumulated conversation history. Use `context build` to generate a context package:
+
+```bash
+# Build context for an entire phase (orientation)
+prismctl context build INIT-X-001/phase-2 --format markdown
+
+# Build context for a specific RMI (narrow re-grounding)
+prismctl context build RMI-MYREPO-042 --format json --out context.json
+```
+
+Or via MCP:
+
+```json
+{"tool": "context_build", "arguments": {"target_id": "RMI-MYREPO-042", "format": "json"}}
+```
+
+A context package contains (ordered stable→volatile):
+
+| Section | Stability | Contents |
+|---------|-----------|----------|
+| Program/Initiative | `stable` | Definitions, decisions, specs |
+| Phase | `phase_stable` | Objectives, member RMIs, dependency edges |
+| Prerequisite Handoffs | `phase_stable` | Prior phase completions and decisions |
+| Current RMI | `rmi_stable` | Title, acceptance criteria, dependencies |
+| Spec References | `rmi_stable` | File paths with git revisions (not copies) |
+| Assignment State | `volatile` | Lease, handoff, evidence to date |
+
+Output is byte-identical across runs at the same Dolt/git revisions — cache-friendly and deterministic.
+
+### Phase-Boundary Context Lifecycle
+
+The phase is the default context lifecycle boundary. At phase boundaries, decide how to handle context:
+
+| Action | When to Use | Command |
+|--------|-------------|---------|
+| **Continue** | Same session continuing a phase | Keep existing context; no rebuild needed |
+| **Re-ground** | New session starting a phase, or resuming after interruption | `prismctl context build <phase-id>` |
+| **Compact** | Context growing large mid-phase | Save decisions to handoff, rebuild from `context build` |
+| **Reset** | Starting a new phase | Complete prior phase, `context build` for the new phase |
+
+The handoff field on assignments captures structured state for continuity:
+
+```json
+{
+  "completed": ["implemented core logic", "added tests"],
+  "remaining": ["update docs"],
+  "decisions": ["used interface pattern for extensibility"],
+  "next_action": "write API documentation"
+}
+```
+
+When releasing or completing work, always populate the handoff — it becomes the prerequisite handoff for the next phase.
+
 ### Dashboard
 
 View a live dashboard of all initiatives, phases, and RMIs:
@@ -321,4 +376,29 @@ Product repos that participate in PRISM-tracked initiatives add this block to th
 ```markdown
 ## PRISM Control
 
-This repo's roadmap items are tracked in [prism-control](https://github.com/ProductBuildersHQ/prism-control). Use `prismctl work ready --repo github.com/ProductBuildersHQ/<this-repo>` to find claimable work, and carry the `Refs: RMI-<REPOSLUG>-<NNN>` trailer on every commit.
+This repo's roadmap items are tracked in [prism-control](https://github.com/ProductBuildersHQ/prism-control).
+
+### Finding and Claiming Work
+
+```bash
+prismctl work ready --repo github.com/ProductBuildersHQ/<this-repo>
+prismctl work claim RMI-<REPOSLUG>-<NNN>
+```
+
+### Context Assembly
+
+At phase or RMI start, assemble working context from the PRISM graph:
+
+```bash
+prismctl context build RMI-<REPOSLUG>-<NNN> --format markdown
+```
+
+### Commit Attribution
+
+Carry the git trailer on every commit:
+
+```text
+feat(scope): description
+
+Refs: RMI-<REPOSLUG>-<NNN>
+```

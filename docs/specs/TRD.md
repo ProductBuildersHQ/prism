@@ -353,3 +353,105 @@ Per the dependency-verification standard, confirm latest versions at implementat
 - `organization` columns on `initiatives` and `repositories` from day one; single-tenant v1 uses one constant value.
 - Portability rule NFR4 keeps consumer queries valid against a plain MySQL read replica for a future hosted UI.
 - No auth in v1; the Dolt SQL server binds to localhost.
+
+## 15. Context Assembly (Phase 7)
+
+Origin: `IDEATION_CHAT_CACHE-OPTIMIZATION.md` (cache-cost ideation, 2026-07). Adopted principle: **specs are the cache, not the chat**. An agent session's working context is assembled deterministically from the PRISM execution graph and repository specs, rather than accumulated as conversation history. The phase remains the default context lifecycle boundary — the session protocol already claims and completes by phase; Phase 7 adds the re-grounding artifact each new session starts from.
+
+### Alignment decisions
+
+How the ideation proposals map onto the implemented system:
+
+| Ideation proposal | Decision |
+|---|---|
+| Context Builder service | **Adopt** — `pkg/contextbuild`, `prismctl context build`, one MCP tool |
+| Phase-boundary context lifecycle with structured handoff | **Already implemented** — `work claim-phase`/`complete-phase` + assignment handoff JSON; Phase 7 adds a phase-level handoff projection |
+| Repo `ROADMAP.md` as generated projection of the DB | **Already implemented** for product repos (RMI-027, `roadmap generate`); this repo keeps a hand-maintained `docs/specs/ROADMAP.md` with `roadmap diff` drift detection |
+| RMIs spanning multiple repositories | **Reject** — the implemented model stands: one repo per RMI; cross-repo work is dependency-linked RMIs. The context repo set is *derived* from those edges instead |
+| ~9 new phase/context MCP tools | **Reject** — a single `context_build` tool; §7's keep-the-surface-small rule applies |
+| Rename `PLAN.md` → `IMPLEMENTATION-PLAN.md` | **Defer** — org-wide convention change; decide outside this repo |
+| Overlap scoring (continue/compact/fork recommendations) | **Defer** — requires file-level RMI metadata that only exists after evidence ingest; revisit using ingested commit evidence |
+| CacheLane-style cache proxy | **Defer** — evaluate only after deterministic assembly ships; expected residual value is small |
+| Cache-friendly restructuring of spec prose | **Adopt partially** — stability classes and canonical ordering live in the generated package, never in the source documents; specs stay provider-neutral |
+
+### Context package (`pkg/contextbuild`)
+
+A context package is built for a **phase** (orientation) or an **RMI** (narrow re-grounding). Go structs are the source of truth; JSON Schema generated via `invopop/jsonschema`, linted with `schemago`, embedded under `schema/`.
+
+Contents, ordered stable → volatile, each section carrying a stability class and a provenance revision (Dolt commit for graph data, git SHA for spec files):
+
+| Section | Stability | Source |
+|---|---|---|
+| Program / initiative definition, decisions | `stable` | Dolt |
+| Phase objective, member RMIs, dependency edges | `phase_stable` | Dolt |
+| Prerequisite phase handoffs | `phase_stable` | Dolt (handoff projection) |
+| Current RMI: title, acceptance criteria, dependencies, repo | `rmi_stable` | Dolt |
+| Spec-file references (paths + revisions) | `rmi_stable` | registry `local_path` + git |
+| Assignment state, lease, evidence to date | `volatile` | Dolt |
+
+Rules:
+
+- **References, not copies.** Spec content (`docs/specs/{PRD,TRD,PLAN}.md`) is referenced by path and git revision; the agent reads the files. This keeps packages small and immune to copy staleness.
+- **Derived repo set.** Primary = the RMI's `repository_id`; secondary = repositories of dependency RMIs and registered `repository_dependencies` targets. No new linkage tables (optional `context_spec` overrides are RMI-035).
+- **Canonical output.** Fixed section and repo ordering, stable serialization, no generated timestamps or random identifiers in stable sections; operational metadata last. Two builds at the same revisions are byte-identical.
+
+### Phase handoff projection
+
+`prismctl phase handoff <phase-id>` aggregates member-RMI assignment handoffs (`completed`/`remaining`/`decisions`/`next_action`), evidence refs, and derived phase status into one JSON + Markdown artifact. Context packages embed it for prerequisite phases, replacing the prior phase's transcript.
+
+### Surfaces
+
+```text
+prismctl context build <rmi-id|phase-id> [--format json|markdown] [--out FILE]
+prismctl phase handoff <phase-id> [--format json|markdown]
+```
+
+MCP adds exactly one tool, `context_build`, calling the same service method as the CLI.
+
+### Non-goals
+
+- No provider-specific cache markers (Claude cache breakpoints, CacheLane lanes) in packages or specs; if ever needed, they belong in a downstream adapter.
+- No conversation-history storage or pruning — PRISM assembles fresh context; the agent runtime owns its transcript.
+- No automatic session-scope recommendations (continue/compact/fork) in v1.
+
+## 16. Token Attribution Reporting (Phase 8)
+
+Maps token spend to the planning graph. Ownership boundary (PRD §6) is preserved: omnidevx owns collection and pricing, devfolio owns developer-experience reports, and the `devx` analytics database (devfolio's Dolt spec) lives **separately from `prismcontrol`, on the same Dolt SQL server** — cross-database joins give single-surface reporting without merging schemas. PRISM computes only initiative-scoped *attribution*, not developer metrics.
+
+### Data sources (`pkg/tokens`)
+
+`TokenSource` interface yielding token events (session ID, workspace, model, timestamp, input/output/cache-read/cache-creation tokens):
+
+| Implementation | Source | Availability |
+|---|---|---|
+| JSONL reader | omnidevx store `events/YYYY/MM/DD/*.jsonl`, `ai.message.completed` events | now |
+| `devx` SQL reader | `devx.token_events` on the shared Dolt server | after devfolio ingest (`RMI-DEVFOLIO-050`+) |
+
+Cost is computed with `omnidevx-core/report`'s embedded pricing (`LookupPricing`/`EstimateCost`) — no pricing table is maintained in this repo.
+
+### Attribution
+
+Precedence, mirroring commit attribution (§8). Every event in a report window lands in exactly one bucket:
+
+1. **Session + time window** — `event.session_id = assignments.worker` and event timestamp within the assignment's `created_at`..`completed_at` (open-ended for active leases). Worker IDs are Claude Code session UUIDs via `CLAUDE_CODE_SESSION_ID` auto-detection. Attributed to RMI → phase → initiative → program.
+2. **Repository-level** — no matching assignment, but event workspace resolves to a registered repository (`local_path`). Attributed to the repository; surfaced as in-scope unattributed spend.
+3. **Out-of-management** — workspace resolves to no registered repository. Summarized as a coverage gap (total + cost, optionally by workspace); never itemized into planning entities.
+
+### Consistency contract with devfolio
+
+devfolio reports **overall** spend — every project, PRISM-managed or not. PRISM reports the **subset** attributable to the planning graph. Consistency is by construction, never by adjustment:
+
+- Both systems read the same omnidevx events and compute cost with the same embedded pricing; PRISM never re-collects, re-prices, or corrects figures.
+- For any window: `bucket1 + bucket2 + bucket3 = devfolio overall spend`, and PRISM's managed spend (buckets 1+2) equals devfolio's spend filtered to the same workspaces. Equality of totals holds only when every active project is PRISM-tracked.
+- Period reports state **coverage**: managed spend ÷ overall spend for the window, so the subset relation is visible rather than implied.
+
+### Surfaces
+
+```text
+prismctl report tokens --initiative <id> [--format json|markdown]
+prismctl report tokens --quarter 2026-Q3 | --since <t> --until <t>
+```
+
+Initiative mode: totals by token category, cost by model, per-RMI rows, session count, residual. Period mode: initiatives active in the window → member RMIs → tokens/cost, sorted by spend, plus the residual bucket. Dashboard gains token/cost columns (summary) and per-phase/per-RMI spend (detail). No new MCP tools (§7 rule); the report is CLI/dashboard-only.
+
+Cross-database views (with `devx` present): `v_initiative_tokens`, `v_unattributed_tokens` — defined in `views.sql` alongside the VisionStudio views, subject to the same NFR4 portability rule (plain SQL, no Dolt system tables).

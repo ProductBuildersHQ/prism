@@ -18,6 +18,7 @@ PRISM Control is headless and library-first. It coordinates work across reposito
 | **RMI** | A Roadmap Item — a single deliverable within one repository |
 | **Assignment** | A lease-based work claim by an agent session on an RMI |
 | **Evidence** | A commit, PR, release, or changelog entry linked to an RMI via `Refs:` trailers |
+| **Repository** | A registered repo in the catalog (`github.com/<org>/<name>`) with dependencies and local path |
 
 ## How It Works
 
