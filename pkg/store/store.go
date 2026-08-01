@@ -35,55 +35,55 @@ type UnitOfWork interface {
 
 // Initiative represents a cross-repository initiative.
 type Initiative struct {
-	ID                 string
-	Organization       string
-	Title              string
-	Description        string
-	Status             string
-	InitType           string // feature, maintenance, migration, compliance, refactor
-	WorkflowID         string // SpecWorkflow override; empty means use the type's default
-	Priority           string
-	HomeRepo           string
-	Workspace          string
-	ProgramID          string
-	Specs              map[string]string
-	CreatedAt          time.Time
-	PlannedAt          *time.Time
-	ExecutingAt        *time.Time
-	DeliveryCompleteAt *time.Time
-	ReleasedAt         *time.Time
-	ClosedAt           *time.Time
-	UpdatedAt          time.Time
+	ID                 string            `json:"id"`
+	Organization       string            `json:"organization"`
+	Title              string            `json:"title"`
+	Description        string            `json:"description,omitempty"`
+	Status             string            `json:"status"`
+	InitType           string            `json:"init_type,omitempty"`   // feature, maintenance, migration, compliance, refactor
+	WorkflowID         string            `json:"workflow_id,omitempty"` // SpecWorkflow override; empty means use the type's default
+	Priority           string            `json:"priority,omitempty"`
+	HomeRepo           string            `json:"home_repo,omitempty"`
+	Workspace          string            `json:"workspace,omitempty"`
+	ProgramID          string            `json:"program_id,omitempty"`
+	Specs              map[string]string `json:"specs,omitempty"`
+	CreatedAt          time.Time         `json:"created_at"`
+	PlannedAt          *time.Time        `json:"planned_at,omitempty"`
+	ExecutingAt        *time.Time        `json:"executing_at,omitempty"`
+	DeliveryCompleteAt *time.Time        `json:"delivery_complete_at,omitempty"`
+	ReleasedAt         *time.Time        `json:"released_at,omitempty"`
+	ClosedAt           *time.Time        `json:"closed_at,omitempty"`
+	UpdatedAt          time.Time         `json:"updated_at"`
 }
 
 // Phase is a themed grouping of RMIs within an initiative.
 // Phase status is always derived from member RMIs — never stored.
 type Phase struct {
-	ID             string
-	InitiativeID   string
-	SequenceNumber int
-	Title          string
-	Theme          string
+	ID             string `json:"id"`
+	InitiativeID   string `json:"initiative_id"`
+	SequenceNumber int    `json:"sequence_number"`
+	Title          string `json:"title"`
+	Theme          string `json:"theme,omitempty"`
 }
 
 // RoadmapItem (RMI) is a deliverable within a single repository.
 type RoadmapItem struct {
-	ID                 string
-	RepositoryID       string
-	InitiativeID       string
-	PhaseID            string
-	Title              string
-	Description        string
-	ItemType           string
-	Status             string
-	Priority           string
-	Required           bool
-	SequenceNumber     int
-	AcceptanceCriteria []string
-	ContextSpec        *ContextSpec
-	CreatedAt          time.Time
-	CompletedAt        *time.Time
-	UpdatedAt          time.Time
+	ID                 string       `json:"id"`
+	RepositoryID       string       `json:"repository_id"`
+	InitiativeID       string       `json:"initiative_id,omitempty"`
+	PhaseID            string       `json:"phase_id,omitempty"`
+	Title              string       `json:"title"`
+	Description        string       `json:"description,omitempty"`
+	ItemType           string       `json:"item_type"`
+	Status             string       `json:"status"`
+	Priority           string       `json:"priority,omitempty"`
+	Required           bool         `json:"required"`
+	SequenceNumber     int          `json:"sequence_number"`
+	AcceptanceCriteria []string     `json:"acceptance_criteria,omitempty"`
+	ContextSpec        *ContextSpec `json:"context_spec,omitempty"`
+	CreatedAt          time.Time    `json:"created_at"`
+	CompletedAt        *time.Time   `json:"completed_at,omitempty"`
+	UpdatedAt          time.Time    `json:"updated_at"`
 }
 
 // ContextSpec contains explicit overrides for context assembly.
@@ -104,30 +104,30 @@ type ContextSpec struct {
 
 // RMIDependency is a directed edge between two RMIs.
 type RMIDependency struct {
-	SourceRMIID  string
-	TargetRMIID  string
-	Relationship string // "requires" or "relates"
+	SourceRMIID  string `json:"source_rmi_id"`
+	TargetRMIID  string `json:"target_rmi_id"`
+	Relationship string `json:"relationship"` // "requires" or "relates"
 }
 
 // InitiativeDependency is a directed edge between two initiatives.
 type InitiativeDependency struct {
-	SourceInitiativeID string
-	TargetInitiativeID string
-	Relationship       string // "requires" or "relates"
+	SourceInitiativeID string `json:"source_initiative_id"`
+	TargetInitiativeID string `json:"target_initiative_id"`
+	Relationship       string `json:"relationship"` // "requires" or "relates"
 }
 
 // Assignment is a lease-based work claim by an agent session.
 type Assignment struct {
-	ID             string
-	RMIID          string
-	Worker         string // session ID; matches omnidevx claudecode collector
-	Status         string
-	LeaseExpiresAt time.Time
-	Workspace      string
-	Handoff        *Handoff
-	CreatedAt      time.Time
-	CompletedAt    *time.Time
-	UpdatedAt      time.Time
+	ID             string     `json:"id"`
+	RMIID          string     `json:"rmi_id"`
+	Worker         string     `json:"worker,omitempty"` // session ID; matches omnidevx claudecode collector
+	Status         string     `json:"status"`
+	LeaseExpiresAt time.Time  `json:"lease_expires_at"`
+	Workspace      string     `json:"workspace,omitempty"`
+	Handoff        *Handoff   `json:"handoff,omitempty"`
+	CreatedAt      time.Time  `json:"created_at"`
+	CompletedAt    *time.Time `json:"completed_at,omitempty"`
+	UpdatedAt      time.Time  `json:"updated_at"`
 }
 
 // Handoff carries compact state for session continuity.
@@ -140,46 +140,46 @@ type Handoff struct {
 
 // DeliveryEvidence links a commit, PR, release, or changelog entry to an RMI.
 type DeliveryEvidence struct {
-	ID           string
-	RMIID        string
-	EvidenceType string // commit|pr|release|changelog|test
-	Reference    string
-	CommitType   string // conventional commit type (commits only)
-	CommitScope  string
-	OccurredAt   *time.Time
-	CreatedAt    time.Time
+	ID           string     `json:"id"`
+	RMIID        string     `json:"rmi_id"`
+	EvidenceType string     `json:"evidence_type"` // commit|pr|release|changelog|test
+	Reference    string     `json:"reference"`
+	CommitType   string     `json:"commit_type,omitempty"` // conventional commit type (commits only)
+	CommitScope  string     `json:"commit_scope,omitempty"`
+	OccurredAt   *time.Time `json:"occurred_at,omitempty"`
+	CreatedAt    time.Time  `json:"created_at"`
 }
 
 // Repository is a catalog entry for a participating repository.
 type Repository struct {
-	ID              string
-	Organization    string
-	RepositoryName  string
-	DefaultBranch   string
-	LocalPath       string // absolute path on disk (for ingest/scan)
-	GoModule        string // go.mod module path (from gitscan)
-	Domain          string
-	Status          string
-	IngestHighWater string // last scanned commit SHA
+	ID              string `json:"id"`
+	Organization    string `json:"organization"`
+	RepositoryName  string `json:"repository_name"`
+	DefaultBranch   string `json:"default_branch,omitempty"`
+	LocalPath       string `json:"local_path,omitempty"` // absolute path on disk (for ingest/scan)
+	GoModule        string `json:"go_module,omitempty"`  // go.mod module path (from gitscan)
+	Domain          string `json:"domain,omitempty"`
+	Status          string `json:"status"`
+	IngestHighWater string `json:"ingest_high_water,omitempty"` // last scanned commit SHA
 }
 
 // Program is an organizational grouping of related initiatives.
 type Program struct {
-	ID           string
-	Name         string
-	Organization string
-	Description  string
-	Hidden       bool // when true, omitted from the dashboard homepage by default
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	ID           string    `json:"id"`
+	Name         string    `json:"name"`
+	Organization string    `json:"organization"`
+	Description  string    `json:"description,omitempty"`
+	Hidden       bool      `json:"hidden,omitempty"` // when true, omitted from the dashboard homepage by default
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
 // RepositoryDependency is a directed edge between two repositories
 // derived from go.mod dependency analysis.
 type RepositoryDependency struct {
-	SourceRepositoryID string
-	TargetRepositoryID string
-	DependencyType     string // "go_module"
+	SourceRepositoryID string `json:"source_repository_id"`
+	TargetRepositoryID string `json:"target_repository_id"`
+	DependencyType     string `json:"dependency_type"` // "go_module"
 }
 
 // ProgramStore defines persistence for programs.
@@ -254,33 +254,33 @@ type RepositoryStore interface {
 
 // SpecWorkflow defines a specification workflow template.
 type SpecWorkflow struct {
-	ID            string
-	Name          string
-	Description   string
-	SpecsRequired []string // e.g. ["PLAN.md", "ROADMAP.md"]
-	SpecsOptional []string // e.g. ["PRD.md", "TRD.md"]
-	InitTypes     []string // initiative types this workflow applies to
+	ID            string   `json:"id"`
+	Name          string   `json:"name"`
+	Description   string   `json:"description,omitempty"`
+	SpecsRequired []string `json:"specs_required,omitempty"` // e.g. ["PLAN.md", "ROADMAP.md"]
+	SpecsOptional []string `json:"specs_optional,omitempty"` // e.g. ["PRD.md", "TRD.md"]
+	InitTypes     []string `json:"init_types,omitempty"`     // initiative types this workflow applies to
 }
 
 // JudgeRubric defines scoring criteria for evaluating a spec type.
 type JudgeRubric struct {
-	ID             string
-	WorkflowID     string
-	SpecType       string         // e.g. "PRD.md"
-	Criteria       map[string]any // scoring dimensions
-	PromptTemplate string         // LLM prompt for evaluation
+	ID             string         `json:"id"`
+	WorkflowID     string         `json:"workflow_id"`
+	SpecType       string         `json:"spec_type"`                 // e.g. "PRD.md"
+	Criteria       map[string]any `json:"criteria,omitempty"`        // scoring dimensions
+	PromptTemplate string         `json:"prompt_template,omitempty"` // LLM prompt for evaluation
 }
 
 // JudgeResult stores an LLM-as-a-Judge evaluation result.
 type JudgeResult struct {
-	ID           string
-	InitiativeID string
-	SpecPath     string
-	RubricID     string
-	Score        float64
-	Rationale    string
-	Model        string
-	EvaluatedAt  time.Time
+	ID           string    `json:"id"`
+	InitiativeID string    `json:"initiative_id"`
+	SpecPath     string    `json:"spec_path"`
+	RubricID     string    `json:"rubric_id"`
+	Score        float64   `json:"score"`
+	Rationale    string    `json:"rationale,omitempty"`
+	Model        string    `json:"model,omitempty"`
+	EvaluatedAt  time.Time `json:"evaluated_at"`
 }
 
 // SpecWorkflowStore defines persistence for spec workflows.
@@ -318,11 +318,11 @@ type Level struct {
 
 // CapabilityModel defines a capability maturity framework.
 type CapabilityModel struct {
-	ID          string
-	Name        string
-	Description string
-	Dimensions  []Dimension
-	MaxLevel    int
+	ID          string      `json:"id"`
+	Name        string      `json:"name"`
+	Description string      `json:"description,omitempty"`
+	Dimensions  []Dimension `json:"dimensions,omitempty"`
+	MaxLevel    int         `json:"max_level"`
 }
 
 // DimensionScore captures the assessment for a single dimension.
@@ -334,16 +334,16 @@ type DimensionScore struct {
 
 // MaturityAssessment captures a point-in-time capability assessment.
 type MaturityAssessment struct {
-	ID           string
-	ModelID      string
-	InitiativeID string
-	Organization string
-	Scores       map[string]DimensionScore
-	OverallScore *float64
-	Summary      string
-	AssessedBy   string
-	Model        string // LLM model used
-	AssessedAt   time.Time
+	ID           string                    `json:"id"`
+	ModelID      string                    `json:"model_id"`
+	InitiativeID string                    `json:"initiative_id,omitempty"`
+	Organization string                    `json:"organization,omitempty"`
+	Scores       map[string]DimensionScore `json:"scores,omitempty"`
+	OverallScore *float64                  `json:"overall_score,omitempty"`
+	Summary      string                    `json:"summary,omitempty"`
+	AssessedBy   string                    `json:"assessed_by,omitempty"`
+	Model        string                    `json:"model,omitempty"` // LLM model used
+	AssessedAt   time.Time                 `json:"assessed_at"`
 }
 
 // MaturityStore defines persistence for capability models and assessments.
