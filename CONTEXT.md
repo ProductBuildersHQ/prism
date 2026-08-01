@@ -5,7 +5,7 @@
 
 ## Current State
 
-**Initiative Status:** executing (9/21 RMIs completed)
+**Initiative Status:** executing (13/17 RMIs completed, 4 cancelled)
 
 ### Completed This Session
 
@@ -17,40 +17,32 @@
 - RMI-104: JudgeResult entity
 - RMI-120: Seed built-in workflows
 
-**Phase 2 — CLI Commands (4/6 complete):**
+**Phase 2 — CLI Commands (complete):**
 
 - RMI-107: `prismctl spec init` — scaffolds specs from workflow
 - RMI-108: `prismctl spec validate` — checks specs exist
 - RMI-109: `prismctl spec judge show/record/list` — agent-driven evaluation
-- RMI-112: Standardize canonical spec path onto initiative record
+- RMI-121: Standardize canonical spec path (`docs/specs/initiatives/{INIT-ID}/`)
+
+**Phase 3 — Maturity Model (complete):**
+
+- RMI-112: CapabilityModel entity + built-in models (big-tech-essentials, big-tech-full, continuous-discovery, api-first)
+- RMI-113: MaturityAssessment entity with dimension scores
+- RMI-114: `prismctl maturity assess show/record/list` — agent-driven assessment
+- RMI-115: `prismctl maturity report` — JSON + table output for radar charts
 
 **Cancelled (duplicates INIT-TOKENATTRIB-001):**
 
 - RMI-105, RMI-106, RMI-110, RMI-111 — token entities/commands already delivered
 
-### Remaining Phase 2 RMIs
-
-| RMI | Title | Notes |
-|-----|-------|-------|
-| RMI-??? | `prismctl spend report` | May already exist via `prismctl report tokens` |
-| RMI-??? | Remaining spend CLI | Check against INIT-TOKENATTRIB-001 |
-
-### Phase 3 — Maturity Model (not started)
-
-| RMI | Title |
-|-----|-------|
-| RMI-113 | Add CapabilityModel entity |
-| RMI-114 | Add MaturityAssessment entity |
-| RMI-115 | `prismctl assess` command |
-| RMI-116 | `prismctl maturity report` command |
-
 ### Phase 4 — visionstudio UI extraction (not started)
 
 | RMI | Title |
 |-----|-------|
-| RMI-117 | Extract UI components from visionstudio |
-| RMI-118 | Integrate spend visualization |
-| RMI-119 | Add radar chart for maturity |
+| RMI-116 | Extract shared UI components from visionstudio |
+| RMI-117 | Execution dashboard panel |
+| RMI-118 | Spend visualization panel |
+| RMI-119 | Maturity radar chart panel |
 
 ## Key Design Decisions
 
@@ -98,6 +90,17 @@ prismctl spec validate <initiative-id>
 prismctl spec judge show <initiative-id> <spec-file>
 prismctl spec judge record <initiative-id> <spec-file> --score <0-10> --rationale "..." --model <id>
 prismctl spec judge list <initiative-id>
+
+# Maturity management
+prismctl maturity model list
+prismctl maturity model get <model-id>
+prismctl maturity model seed
+
+prismctl maturity assess show <initiative-id> <model-id>
+prismctl maturity assess record <initiative-id> <model-id> --scores '{}' --overall <n> --summary "..." --assessed-by "..." --model <llm>
+prismctl maturity assess list <initiative-id>
+
+prismctl maturity report <initiative-id> [--json]
 ```
 
 ## Related Context
