@@ -148,7 +148,6 @@ func entInitiativeToStore(e *ent.Initiative) *store.Initiative {
 		Description:        e.Description,
 		Status:             e.Status,
 		InitType:           e.InitType,
-		WorkflowID:         e.WorkflowID,
 		Priority:           e.Priority,
 		HomeRepo:           e.HomeRepo,
 		Workspace:          e.Workspace,
@@ -163,6 +162,9 @@ func entInitiativeToStore(e *ent.Initiative) *store.Initiative {
 	}
 	if prog, err := e.Edges.ProgramOrErr(); err == nil {
 		si.ProgramID = prog.ID
+	}
+	if wf, err := e.Edges.WorkflowOrErr(); err == nil {
+		si.WorkflowID = wf.ID
 	}
 	return si
 }
@@ -215,6 +217,7 @@ func (d *DoltStore) GetInitiative(ctx context.Context, id string) (*store.Initia
 	e, err := d.client.Initiative.Query().
 		Where(initiativeEnt.IDEQ(id)).
 		WithProgram().
+		WithWorkflow().
 		Only(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("get initiative %s: %w", id, err)
@@ -223,7 +226,7 @@ func (d *DoltStore) GetInitiative(ctx context.Context, id string) (*store.Initia
 }
 
 func (d *DoltStore) ListInitiatives(ctx context.Context) ([]*store.Initiative, error) {
-	rows, err := d.client.Initiative.Query().WithProgram().All(ctx)
+	rows, err := d.client.Initiative.Query().WithProgram().WithWorkflow().All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("list initiatives: %w", err)
 	}
@@ -246,7 +249,7 @@ func (d *DoltStore) UpdateInitiative(ctx context.Context, init *store.Initiative
 	if init.WorkflowID != "" {
 		b.SetWorkflowID(init.WorkflowID)
 	} else {
-		b.ClearWorkflowID()
+		b.ClearWorkflow()
 	}
 	if init.Description != "" {
 		b.SetDescription(init.Description)
