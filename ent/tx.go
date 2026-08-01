@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// Assignment is the client for interacting with the Assignment builders.
 	Assignment *AssignmentClient
+	// CapabilityModel is the client for interacting with the CapabilityModel builders.
+	CapabilityModel *CapabilityModelClient
 	// DeliveryEvidence is the client for interacting with the DeliveryEvidence builders.
 	DeliveryEvidence *DeliveryEvidenceClient
 	// Initiative is the client for interacting with the Initiative builders.
@@ -24,6 +26,8 @@ type Tx struct {
 	JudgeResult *JudgeResultClient
 	// JudgeRubric is the client for interacting with the JudgeRubric builders.
 	JudgeRubric *JudgeRubricClient
+	// MaturityAssessment is the client for interacting with the MaturityAssessment builders.
+	MaturityAssessment *MaturityAssessmentClient
 	// Phase is the client for interacting with the Phase builders.
 	Phase *PhaseClient
 	// Program is the client for interacting with the Program builders.
@@ -170,11 +174,13 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Assignment = NewAssignmentClient(tx.config)
+	tx.CapabilityModel = NewCapabilityModelClient(tx.config)
 	tx.DeliveryEvidence = NewDeliveryEvidenceClient(tx.config)
 	tx.Initiative = NewInitiativeClient(tx.config)
 	tx.InitiativeDependency = NewInitiativeDependencyClient(tx.config)
 	tx.JudgeResult = NewJudgeResultClient(tx.config)
 	tx.JudgeRubric = NewJudgeRubricClient(tx.config)
+	tx.MaturityAssessment = NewMaturityAssessmentClient(tx.config)
 	tx.Phase = NewPhaseClient(tx.config)
 	tx.Program = NewProgramClient(tx.config)
 	tx.RMIDependency = NewRMIDependencyClient(tx.config)

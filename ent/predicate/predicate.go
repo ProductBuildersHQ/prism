@@ -9,6 +9,9 @@ import (
 // Assignment is the predicate function for assignment builders.
 type Assignment func(*sql.Selector)
 
+// CapabilityModel is the predicate function for capabilitymodel builders.
+type CapabilityModel func(*sql.Selector)
+
 // DeliveryEvidence is the predicate function for deliveryevidence builders.
 type DeliveryEvidence func(*sql.Selector)
 
@@ -23,6 +26,9 @@ type JudgeResult func(*sql.Selector)
 
 // JudgeRubric is the predicate function for judgerubric builders.
 type JudgeRubric func(*sql.Selector)
+
+// MaturityAssessment is the predicate function for maturityassessment builders.
+type MaturityAssessment func(*sql.Selector)
 
 // Phase is the predicate function for phase builders.
 type Phase func(*sql.Selector)

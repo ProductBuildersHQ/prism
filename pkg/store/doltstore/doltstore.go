@@ -23,7 +23,9 @@ import (
 	"github.com/ProductBuildersHQ/prism-control/ent/initiativedependency"
 	"github.com/ProductBuildersHQ/prism-control/ent/judgeresult"
 	"github.com/ProductBuildersHQ/prism-control/ent/judgerubric"
+	"github.com/ProductBuildersHQ/prism-control/ent/maturityassessment"
 	"github.com/ProductBuildersHQ/prism-control/ent/phase"
+	"github.com/ProductBuildersHQ/prism-control/ent/schema"
 	"github.com/ProductBuildersHQ/prism-control/ent/repository"
 	"github.com/ProductBuildersHQ/prism-control/ent/repositorydependency"
 	"github.com/ProductBuildersHQ/prism-control/ent/rmidependency"
@@ -1286,6 +1288,258 @@ func (d *DoltStore) ListJudgeResults(ctx context.Context, initiativeID string) (
 			Rationale:    r.Rationale,
 			Model:        r.Model,
 			EvaluatedAt:  r.EvaluatedAt,
+		}
+	}
+	return result, nil
+}
+
+// ---------------------------------------------------------------------------
+// CapabilityModel CRUD (Ent-backed)
+// ---------------------------------------------------------------------------
+
+func entDimensionsToStore(dims []schema.Dimension) []store.Dimension {
+	result := make([]store.Dimension, len(dims))
+	for i, d := range dims {
+		levels := make([]store.Level, len(d.Levels))
+		for j, l := range d.Levels {
+			levels[j] = store.Level{
+				Level:       l.Level,
+				Name:        l.Name,
+				Description: l.Description,
+			}
+		}
+		result[i] = store.Dimension{
+			Key:         d.Key,
+			Name:        d.Name,
+			Description: d.Description,
+			Levels:      levels,
+			Sources:     d.Sources,
+		}
+	}
+	return result
+}
+
+func storeDimensionsToEnt(dims []store.Dimension) []schema.Dimension {
+	result := make([]schema.Dimension, len(dims))
+	for i, d := range dims {
+		levels := make([]schema.Level, len(d.Levels))
+		for j, l := range d.Levels {
+			levels[j] = schema.Level{
+				Level:       l.Level,
+				Name:        l.Name,
+				Description: l.Description,
+			}
+		}
+		result[i] = schema.Dimension{
+			Key:         d.Key,
+			Name:        d.Name,
+			Description: d.Description,
+			Levels:      levels,
+			Sources:     d.Sources,
+		}
+	}
+	return result
+}
+
+func (d *DoltStore) CreateCapabilityModel(ctx context.Context, model *store.CapabilityModel) error {
+	_, err := d.client.CapabilityModel.Create().
+		SetID(model.ID).
+		SetName(model.Name).
+		SetDescription(model.Description).
+		SetDimensions(storeDimensionsToEnt(model.Dimensions)).
+		SetMaxLevel(model.MaxLevel).
+		Save(ctx)
+	if err != nil {
+		return fmt.Errorf("create capability model: %w", err)
+	}
+	return nil
+}
+
+func (d *DoltStore) GetCapabilityModel(ctx context.Context, id string) (*store.CapabilityModel, error) {
+	row, err := d.client.CapabilityModel.Get(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("get capability model %s: %w", id, err)
+	}
+	return &store.CapabilityModel{
+		ID:          row.ID,
+		Name:        row.Name,
+		Description: row.Description,
+		Dimensions:  entDimensionsToStore(row.Dimensions),
+		MaxLevel:    row.MaxLevel,
+	}, nil
+}
+
+func (d *DoltStore) ListCapabilityModels(ctx context.Context) ([]*store.CapabilityModel, error) {
+	rows, err := d.client.CapabilityModel.Query().All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("list capability models: %w", err)
+	}
+	result := make([]*store.CapabilityModel, len(rows))
+	for i, r := range rows {
+		result[i] = &store.CapabilityModel{
+			ID:          r.ID,
+			Name:        r.Name,
+			Description: r.Description,
+			Dimensions:  entDimensionsToStore(r.Dimensions),
+			MaxLevel:    r.MaxLevel,
+		}
+	}
+	return result, nil
+}
+
+func (d *DoltStore) UpdateCapabilityModel(ctx context.Context, model *store.CapabilityModel) error {
+	_, err := d.client.CapabilityModel.UpdateOneID(model.ID).
+		SetName(model.Name).
+		SetDescription(model.Description).
+		SetDimensions(storeDimensionsToEnt(model.Dimensions)).
+		SetMaxLevel(model.MaxLevel).
+		Save(ctx)
+	if err != nil {
+		return fmt.Errorf("update capability model %s: %w", model.ID, err)
+	}
+	return nil
+}
+
+// ---------------------------------------------------------------------------
+// MaturityAssessment CRUD (Ent-backed)
+// ---------------------------------------------------------------------------
+
+func entScoresToStore(scores map[string]schema.DimensionScore) map[string]store.DimensionScore {
+	result := make(map[string]store.DimensionScore, len(scores))
+	for k, v := range scores {
+		result[k] = store.DimensionScore{
+			Level:     v.Level,
+			Rationale: v.Rationale,
+			Evidence:  v.Evidence,
+		}
+	}
+	return result
+}
+
+func storeScoresToEnt(scores map[string]store.DimensionScore) map[string]schema.DimensionScore {
+	result := make(map[string]schema.DimensionScore, len(scores))
+	for k, v := range scores {
+		result[k] = schema.DimensionScore{
+			Level:     v.Level,
+			Rationale: v.Rationale,
+			Evidence:  v.Evidence,
+		}
+	}
+	return result
+}
+
+func (d *DoltStore) CreateMaturityAssessment(ctx context.Context, a *store.MaturityAssessment) error {
+	builder := d.client.MaturityAssessment.Create().
+		SetID(a.ID).
+		SetScores(storeScoresToEnt(a.Scores)).
+		SetSummary(a.Summary).
+		SetAssessedAt(a.AssessedAt)
+	if a.InitiativeID != "" {
+		builder = builder.SetInitiativeID(a.InitiativeID)
+	}
+	if a.Organization != "" {
+		builder = builder.SetOrganization(a.Organization)
+	}
+	if a.OverallScore != nil {
+		builder = builder.SetOverallScore(*a.OverallScore)
+	}
+	if a.AssessedBy != "" {
+		builder = builder.SetAssessedBy(a.AssessedBy)
+	}
+	if a.Model != "" {
+		builder = builder.SetModel(a.Model)
+	}
+	if a.ModelID != "" {
+		builder = builder.SetCapabilityModelID(a.ModelID)
+	}
+	_, err := builder.Save(ctx)
+	if err != nil {
+		return fmt.Errorf("create maturity assessment: %w", err)
+	}
+	return nil
+}
+
+func (d *DoltStore) GetMaturityAssessment(ctx context.Context, id string) (*store.MaturityAssessment, error) {
+	row, err := d.client.MaturityAssessment.Query().
+		Where(maturityassessment.IDEQ(id)).
+		WithCapabilityModel().
+		Only(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("get maturity assessment %s: %w", id, err)
+	}
+	modelID := ""
+	if cm, err := row.Edges.CapabilityModelOrErr(); err == nil {
+		modelID = cm.ID
+	}
+	return &store.MaturityAssessment{
+		ID:           row.ID,
+		ModelID:      modelID,
+		InitiativeID: row.InitiativeID,
+		Organization: row.Organization,
+		Scores:       entScoresToStore(row.Scores),
+		OverallScore: row.OverallScore,
+		Summary:      row.Summary,
+		AssessedBy:   row.AssessedBy,
+		Model:        row.Model,
+		AssessedAt:   row.AssessedAt,
+	}, nil
+}
+
+func (d *DoltStore) ListMaturityAssessments(ctx context.Context, initiativeID string) ([]*store.MaturityAssessment, error) {
+	rows, err := d.client.MaturityAssessment.Query().
+		Where(maturityassessment.InitiativeIDEQ(initiativeID)).
+		WithCapabilityModel().
+		All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("list maturity assessments for %s: %w", initiativeID, err)
+	}
+	result := make([]*store.MaturityAssessment, len(rows))
+	for i, r := range rows {
+		modelID := ""
+		if cm, err := r.Edges.CapabilityModelOrErr(); err == nil {
+			modelID = cm.ID
+		}
+		result[i] = &store.MaturityAssessment{
+			ID:           r.ID,
+			ModelID:      modelID,
+			InitiativeID: r.InitiativeID,
+			Organization: r.Organization,
+			Scores:       entScoresToStore(r.Scores),
+			OverallScore: r.OverallScore,
+			Summary:      r.Summary,
+			AssessedBy:   r.AssessedBy,
+			Model:        r.Model,
+			AssessedAt:   r.AssessedAt,
+		}
+	}
+	return result, nil
+}
+
+func (d *DoltStore) ListMaturityAssessmentsByOrg(ctx context.Context, org string) ([]*store.MaturityAssessment, error) {
+	rows, err := d.client.MaturityAssessment.Query().
+		Where(maturityassessment.OrganizationEQ(org)).
+		WithCapabilityModel().
+		All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("list maturity assessments for org %s: %w", org, err)
+	}
+	result := make([]*store.MaturityAssessment, len(rows))
+	for i, r := range rows {
+		modelID := ""
+		if cm, err := r.Edges.CapabilityModelOrErr(); err == nil {
+			modelID = cm.ID
+		}
+		result[i] = &store.MaturityAssessment{
+			ID:           r.ID,
+			ModelID:      modelID,
+			InitiativeID: r.InitiativeID,
+			Organization: r.Organization,
+			Scores:       entScoresToStore(r.Scores),
+			OverallScore: r.OverallScore,
+			Summary:      r.Summary,
+			AssessedBy:   r.AssessedBy,
+			Model:        r.Model,
+			AssessedAt:   r.AssessedAt,
 		}
 	}
 	return result, nil

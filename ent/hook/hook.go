@@ -21,6 +21,18 @@ func (f AssignmentFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, 
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AssignmentMutation", m)
 }
 
+// The CapabilityModelFunc type is an adapter to allow the use of ordinary
+// function as CapabilityModel mutator.
+type CapabilityModelFunc func(context.Context, *ent.CapabilityModelMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CapabilityModelFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CapabilityModelMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CapabilityModelMutation", m)
+}
+
 // The DeliveryEvidenceFunc type is an adapter to allow the use of ordinary
 // function as DeliveryEvidence mutator.
 type DeliveryEvidenceFunc func(context.Context, *ent.DeliveryEvidenceMutation) (ent.Value, error)
@@ -79,6 +91,18 @@ func (f JudgeRubricFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.JudgeRubricMutation", m)
+}
+
+// The MaturityAssessmentFunc type is an adapter to allow the use of ordinary
+// function as MaturityAssessment mutator.
+type MaturityAssessmentFunc func(context.Context, *ent.MaturityAssessmentMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f MaturityAssessmentFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.MaturityAssessmentMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.MaturityAssessmentMutation", m)
 }
 
 // The PhaseFunc type is an adapter to allow the use of ordinary

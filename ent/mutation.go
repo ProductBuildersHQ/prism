@@ -12,11 +12,13 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/ProductBuildersHQ/prism-control/ent/assignment"
+	"github.com/ProductBuildersHQ/prism-control/ent/capabilitymodel"
 	"github.com/ProductBuildersHQ/prism-control/ent/deliveryevidence"
 	"github.com/ProductBuildersHQ/prism-control/ent/initiative"
 	"github.com/ProductBuildersHQ/prism-control/ent/initiativedependency"
 	"github.com/ProductBuildersHQ/prism-control/ent/judgeresult"
 	"github.com/ProductBuildersHQ/prism-control/ent/judgerubric"
+	"github.com/ProductBuildersHQ/prism-control/ent/maturityassessment"
 	"github.com/ProductBuildersHQ/prism-control/ent/phase"
 	"github.com/ProductBuildersHQ/prism-control/ent/predicate"
 	"github.com/ProductBuildersHQ/prism-control/ent/program"
@@ -24,6 +26,7 @@ import (
 	"github.com/ProductBuildersHQ/prism-control/ent/repositorydependency"
 	"github.com/ProductBuildersHQ/prism-control/ent/rmidependency"
 	"github.com/ProductBuildersHQ/prism-control/ent/roadmapitem"
+	"github.com/ProductBuildersHQ/prism-control/ent/schema"
 	"github.com/ProductBuildersHQ/prism-control/ent/specworkflow"
 )
 
@@ -37,11 +40,13 @@ const (
 
 	// Node types.
 	TypeAssignment           = "Assignment"
+	TypeCapabilityModel      = "CapabilityModel"
 	TypeDeliveryEvidence     = "DeliveryEvidence"
 	TypeInitiative           = "Initiative"
 	TypeInitiativeDependency = "InitiativeDependency"
 	TypeJudgeResult          = "JudgeResult"
 	TypeJudgeRubric          = "JudgeRubric"
+	TypeMaturityAssessment   = "MaturityAssessment"
 	TypePhase                = "Phase"
 	TypeProgram              = "Program"
 	TypeRMIDependency        = "RMIDependency"
@@ -886,6 +891,687 @@ func (m *AssignmentMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Assignment edge %s", name)
+}
+
+// CapabilityModelMutation represents an operation that mutates the CapabilityModel nodes in the graph.
+type CapabilityModelMutation struct {
+	config
+	op                 Op
+	typ                string
+	id                 *string
+	name               *string
+	description        *string
+	dimensions         *[]schema.Dimension
+	appenddimensions   []schema.Dimension
+	max_level          *int
+	addmax_level       *int
+	clearedFields      map[string]struct{}
+	assessments        map[string]struct{}
+	removedassessments map[string]struct{}
+	clearedassessments bool
+	done               bool
+	oldValue           func(context.Context) (*CapabilityModel, error)
+	predicates         []predicate.CapabilityModel
+}
+
+var _ ent.Mutation = (*CapabilityModelMutation)(nil)
+
+// capabilitymodelOption allows management of the mutation configuration using functional options.
+type capabilitymodelOption func(*CapabilityModelMutation)
+
+// newCapabilityModelMutation creates new mutation for the CapabilityModel entity.
+func newCapabilityModelMutation(c config, op Op, opts ...capabilitymodelOption) *CapabilityModelMutation {
+	m := &CapabilityModelMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeCapabilityModel,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCapabilityModelID sets the ID field of the mutation.
+func withCapabilityModelID(id string) capabilitymodelOption {
+	return func(m *CapabilityModelMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *CapabilityModel
+		)
+		m.oldValue = func(ctx context.Context) (*CapabilityModel, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().CapabilityModel.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withCapabilityModel sets the old CapabilityModel of the mutation.
+func withCapabilityModel(node *CapabilityModel) capabilitymodelOption {
+	return func(m *CapabilityModelMutation) {
+		m.oldValue = func(context.Context) (*CapabilityModel, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CapabilityModelMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CapabilityModelMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of CapabilityModel entities.
+func (m *CapabilityModelMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CapabilityModelMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *CapabilityModelMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().CapabilityModel.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetName sets the "name" field.
+func (m *CapabilityModelMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *CapabilityModelMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the CapabilityModel entity.
+// If the CapabilityModel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CapabilityModelMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *CapabilityModelMutation) ResetName() {
+	m.name = nil
+}
+
+// SetDescription sets the "description" field.
+func (m *CapabilityModelMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *CapabilityModelMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the CapabilityModel entity.
+// If the CapabilityModel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CapabilityModelMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ClearDescription clears the value of the "description" field.
+func (m *CapabilityModelMutation) ClearDescription() {
+	m.description = nil
+	m.clearedFields[capabilitymodel.FieldDescription] = struct{}{}
+}
+
+// DescriptionCleared returns if the "description" field was cleared in this mutation.
+func (m *CapabilityModelMutation) DescriptionCleared() bool {
+	_, ok := m.clearedFields[capabilitymodel.FieldDescription]
+	return ok
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *CapabilityModelMutation) ResetDescription() {
+	m.description = nil
+	delete(m.clearedFields, capabilitymodel.FieldDescription)
+}
+
+// SetDimensions sets the "dimensions" field.
+func (m *CapabilityModelMutation) SetDimensions(s []schema.Dimension) {
+	m.dimensions = &s
+	m.appenddimensions = nil
+}
+
+// Dimensions returns the value of the "dimensions" field in the mutation.
+func (m *CapabilityModelMutation) Dimensions() (r []schema.Dimension, exists bool) {
+	v := m.dimensions
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDimensions returns the old "dimensions" field's value of the CapabilityModel entity.
+// If the CapabilityModel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CapabilityModelMutation) OldDimensions(ctx context.Context) (v []schema.Dimension, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDimensions is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDimensions requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDimensions: %w", err)
+	}
+	return oldValue.Dimensions, nil
+}
+
+// AppendDimensions adds s to the "dimensions" field.
+func (m *CapabilityModelMutation) AppendDimensions(s []schema.Dimension) {
+	m.appenddimensions = append(m.appenddimensions, s...)
+}
+
+// AppendedDimensions returns the list of values that were appended to the "dimensions" field in this mutation.
+func (m *CapabilityModelMutation) AppendedDimensions() ([]schema.Dimension, bool) {
+	if len(m.appenddimensions) == 0 {
+		return nil, false
+	}
+	return m.appenddimensions, true
+}
+
+// ClearDimensions clears the value of the "dimensions" field.
+func (m *CapabilityModelMutation) ClearDimensions() {
+	m.dimensions = nil
+	m.appenddimensions = nil
+	m.clearedFields[capabilitymodel.FieldDimensions] = struct{}{}
+}
+
+// DimensionsCleared returns if the "dimensions" field was cleared in this mutation.
+func (m *CapabilityModelMutation) DimensionsCleared() bool {
+	_, ok := m.clearedFields[capabilitymodel.FieldDimensions]
+	return ok
+}
+
+// ResetDimensions resets all changes to the "dimensions" field.
+func (m *CapabilityModelMutation) ResetDimensions() {
+	m.dimensions = nil
+	m.appenddimensions = nil
+	delete(m.clearedFields, capabilitymodel.FieldDimensions)
+}
+
+// SetMaxLevel sets the "max_level" field.
+func (m *CapabilityModelMutation) SetMaxLevel(i int) {
+	m.max_level = &i
+	m.addmax_level = nil
+}
+
+// MaxLevel returns the value of the "max_level" field in the mutation.
+func (m *CapabilityModelMutation) MaxLevel() (r int, exists bool) {
+	v := m.max_level
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMaxLevel returns the old "max_level" field's value of the CapabilityModel entity.
+// If the CapabilityModel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CapabilityModelMutation) OldMaxLevel(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMaxLevel is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMaxLevel requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMaxLevel: %w", err)
+	}
+	return oldValue.MaxLevel, nil
+}
+
+// AddMaxLevel adds i to the "max_level" field.
+func (m *CapabilityModelMutation) AddMaxLevel(i int) {
+	if m.addmax_level != nil {
+		*m.addmax_level += i
+	} else {
+		m.addmax_level = &i
+	}
+}
+
+// AddedMaxLevel returns the value that was added to the "max_level" field in this mutation.
+func (m *CapabilityModelMutation) AddedMaxLevel() (r int, exists bool) {
+	v := m.addmax_level
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMaxLevel resets all changes to the "max_level" field.
+func (m *CapabilityModelMutation) ResetMaxLevel() {
+	m.max_level = nil
+	m.addmax_level = nil
+}
+
+// AddAssessmentIDs adds the "assessments" edge to the MaturityAssessment entity by ids.
+func (m *CapabilityModelMutation) AddAssessmentIDs(ids ...string) {
+	if m.assessments == nil {
+		m.assessments = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.assessments[ids[i]] = struct{}{}
+	}
+}
+
+// ClearAssessments clears the "assessments" edge to the MaturityAssessment entity.
+func (m *CapabilityModelMutation) ClearAssessments() {
+	m.clearedassessments = true
+}
+
+// AssessmentsCleared reports if the "assessments" edge to the MaturityAssessment entity was cleared.
+func (m *CapabilityModelMutation) AssessmentsCleared() bool {
+	return m.clearedassessments
+}
+
+// RemoveAssessmentIDs removes the "assessments" edge to the MaturityAssessment entity by IDs.
+func (m *CapabilityModelMutation) RemoveAssessmentIDs(ids ...string) {
+	if m.removedassessments == nil {
+		m.removedassessments = make(map[string]struct{})
+	}
+	for i := range ids {
+		delete(m.assessments, ids[i])
+		m.removedassessments[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedAssessments returns the removed IDs of the "assessments" edge to the MaturityAssessment entity.
+func (m *CapabilityModelMutation) RemovedAssessmentsIDs() (ids []string) {
+	for id := range m.removedassessments {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// AssessmentsIDs returns the "assessments" edge IDs in the mutation.
+func (m *CapabilityModelMutation) AssessmentsIDs() (ids []string) {
+	for id := range m.assessments {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetAssessments resets all changes to the "assessments" edge.
+func (m *CapabilityModelMutation) ResetAssessments() {
+	m.assessments = nil
+	m.clearedassessments = false
+	m.removedassessments = nil
+}
+
+// Where appends a list predicates to the CapabilityModelMutation builder.
+func (m *CapabilityModelMutation) Where(ps ...predicate.CapabilityModel) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CapabilityModelMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CapabilityModelMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.CapabilityModel, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *CapabilityModelMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CapabilityModelMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (CapabilityModel).
+func (m *CapabilityModelMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *CapabilityModelMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m.name != nil {
+		fields = append(fields, capabilitymodel.FieldName)
+	}
+	if m.description != nil {
+		fields = append(fields, capabilitymodel.FieldDescription)
+	}
+	if m.dimensions != nil {
+		fields = append(fields, capabilitymodel.FieldDimensions)
+	}
+	if m.max_level != nil {
+		fields = append(fields, capabilitymodel.FieldMaxLevel)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *CapabilityModelMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case capabilitymodel.FieldName:
+		return m.Name()
+	case capabilitymodel.FieldDescription:
+		return m.Description()
+	case capabilitymodel.FieldDimensions:
+		return m.Dimensions()
+	case capabilitymodel.FieldMaxLevel:
+		return m.MaxLevel()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *CapabilityModelMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case capabilitymodel.FieldName:
+		return m.OldName(ctx)
+	case capabilitymodel.FieldDescription:
+		return m.OldDescription(ctx)
+	case capabilitymodel.FieldDimensions:
+		return m.OldDimensions(ctx)
+	case capabilitymodel.FieldMaxLevel:
+		return m.OldMaxLevel(ctx)
+	}
+	return nil, fmt.Errorf("unknown CapabilityModel field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CapabilityModelMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case capabilitymodel.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case capabilitymodel.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
+		return nil
+	case capabilitymodel.FieldDimensions:
+		v, ok := value.([]schema.Dimension)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDimensions(v)
+		return nil
+	case capabilitymodel.FieldMaxLevel:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMaxLevel(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CapabilityModel field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *CapabilityModelMutation) AddedFields() []string {
+	var fields []string
+	if m.addmax_level != nil {
+		fields = append(fields, capabilitymodel.FieldMaxLevel)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *CapabilityModelMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case capabilitymodel.FieldMaxLevel:
+		return m.AddedMaxLevel()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CapabilityModelMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case capabilitymodel.FieldMaxLevel:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMaxLevel(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CapabilityModel numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *CapabilityModelMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(capabilitymodel.FieldDescription) {
+		fields = append(fields, capabilitymodel.FieldDescription)
+	}
+	if m.FieldCleared(capabilitymodel.FieldDimensions) {
+		fields = append(fields, capabilitymodel.FieldDimensions)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *CapabilityModelMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *CapabilityModelMutation) ClearField(name string) error {
+	switch name {
+	case capabilitymodel.FieldDescription:
+		m.ClearDescription()
+		return nil
+	case capabilitymodel.FieldDimensions:
+		m.ClearDimensions()
+		return nil
+	}
+	return fmt.Errorf("unknown CapabilityModel nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *CapabilityModelMutation) ResetField(name string) error {
+	switch name {
+	case capabilitymodel.FieldName:
+		m.ResetName()
+		return nil
+	case capabilitymodel.FieldDescription:
+		m.ResetDescription()
+		return nil
+	case capabilitymodel.FieldDimensions:
+		m.ResetDimensions()
+		return nil
+	case capabilitymodel.FieldMaxLevel:
+		m.ResetMaxLevel()
+		return nil
+	}
+	return fmt.Errorf("unknown CapabilityModel field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *CapabilityModelMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.assessments != nil {
+		edges = append(edges, capabilitymodel.EdgeAssessments)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *CapabilityModelMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case capabilitymodel.EdgeAssessments:
+		ids := make([]ent.Value, 0, len(m.assessments))
+		for id := range m.assessments {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *CapabilityModelMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.removedassessments != nil {
+		edges = append(edges, capabilitymodel.EdgeAssessments)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *CapabilityModelMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case capabilitymodel.EdgeAssessments:
+		ids := make([]ent.Value, 0, len(m.removedassessments))
+		for id := range m.removedassessments {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *CapabilityModelMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedassessments {
+		edges = append(edges, capabilitymodel.EdgeAssessments)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *CapabilityModelMutation) EdgeCleared(name string) bool {
+	switch name {
+	case capabilitymodel.EdgeAssessments:
+		return m.clearedassessments
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *CapabilityModelMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown CapabilityModel unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *CapabilityModelMutation) ResetEdge(name string) error {
+	switch name {
+	case capabilitymodel.EdgeAssessments:
+		m.ResetAssessments()
+		return nil
+	}
+	return fmt.Errorf("unknown CapabilityModel edge %s", name)
 }
 
 // DeliveryEvidenceMutation represents an operation that mutates the DeliveryEvidence nodes in the graph.
@@ -5077,6 +5763,956 @@ func (m *JudgeRubricMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown JudgeRubric edge %s", name)
+}
+
+// MaturityAssessmentMutation represents an operation that mutates the MaturityAssessment nodes in the graph.
+type MaturityAssessmentMutation struct {
+	config
+	op                      Op
+	typ                     string
+	id                      *string
+	initiative_id           *string
+	organization            *string
+	scores                  *map[string]schema.DimensionScore
+	overall_score           *float64
+	addoverall_score        *float64
+	summary                 *string
+	assessed_by             *string
+	model                   *string
+	assessed_at             *time.Time
+	clearedFields           map[string]struct{}
+	capability_model        *string
+	clearedcapability_model bool
+	done                    bool
+	oldValue                func(context.Context) (*MaturityAssessment, error)
+	predicates              []predicate.MaturityAssessment
+}
+
+var _ ent.Mutation = (*MaturityAssessmentMutation)(nil)
+
+// maturityassessmentOption allows management of the mutation configuration using functional options.
+type maturityassessmentOption func(*MaturityAssessmentMutation)
+
+// newMaturityAssessmentMutation creates new mutation for the MaturityAssessment entity.
+func newMaturityAssessmentMutation(c config, op Op, opts ...maturityassessmentOption) *MaturityAssessmentMutation {
+	m := &MaturityAssessmentMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeMaturityAssessment,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withMaturityAssessmentID sets the ID field of the mutation.
+func withMaturityAssessmentID(id string) maturityassessmentOption {
+	return func(m *MaturityAssessmentMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *MaturityAssessment
+		)
+		m.oldValue = func(ctx context.Context) (*MaturityAssessment, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().MaturityAssessment.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withMaturityAssessment sets the old MaturityAssessment of the mutation.
+func withMaturityAssessment(node *MaturityAssessment) maturityassessmentOption {
+	return func(m *MaturityAssessmentMutation) {
+		m.oldValue = func(context.Context) (*MaturityAssessment, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m MaturityAssessmentMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m MaturityAssessmentMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of MaturityAssessment entities.
+func (m *MaturityAssessmentMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *MaturityAssessmentMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *MaturityAssessmentMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().MaturityAssessment.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetInitiativeID sets the "initiative_id" field.
+func (m *MaturityAssessmentMutation) SetInitiativeID(s string) {
+	m.initiative_id = &s
+}
+
+// InitiativeID returns the value of the "initiative_id" field in the mutation.
+func (m *MaturityAssessmentMutation) InitiativeID() (r string, exists bool) {
+	v := m.initiative_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldInitiativeID returns the old "initiative_id" field's value of the MaturityAssessment entity.
+// If the MaturityAssessment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MaturityAssessmentMutation) OldInitiativeID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldInitiativeID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldInitiativeID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInitiativeID: %w", err)
+	}
+	return oldValue.InitiativeID, nil
+}
+
+// ClearInitiativeID clears the value of the "initiative_id" field.
+func (m *MaturityAssessmentMutation) ClearInitiativeID() {
+	m.initiative_id = nil
+	m.clearedFields[maturityassessment.FieldInitiativeID] = struct{}{}
+}
+
+// InitiativeIDCleared returns if the "initiative_id" field was cleared in this mutation.
+func (m *MaturityAssessmentMutation) InitiativeIDCleared() bool {
+	_, ok := m.clearedFields[maturityassessment.FieldInitiativeID]
+	return ok
+}
+
+// ResetInitiativeID resets all changes to the "initiative_id" field.
+func (m *MaturityAssessmentMutation) ResetInitiativeID() {
+	m.initiative_id = nil
+	delete(m.clearedFields, maturityassessment.FieldInitiativeID)
+}
+
+// SetOrganization sets the "organization" field.
+func (m *MaturityAssessmentMutation) SetOrganization(s string) {
+	m.organization = &s
+}
+
+// Organization returns the value of the "organization" field in the mutation.
+func (m *MaturityAssessmentMutation) Organization() (r string, exists bool) {
+	v := m.organization
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrganization returns the old "organization" field's value of the MaturityAssessment entity.
+// If the MaturityAssessment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MaturityAssessmentMutation) OldOrganization(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrganization is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrganization requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrganization: %w", err)
+	}
+	return oldValue.Organization, nil
+}
+
+// ClearOrganization clears the value of the "organization" field.
+func (m *MaturityAssessmentMutation) ClearOrganization() {
+	m.organization = nil
+	m.clearedFields[maturityassessment.FieldOrganization] = struct{}{}
+}
+
+// OrganizationCleared returns if the "organization" field was cleared in this mutation.
+func (m *MaturityAssessmentMutation) OrganizationCleared() bool {
+	_, ok := m.clearedFields[maturityassessment.FieldOrganization]
+	return ok
+}
+
+// ResetOrganization resets all changes to the "organization" field.
+func (m *MaturityAssessmentMutation) ResetOrganization() {
+	m.organization = nil
+	delete(m.clearedFields, maturityassessment.FieldOrganization)
+}
+
+// SetScores sets the "scores" field.
+func (m *MaturityAssessmentMutation) SetScores(ms map[string]schema.DimensionScore) {
+	m.scores = &ms
+}
+
+// Scores returns the value of the "scores" field in the mutation.
+func (m *MaturityAssessmentMutation) Scores() (r map[string]schema.DimensionScore, exists bool) {
+	v := m.scores
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldScores returns the old "scores" field's value of the MaturityAssessment entity.
+// If the MaturityAssessment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MaturityAssessmentMutation) OldScores(ctx context.Context) (v map[string]schema.DimensionScore, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldScores is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldScores requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldScores: %w", err)
+	}
+	return oldValue.Scores, nil
+}
+
+// ClearScores clears the value of the "scores" field.
+func (m *MaturityAssessmentMutation) ClearScores() {
+	m.scores = nil
+	m.clearedFields[maturityassessment.FieldScores] = struct{}{}
+}
+
+// ScoresCleared returns if the "scores" field was cleared in this mutation.
+func (m *MaturityAssessmentMutation) ScoresCleared() bool {
+	_, ok := m.clearedFields[maturityassessment.FieldScores]
+	return ok
+}
+
+// ResetScores resets all changes to the "scores" field.
+func (m *MaturityAssessmentMutation) ResetScores() {
+	m.scores = nil
+	delete(m.clearedFields, maturityassessment.FieldScores)
+}
+
+// SetOverallScore sets the "overall_score" field.
+func (m *MaturityAssessmentMutation) SetOverallScore(f float64) {
+	m.overall_score = &f
+	m.addoverall_score = nil
+}
+
+// OverallScore returns the value of the "overall_score" field in the mutation.
+func (m *MaturityAssessmentMutation) OverallScore() (r float64, exists bool) {
+	v := m.overall_score
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOverallScore returns the old "overall_score" field's value of the MaturityAssessment entity.
+// If the MaturityAssessment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MaturityAssessmentMutation) OldOverallScore(ctx context.Context) (v *float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOverallScore is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOverallScore requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOverallScore: %w", err)
+	}
+	return oldValue.OverallScore, nil
+}
+
+// AddOverallScore adds f to the "overall_score" field.
+func (m *MaturityAssessmentMutation) AddOverallScore(f float64) {
+	if m.addoverall_score != nil {
+		*m.addoverall_score += f
+	} else {
+		m.addoverall_score = &f
+	}
+}
+
+// AddedOverallScore returns the value that was added to the "overall_score" field in this mutation.
+func (m *MaturityAssessmentMutation) AddedOverallScore() (r float64, exists bool) {
+	v := m.addoverall_score
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearOverallScore clears the value of the "overall_score" field.
+func (m *MaturityAssessmentMutation) ClearOverallScore() {
+	m.overall_score = nil
+	m.addoverall_score = nil
+	m.clearedFields[maturityassessment.FieldOverallScore] = struct{}{}
+}
+
+// OverallScoreCleared returns if the "overall_score" field was cleared in this mutation.
+func (m *MaturityAssessmentMutation) OverallScoreCleared() bool {
+	_, ok := m.clearedFields[maturityassessment.FieldOverallScore]
+	return ok
+}
+
+// ResetOverallScore resets all changes to the "overall_score" field.
+func (m *MaturityAssessmentMutation) ResetOverallScore() {
+	m.overall_score = nil
+	m.addoverall_score = nil
+	delete(m.clearedFields, maturityassessment.FieldOverallScore)
+}
+
+// SetSummary sets the "summary" field.
+func (m *MaturityAssessmentMutation) SetSummary(s string) {
+	m.summary = &s
+}
+
+// Summary returns the value of the "summary" field in the mutation.
+func (m *MaturityAssessmentMutation) Summary() (r string, exists bool) {
+	v := m.summary
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSummary returns the old "summary" field's value of the MaturityAssessment entity.
+// If the MaturityAssessment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MaturityAssessmentMutation) OldSummary(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSummary is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSummary requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSummary: %w", err)
+	}
+	return oldValue.Summary, nil
+}
+
+// ClearSummary clears the value of the "summary" field.
+func (m *MaturityAssessmentMutation) ClearSummary() {
+	m.summary = nil
+	m.clearedFields[maturityassessment.FieldSummary] = struct{}{}
+}
+
+// SummaryCleared returns if the "summary" field was cleared in this mutation.
+func (m *MaturityAssessmentMutation) SummaryCleared() bool {
+	_, ok := m.clearedFields[maturityassessment.FieldSummary]
+	return ok
+}
+
+// ResetSummary resets all changes to the "summary" field.
+func (m *MaturityAssessmentMutation) ResetSummary() {
+	m.summary = nil
+	delete(m.clearedFields, maturityassessment.FieldSummary)
+}
+
+// SetAssessedBy sets the "assessed_by" field.
+func (m *MaturityAssessmentMutation) SetAssessedBy(s string) {
+	m.assessed_by = &s
+}
+
+// AssessedBy returns the value of the "assessed_by" field in the mutation.
+func (m *MaturityAssessmentMutation) AssessedBy() (r string, exists bool) {
+	v := m.assessed_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAssessedBy returns the old "assessed_by" field's value of the MaturityAssessment entity.
+// If the MaturityAssessment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MaturityAssessmentMutation) OldAssessedBy(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAssessedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAssessedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAssessedBy: %w", err)
+	}
+	return oldValue.AssessedBy, nil
+}
+
+// ClearAssessedBy clears the value of the "assessed_by" field.
+func (m *MaturityAssessmentMutation) ClearAssessedBy() {
+	m.assessed_by = nil
+	m.clearedFields[maturityassessment.FieldAssessedBy] = struct{}{}
+}
+
+// AssessedByCleared returns if the "assessed_by" field was cleared in this mutation.
+func (m *MaturityAssessmentMutation) AssessedByCleared() bool {
+	_, ok := m.clearedFields[maturityassessment.FieldAssessedBy]
+	return ok
+}
+
+// ResetAssessedBy resets all changes to the "assessed_by" field.
+func (m *MaturityAssessmentMutation) ResetAssessedBy() {
+	m.assessed_by = nil
+	delete(m.clearedFields, maturityassessment.FieldAssessedBy)
+}
+
+// SetModel sets the "model" field.
+func (m *MaturityAssessmentMutation) SetModel(s string) {
+	m.model = &s
+}
+
+// Model returns the value of the "model" field in the mutation.
+func (m *MaturityAssessmentMutation) Model() (r string, exists bool) {
+	v := m.model
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldModel returns the old "model" field's value of the MaturityAssessment entity.
+// If the MaturityAssessment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MaturityAssessmentMutation) OldModel(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldModel is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldModel requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldModel: %w", err)
+	}
+	return oldValue.Model, nil
+}
+
+// ClearModel clears the value of the "model" field.
+func (m *MaturityAssessmentMutation) ClearModel() {
+	m.model = nil
+	m.clearedFields[maturityassessment.FieldModel] = struct{}{}
+}
+
+// ModelCleared returns if the "model" field was cleared in this mutation.
+func (m *MaturityAssessmentMutation) ModelCleared() bool {
+	_, ok := m.clearedFields[maturityassessment.FieldModel]
+	return ok
+}
+
+// ResetModel resets all changes to the "model" field.
+func (m *MaturityAssessmentMutation) ResetModel() {
+	m.model = nil
+	delete(m.clearedFields, maturityassessment.FieldModel)
+}
+
+// SetAssessedAt sets the "assessed_at" field.
+func (m *MaturityAssessmentMutation) SetAssessedAt(t time.Time) {
+	m.assessed_at = &t
+}
+
+// AssessedAt returns the value of the "assessed_at" field in the mutation.
+func (m *MaturityAssessmentMutation) AssessedAt() (r time.Time, exists bool) {
+	v := m.assessed_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAssessedAt returns the old "assessed_at" field's value of the MaturityAssessment entity.
+// If the MaturityAssessment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MaturityAssessmentMutation) OldAssessedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAssessedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAssessedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAssessedAt: %w", err)
+	}
+	return oldValue.AssessedAt, nil
+}
+
+// ResetAssessedAt resets all changes to the "assessed_at" field.
+func (m *MaturityAssessmentMutation) ResetAssessedAt() {
+	m.assessed_at = nil
+}
+
+// SetCapabilityModelID sets the "capability_model" edge to the CapabilityModel entity by id.
+func (m *MaturityAssessmentMutation) SetCapabilityModelID(id string) {
+	m.capability_model = &id
+}
+
+// ClearCapabilityModel clears the "capability_model" edge to the CapabilityModel entity.
+func (m *MaturityAssessmentMutation) ClearCapabilityModel() {
+	m.clearedcapability_model = true
+}
+
+// CapabilityModelCleared reports if the "capability_model" edge to the CapabilityModel entity was cleared.
+func (m *MaturityAssessmentMutation) CapabilityModelCleared() bool {
+	return m.clearedcapability_model
+}
+
+// CapabilityModelID returns the "capability_model" edge ID in the mutation.
+func (m *MaturityAssessmentMutation) CapabilityModelID() (id string, exists bool) {
+	if m.capability_model != nil {
+		return *m.capability_model, true
+	}
+	return
+}
+
+// CapabilityModelIDs returns the "capability_model" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// CapabilityModelID instead. It exists only for internal usage by the builders.
+func (m *MaturityAssessmentMutation) CapabilityModelIDs() (ids []string) {
+	if id := m.capability_model; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetCapabilityModel resets all changes to the "capability_model" edge.
+func (m *MaturityAssessmentMutation) ResetCapabilityModel() {
+	m.capability_model = nil
+	m.clearedcapability_model = false
+}
+
+// Where appends a list predicates to the MaturityAssessmentMutation builder.
+func (m *MaturityAssessmentMutation) Where(ps ...predicate.MaturityAssessment) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the MaturityAssessmentMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *MaturityAssessmentMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.MaturityAssessment, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *MaturityAssessmentMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *MaturityAssessmentMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (MaturityAssessment).
+func (m *MaturityAssessmentMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *MaturityAssessmentMutation) Fields() []string {
+	fields := make([]string, 0, 8)
+	if m.initiative_id != nil {
+		fields = append(fields, maturityassessment.FieldInitiativeID)
+	}
+	if m.organization != nil {
+		fields = append(fields, maturityassessment.FieldOrganization)
+	}
+	if m.scores != nil {
+		fields = append(fields, maturityassessment.FieldScores)
+	}
+	if m.overall_score != nil {
+		fields = append(fields, maturityassessment.FieldOverallScore)
+	}
+	if m.summary != nil {
+		fields = append(fields, maturityassessment.FieldSummary)
+	}
+	if m.assessed_by != nil {
+		fields = append(fields, maturityassessment.FieldAssessedBy)
+	}
+	if m.model != nil {
+		fields = append(fields, maturityassessment.FieldModel)
+	}
+	if m.assessed_at != nil {
+		fields = append(fields, maturityassessment.FieldAssessedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *MaturityAssessmentMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case maturityassessment.FieldInitiativeID:
+		return m.InitiativeID()
+	case maturityassessment.FieldOrganization:
+		return m.Organization()
+	case maturityassessment.FieldScores:
+		return m.Scores()
+	case maturityassessment.FieldOverallScore:
+		return m.OverallScore()
+	case maturityassessment.FieldSummary:
+		return m.Summary()
+	case maturityassessment.FieldAssessedBy:
+		return m.AssessedBy()
+	case maturityassessment.FieldModel:
+		return m.Model()
+	case maturityassessment.FieldAssessedAt:
+		return m.AssessedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *MaturityAssessmentMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case maturityassessment.FieldInitiativeID:
+		return m.OldInitiativeID(ctx)
+	case maturityassessment.FieldOrganization:
+		return m.OldOrganization(ctx)
+	case maturityassessment.FieldScores:
+		return m.OldScores(ctx)
+	case maturityassessment.FieldOverallScore:
+		return m.OldOverallScore(ctx)
+	case maturityassessment.FieldSummary:
+		return m.OldSummary(ctx)
+	case maturityassessment.FieldAssessedBy:
+		return m.OldAssessedBy(ctx)
+	case maturityassessment.FieldModel:
+		return m.OldModel(ctx)
+	case maturityassessment.FieldAssessedAt:
+		return m.OldAssessedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown MaturityAssessment field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *MaturityAssessmentMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case maturityassessment.FieldInitiativeID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetInitiativeID(v)
+		return nil
+	case maturityassessment.FieldOrganization:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrganization(v)
+		return nil
+	case maturityassessment.FieldScores:
+		v, ok := value.(map[string]schema.DimensionScore)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetScores(v)
+		return nil
+	case maturityassessment.FieldOverallScore:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOverallScore(v)
+		return nil
+	case maturityassessment.FieldSummary:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSummary(v)
+		return nil
+	case maturityassessment.FieldAssessedBy:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAssessedBy(v)
+		return nil
+	case maturityassessment.FieldModel:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetModel(v)
+		return nil
+	case maturityassessment.FieldAssessedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAssessedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown MaturityAssessment field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *MaturityAssessmentMutation) AddedFields() []string {
+	var fields []string
+	if m.addoverall_score != nil {
+		fields = append(fields, maturityassessment.FieldOverallScore)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *MaturityAssessmentMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case maturityassessment.FieldOverallScore:
+		return m.AddedOverallScore()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *MaturityAssessmentMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case maturityassessment.FieldOverallScore:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddOverallScore(v)
+		return nil
+	}
+	return fmt.Errorf("unknown MaturityAssessment numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *MaturityAssessmentMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(maturityassessment.FieldInitiativeID) {
+		fields = append(fields, maturityassessment.FieldInitiativeID)
+	}
+	if m.FieldCleared(maturityassessment.FieldOrganization) {
+		fields = append(fields, maturityassessment.FieldOrganization)
+	}
+	if m.FieldCleared(maturityassessment.FieldScores) {
+		fields = append(fields, maturityassessment.FieldScores)
+	}
+	if m.FieldCleared(maturityassessment.FieldOverallScore) {
+		fields = append(fields, maturityassessment.FieldOverallScore)
+	}
+	if m.FieldCleared(maturityassessment.FieldSummary) {
+		fields = append(fields, maturityassessment.FieldSummary)
+	}
+	if m.FieldCleared(maturityassessment.FieldAssessedBy) {
+		fields = append(fields, maturityassessment.FieldAssessedBy)
+	}
+	if m.FieldCleared(maturityassessment.FieldModel) {
+		fields = append(fields, maturityassessment.FieldModel)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *MaturityAssessmentMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *MaturityAssessmentMutation) ClearField(name string) error {
+	switch name {
+	case maturityassessment.FieldInitiativeID:
+		m.ClearInitiativeID()
+		return nil
+	case maturityassessment.FieldOrganization:
+		m.ClearOrganization()
+		return nil
+	case maturityassessment.FieldScores:
+		m.ClearScores()
+		return nil
+	case maturityassessment.FieldOverallScore:
+		m.ClearOverallScore()
+		return nil
+	case maturityassessment.FieldSummary:
+		m.ClearSummary()
+		return nil
+	case maturityassessment.FieldAssessedBy:
+		m.ClearAssessedBy()
+		return nil
+	case maturityassessment.FieldModel:
+		m.ClearModel()
+		return nil
+	}
+	return fmt.Errorf("unknown MaturityAssessment nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *MaturityAssessmentMutation) ResetField(name string) error {
+	switch name {
+	case maturityassessment.FieldInitiativeID:
+		m.ResetInitiativeID()
+		return nil
+	case maturityassessment.FieldOrganization:
+		m.ResetOrganization()
+		return nil
+	case maturityassessment.FieldScores:
+		m.ResetScores()
+		return nil
+	case maturityassessment.FieldOverallScore:
+		m.ResetOverallScore()
+		return nil
+	case maturityassessment.FieldSummary:
+		m.ResetSummary()
+		return nil
+	case maturityassessment.FieldAssessedBy:
+		m.ResetAssessedBy()
+		return nil
+	case maturityassessment.FieldModel:
+		m.ResetModel()
+		return nil
+	case maturityassessment.FieldAssessedAt:
+		m.ResetAssessedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown MaturityAssessment field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *MaturityAssessmentMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.capability_model != nil {
+		edges = append(edges, maturityassessment.EdgeCapabilityModel)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *MaturityAssessmentMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case maturityassessment.EdgeCapabilityModel:
+		if id := m.capability_model; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *MaturityAssessmentMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *MaturityAssessmentMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *MaturityAssessmentMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedcapability_model {
+		edges = append(edges, maturityassessment.EdgeCapabilityModel)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *MaturityAssessmentMutation) EdgeCleared(name string) bool {
+	switch name {
+	case maturityassessment.EdgeCapabilityModel:
+		return m.clearedcapability_model
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *MaturityAssessmentMutation) ClearEdge(name string) error {
+	switch name {
+	case maturityassessment.EdgeCapabilityModel:
+		m.ClearCapabilityModel()
+		return nil
+	}
+	return fmt.Errorf("unknown MaturityAssessment unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *MaturityAssessmentMutation) ResetEdge(name string) error {
+	switch name {
+	case maturityassessment.EdgeCapabilityModel:
+		m.ResetCapabilityModel()
+		return nil
+	}
+	return fmt.Errorf("unknown MaturityAssessment edge %s", name)
 }
 
 // PhaseMutation represents an operation that mutates the Phase nodes in the graph.

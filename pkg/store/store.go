@@ -21,6 +21,7 @@ type Store interface {
 	RepositoryStore
 	SpecWorkflowStore
 	JudgeStore
+	MaturityStore
 }
 
 // UnitOfWork groups a SQL transaction with a subsequent Dolt commit.
@@ -297,4 +298,62 @@ type JudgeStore interface {
 	ListJudgeRubrics(ctx context.Context, workflowID string) ([]*JudgeRubric, error)
 	CreateJudgeResult(ctx context.Context, result *JudgeResult) error
 	ListJudgeResults(ctx context.Context, initiativeID string) ([]*JudgeResult, error)
+}
+
+// Dimension is a capability area within a maturity model.
+type Dimension struct {
+	Key         string   `json:"key"`
+	Name        string   `json:"name"`
+	Description string   `json:"description,omitempty"`
+	Levels      []Level  `json:"levels,omitempty"`
+	Sources     []string `json:"sources,omitempty"`
+}
+
+// Level describes a maturity level within a dimension.
+type Level struct {
+	Level       int    `json:"level"`
+	Name        string `json:"name"`
+	Description string `json:"description,omitempty"`
+}
+
+// CapabilityModel defines a capability maturity framework.
+type CapabilityModel struct {
+	ID          string
+	Name        string
+	Description string
+	Dimensions  []Dimension
+	MaxLevel    int
+}
+
+// DimensionScore captures the assessment for a single dimension.
+type DimensionScore struct {
+	Level     int    `json:"level"`
+	Rationale string `json:"rationale,omitempty"`
+	Evidence  string `json:"evidence,omitempty"`
+}
+
+// MaturityAssessment captures a point-in-time capability assessment.
+type MaturityAssessment struct {
+	ID           string
+	ModelID      string
+	InitiativeID string
+	Organization string
+	Scores       map[string]DimensionScore
+	OverallScore *float64
+	Summary      string
+	AssessedBy   string
+	Model        string // LLM model used
+	AssessedAt   time.Time
+}
+
+// MaturityStore defines persistence for capability models and assessments.
+type MaturityStore interface {
+	CreateCapabilityModel(ctx context.Context, model *CapabilityModel) error
+	GetCapabilityModel(ctx context.Context, id string) (*CapabilityModel, error)
+	ListCapabilityModels(ctx context.Context) ([]*CapabilityModel, error)
+	UpdateCapabilityModel(ctx context.Context, model *CapabilityModel) error
+	CreateMaturityAssessment(ctx context.Context, assessment *MaturityAssessment) error
+	GetMaturityAssessment(ctx context.Context, id string) (*MaturityAssessment, error)
+	ListMaturityAssessments(ctx context.Context, initiativeID string) ([]*MaturityAssessment, error)
+	ListMaturityAssessmentsByOrg(ctx context.Context, org string) ([]*MaturityAssessment, error)
 }

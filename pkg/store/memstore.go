@@ -9,35 +9,39 @@ import (
 // MemStore is an in-memory Store implementation for unit testing.
 // It is safe for concurrent use.
 type MemStore struct {
-	mu           sync.RWMutex
-	programs     map[string]*Program
-	initiatives  map[string]*Initiative
-	phases       map[string]*Phase
-	rmis         map[string]*RoadmapItem
-	deps         []*RMIDependency
-	initDeps     []*InitiativeDependency
-	assignments  map[string]*Assignment
-	evidence     map[string]*DeliveryEvidence
-	repositories map[string]*Repository
-	repoDeps     []*RepositoryDependency
-	workflows    map[string]*SpecWorkflow
-	judgeRubrics map[string]*JudgeRubric
-	judgeResults map[string]*JudgeResult
+	mu                  sync.RWMutex
+	programs            map[string]*Program
+	initiatives         map[string]*Initiative
+	phases              map[string]*Phase
+	rmis                map[string]*RoadmapItem
+	deps                []*RMIDependency
+	initDeps            []*InitiativeDependency
+	assignments         map[string]*Assignment
+	evidence            map[string]*DeliveryEvidence
+	repositories        map[string]*Repository
+	repoDeps            []*RepositoryDependency
+	workflows           map[string]*SpecWorkflow
+	judgeRubrics        map[string]*JudgeRubric
+	judgeResults        map[string]*JudgeResult
+	capabilityModels    map[string]*CapabilityModel
+	maturityAssessments map[string]*MaturityAssessment
 }
 
 // NewMemStore creates a new in-memory store.
 func NewMemStore() *MemStore {
 	return &MemStore{
-		programs:     make(map[string]*Program),
-		initiatives:  make(map[string]*Initiative),
-		phases:       make(map[string]*Phase),
-		rmis:         make(map[string]*RoadmapItem),
-		assignments:  make(map[string]*Assignment),
-		evidence:     make(map[string]*DeliveryEvidence),
-		repositories: make(map[string]*Repository),
-		workflows:    make(map[string]*SpecWorkflow),
-		judgeRubrics: make(map[string]*JudgeRubric),
-		judgeResults: make(map[string]*JudgeResult),
+		programs:            make(map[string]*Program),
+		initiatives:         make(map[string]*Initiative),
+		phases:              make(map[string]*Phase),
+		rmis:                make(map[string]*RoadmapItem),
+		assignments:         make(map[string]*Assignment),
+		evidence:            make(map[string]*DeliveryEvidence),
+		repositories:        make(map[string]*Repository),
+		workflows:           make(map[string]*SpecWorkflow),
+		judgeRubrics:        make(map[string]*JudgeRubric),
+		judgeResults:        make(map[string]*JudgeResult),
+		capabilityModels:    make(map[string]*CapabilityModel),
+		maturityAssessments: make(map[string]*MaturityAssessment),
 	}
 }
 
@@ -596,6 +600,98 @@ func (m *MemStore) ListJudgeResults(_ context.Context, initiativeID string) ([]*
 	for _, r := range m.judgeResults {
 		if r.InitiativeID == initiativeID {
 			result = append(result, r)
+		}
+	}
+	return result, nil
+}
+
+// ---------------------------------------------------------------------------
+// CapabilityModel CRUD
+// ---------------------------------------------------------------------------
+
+func (m *MemStore) CreateCapabilityModel(_ context.Context, model *CapabilityModel) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if _, exists := m.capabilityModels[model.ID]; exists {
+		return fmt.Errorf("capability model %s already exists", model.ID)
+	}
+	m.capabilityModels[model.ID] = model
+	return nil
+}
+
+func (m *MemStore) GetCapabilityModel(_ context.Context, id string) (*CapabilityModel, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	model, ok := m.capabilityModels[id]
+	if !ok {
+		return nil, fmt.Errorf("capability model %s not found", id)
+	}
+	return model, nil
+}
+
+func (m *MemStore) ListCapabilityModels(_ context.Context) ([]*CapabilityModel, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	result := make([]*CapabilityModel, 0, len(m.capabilityModels))
+	for _, v := range m.capabilityModels {
+		result = append(result, v)
+	}
+	return result, nil
+}
+
+func (m *MemStore) UpdateCapabilityModel(_ context.Context, model *CapabilityModel) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if _, exists := m.capabilityModels[model.ID]; !exists {
+		return fmt.Errorf("capability model %s not found", model.ID)
+	}
+	m.capabilityModels[model.ID] = model
+	return nil
+}
+
+// ---------------------------------------------------------------------------
+// MaturityAssessment CRUD
+// ---------------------------------------------------------------------------
+
+func (m *MemStore) CreateMaturityAssessment(_ context.Context, assessment *MaturityAssessment) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if _, exists := m.maturityAssessments[assessment.ID]; exists {
+		return fmt.Errorf("maturity assessment %s already exists", assessment.ID)
+	}
+	m.maturityAssessments[assessment.ID] = assessment
+	return nil
+}
+
+func (m *MemStore) GetMaturityAssessment(_ context.Context, id string) (*MaturityAssessment, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	assessment, ok := m.maturityAssessments[id]
+	if !ok {
+		return nil, fmt.Errorf("maturity assessment %s not found", id)
+	}
+	return assessment, nil
+}
+
+func (m *MemStore) ListMaturityAssessments(_ context.Context, initiativeID string) ([]*MaturityAssessment, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	var result []*MaturityAssessment
+	for _, a := range m.maturityAssessments {
+		if a.InitiativeID == initiativeID {
+			result = append(result, a)
+		}
+	}
+	return result, nil
+}
+
+func (m *MemStore) ListMaturityAssessmentsByOrg(_ context.Context, org string) ([]*MaturityAssessment, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	var result []*MaturityAssessment
+	for _, a := range m.maturityAssessments {
+		if a.Organization == org {
+			result = append(result, a)
 		}
 	}
 	return result, nil

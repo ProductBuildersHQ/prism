@@ -13,11 +13,13 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/ProductBuildersHQ/prism-control/ent/assignment"
+	"github.com/ProductBuildersHQ/prism-control/ent/capabilitymodel"
 	"github.com/ProductBuildersHQ/prism-control/ent/deliveryevidence"
 	"github.com/ProductBuildersHQ/prism-control/ent/initiative"
 	"github.com/ProductBuildersHQ/prism-control/ent/initiativedependency"
 	"github.com/ProductBuildersHQ/prism-control/ent/judgeresult"
 	"github.com/ProductBuildersHQ/prism-control/ent/judgerubric"
+	"github.com/ProductBuildersHQ/prism-control/ent/maturityassessment"
 	"github.com/ProductBuildersHQ/prism-control/ent/phase"
 	"github.com/ProductBuildersHQ/prism-control/ent/program"
 	"github.com/ProductBuildersHQ/prism-control/ent/repository"
@@ -86,11 +88,13 @@ func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			assignment.Table:           assignment.ValidColumn,
+			capabilitymodel.Table:      capabilitymodel.ValidColumn,
 			deliveryevidence.Table:     deliveryevidence.ValidColumn,
 			initiative.Table:           initiative.ValidColumn,
 			initiativedependency.Table: initiativedependency.ValidColumn,
 			judgeresult.Table:          judgeresult.ValidColumn,
 			judgerubric.Table:          judgerubric.ValidColumn,
+			maturityassessment.Table:   maturityassessment.ValidColumn,
 			phase.Table:                phase.ValidColumn,
 			program.Table:              program.ValidColumn,
 			rmidependency.Table:        rmidependency.ValidColumn,

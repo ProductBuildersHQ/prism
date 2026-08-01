@@ -4,11 +4,13 @@ package ent
 
 import (
 	"github.com/ProductBuildersHQ/prism-control/ent/assignment"
+	"github.com/ProductBuildersHQ/prism-control/ent/capabilitymodel"
 	"github.com/ProductBuildersHQ/prism-control/ent/deliveryevidence"
 	"github.com/ProductBuildersHQ/prism-control/ent/initiative"
 	"github.com/ProductBuildersHQ/prism-control/ent/initiativedependency"
 	"github.com/ProductBuildersHQ/prism-control/ent/judgeresult"
 	"github.com/ProductBuildersHQ/prism-control/ent/judgerubric"
+	"github.com/ProductBuildersHQ/prism-control/ent/maturityassessment"
 	"github.com/ProductBuildersHQ/prism-control/ent/phase"
 	"github.com/ProductBuildersHQ/prism-control/ent/program"
 	"github.com/ProductBuildersHQ/prism-control/ent/repository"
@@ -41,6 +43,20 @@ func init() {
 	assignmentDescID := assignmentFields[0].Descriptor()
 	// assignment.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	assignment.IDValidator = assignmentDescID.Validators[0].(func(string) error)
+	capabilitymodelFields := schema.CapabilityModel{}.Fields()
+	_ = capabilitymodelFields
+	// capabilitymodelDescName is the schema descriptor for name field.
+	capabilitymodelDescName := capabilitymodelFields[1].Descriptor()
+	// capabilitymodel.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	capabilitymodel.NameValidator = capabilitymodelDescName.Validators[0].(func(string) error)
+	// capabilitymodelDescMaxLevel is the schema descriptor for max_level field.
+	capabilitymodelDescMaxLevel := capabilitymodelFields[4].Descriptor()
+	// capabilitymodel.DefaultMaxLevel holds the default value on creation for the max_level field.
+	capabilitymodel.DefaultMaxLevel = capabilitymodelDescMaxLevel.Default.(int)
+	// capabilitymodelDescID is the schema descriptor for id field.
+	capabilitymodelDescID := capabilitymodelFields[0].Descriptor()
+	// capabilitymodel.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	capabilitymodel.IDValidator = capabilitymodelDescID.Validators[0].(func(string) error)
 	deliveryevidenceFields := schema.DeliveryEvidence{}.Fields()
 	_ = deliveryevidenceFields
 	// deliveryevidenceDescEvidenceType is the schema descriptor for evidence_type field.
@@ -141,6 +157,28 @@ func init() {
 	judgerubricDescID := judgerubricFields[0].Descriptor()
 	// judgerubric.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	judgerubric.IDValidator = judgerubricDescID.Validators[0].(func(string) error)
+	maturityassessmentFields := schema.MaturityAssessment{}.Fields()
+	_ = maturityassessmentFields
+	// maturityassessmentDescInitiativeID is the schema descriptor for initiative_id field.
+	maturityassessmentDescInitiativeID := maturityassessmentFields[1].Descriptor()
+	// maturityassessment.InitiativeIDValidator is a validator for the "initiative_id" field. It is called by the builders before save.
+	maturityassessment.InitiativeIDValidator = maturityassessmentDescInitiativeID.Validators[0].(func(string) error)
+	// maturityassessmentDescOrganization is the schema descriptor for organization field.
+	maturityassessmentDescOrganization := maturityassessmentFields[2].Descriptor()
+	// maturityassessment.OrganizationValidator is a validator for the "organization" field. It is called by the builders before save.
+	maturityassessment.OrganizationValidator = maturityassessmentDescOrganization.Validators[0].(func(string) error)
+	// maturityassessmentDescAssessedBy is the schema descriptor for assessed_by field.
+	maturityassessmentDescAssessedBy := maturityassessmentFields[6].Descriptor()
+	// maturityassessment.AssessedByValidator is a validator for the "assessed_by" field. It is called by the builders before save.
+	maturityassessment.AssessedByValidator = maturityassessmentDescAssessedBy.Validators[0].(func(string) error)
+	// maturityassessmentDescModel is the schema descriptor for model field.
+	maturityassessmentDescModel := maturityassessmentFields[7].Descriptor()
+	// maturityassessment.ModelValidator is a validator for the "model" field. It is called by the builders before save.
+	maturityassessment.ModelValidator = maturityassessmentDescModel.Validators[0].(func(string) error)
+	// maturityassessmentDescID is the schema descriptor for id field.
+	maturityassessmentDescID := maturityassessmentFields[0].Descriptor()
+	// maturityassessment.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	maturityassessment.IDValidator = maturityassessmentDescID.Validators[0].(func(string) error)
 	phaseFields := schema.Phase{}.Fields()
 	_ = phaseFields
 	// phaseDescTitle is the schema descriptor for title field.

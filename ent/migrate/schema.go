@@ -35,6 +35,20 @@ var (
 			},
 		},
 	}
+	// CapabilityModelsColumns holds the columns for the "capability_models" table.
+	CapabilityModelsColumns = []*schema.Column{
+		{Name: "model_id", Type: field.TypeString, Size: 64},
+		{Name: "name", Type: field.TypeString, Size: 128},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "dimensions", Type: field.TypeJSON, Nullable: true},
+		{Name: "max_level", Type: field.TypeInt, Default: 5},
+	}
+	// CapabilityModelsTable holds the schema information for the "capability_models" table.
+	CapabilityModelsTable = &schema.Table{
+		Name:       "capability_models",
+		Columns:    CapabilityModelsColumns,
+		PrimaryKey: []*schema.Column{CapabilityModelsColumns[0]},
+	}
 	// DeliveryEvidencesColumns holds the columns for the "delivery_evidences" table.
 	DeliveryEvidencesColumns = []*schema.Column{
 		{Name: "evidence_id", Type: field.TypeString, Size: 128},
@@ -165,6 +179,33 @@ var (
 				Symbol:     "judge_rubrics_spec_workflows_rubrics",
 				Columns:    []*schema.Column{JudgeRubricsColumns[4]},
 				RefColumns: []*schema.Column{SpecWorkflowsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// MaturityAssessmentsColumns holds the columns for the "maturity_assessments" table.
+	MaturityAssessmentsColumns = []*schema.Column{
+		{Name: "assessment_id", Type: field.TypeString, Size: 64},
+		{Name: "initiative_id", Type: field.TypeString, Nullable: true, Size: 64},
+		{Name: "organization", Type: field.TypeString, Nullable: true, Size: 128},
+		{Name: "scores", Type: field.TypeJSON, Nullable: true},
+		{Name: "overall_score", Type: field.TypeFloat64, Nullable: true},
+		{Name: "summary", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "assessed_by", Type: field.TypeString, Nullable: true, Size: 128},
+		{Name: "model", Type: field.TypeString, Nullable: true, Size: 64},
+		{Name: "assessed_at", Type: field.TypeTime},
+		{Name: "capability_model_assessments", Type: field.TypeString, Nullable: true, Size: 64},
+	}
+	// MaturityAssessmentsTable holds the schema information for the "maturity_assessments" table.
+	MaturityAssessmentsTable = &schema.Table{
+		Name:       "maturity_assessments",
+		Columns:    MaturityAssessmentsColumns,
+		PrimaryKey: []*schema.Column{MaturityAssessmentsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "maturity_assessments_capability_models_assessments",
+				Columns:    []*schema.Column{MaturityAssessmentsColumns[9]},
+				RefColumns: []*schema.Column{CapabilityModelsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
@@ -327,11 +368,13 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AssignmentsTable,
+		CapabilityModelsTable,
 		DeliveryEvidencesTable,
 		InitiativesTable,
 		InitiativeDependenciesTable,
 		JudgeResultsTable,
 		JudgeRubricsTable,
+		MaturityAssessmentsTable,
 		PhasesTable,
 		ProgramsTable,
 		RmiDependenciesTable,
@@ -349,6 +392,7 @@ func init() {
 	InitiativesTable.ForeignKeys[1].RefTable = SpecWorkflowsTable
 	JudgeResultsTable.ForeignKeys[0].RefTable = JudgeRubricsTable
 	JudgeRubricsTable.ForeignKeys[0].RefTable = SpecWorkflowsTable
+	MaturityAssessmentsTable.ForeignKeys[0].RefTable = CapabilityModelsTable
 	PhasesTable.ForeignKeys[0].RefTable = InitiativesTable
 	RoadmapItemsTable.ForeignKeys[0].RefTable = InitiativesTable
 	RoadmapItemsTable.ForeignKeys[1].RefTable = PhasesTable

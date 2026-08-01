@@ -16,11 +16,13 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/ProductBuildersHQ/prism-control/ent/assignment"
+	"github.com/ProductBuildersHQ/prism-control/ent/capabilitymodel"
 	"github.com/ProductBuildersHQ/prism-control/ent/deliveryevidence"
 	"github.com/ProductBuildersHQ/prism-control/ent/initiative"
 	"github.com/ProductBuildersHQ/prism-control/ent/initiativedependency"
 	"github.com/ProductBuildersHQ/prism-control/ent/judgeresult"
 	"github.com/ProductBuildersHQ/prism-control/ent/judgerubric"
+	"github.com/ProductBuildersHQ/prism-control/ent/maturityassessment"
 	"github.com/ProductBuildersHQ/prism-control/ent/phase"
 	"github.com/ProductBuildersHQ/prism-control/ent/program"
 	"github.com/ProductBuildersHQ/prism-control/ent/repository"
@@ -37,6 +39,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// Assignment is the client for interacting with the Assignment builders.
 	Assignment *AssignmentClient
+	// CapabilityModel is the client for interacting with the CapabilityModel builders.
+	CapabilityModel *CapabilityModelClient
 	// DeliveryEvidence is the client for interacting with the DeliveryEvidence builders.
 	DeliveryEvidence *DeliveryEvidenceClient
 	// Initiative is the client for interacting with the Initiative builders.
@@ -47,6 +51,8 @@ type Client struct {
 	JudgeResult *JudgeResultClient
 	// JudgeRubric is the client for interacting with the JudgeRubric builders.
 	JudgeRubric *JudgeRubricClient
+	// MaturityAssessment is the client for interacting with the MaturityAssessment builders.
+	MaturityAssessment *MaturityAssessmentClient
 	// Phase is the client for interacting with the Phase builders.
 	Phase *PhaseClient
 	// Program is the client for interacting with the Program builders.
@@ -73,11 +79,13 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Assignment = NewAssignmentClient(c.config)
+	c.CapabilityModel = NewCapabilityModelClient(c.config)
 	c.DeliveryEvidence = NewDeliveryEvidenceClient(c.config)
 	c.Initiative = NewInitiativeClient(c.config)
 	c.InitiativeDependency = NewInitiativeDependencyClient(c.config)
 	c.JudgeResult = NewJudgeResultClient(c.config)
 	c.JudgeRubric = NewJudgeRubricClient(c.config)
+	c.MaturityAssessment = NewMaturityAssessmentClient(c.config)
 	c.Phase = NewPhaseClient(c.config)
 	c.Program = NewProgramClient(c.config)
 	c.RMIDependency = NewRMIDependencyClient(c.config)
@@ -178,11 +186,13 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:                  ctx,
 		config:               cfg,
 		Assignment:           NewAssignmentClient(cfg),
+		CapabilityModel:      NewCapabilityModelClient(cfg),
 		DeliveryEvidence:     NewDeliveryEvidenceClient(cfg),
 		Initiative:           NewInitiativeClient(cfg),
 		InitiativeDependency: NewInitiativeDependencyClient(cfg),
 		JudgeResult:          NewJudgeResultClient(cfg),
 		JudgeRubric:          NewJudgeRubricClient(cfg),
+		MaturityAssessment:   NewMaturityAssessmentClient(cfg),
 		Phase:                NewPhaseClient(cfg),
 		Program:              NewProgramClient(cfg),
 		RMIDependency:        NewRMIDependencyClient(cfg),
@@ -210,11 +220,13 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ctx:                  ctx,
 		config:               cfg,
 		Assignment:           NewAssignmentClient(cfg),
+		CapabilityModel:      NewCapabilityModelClient(cfg),
 		DeliveryEvidence:     NewDeliveryEvidenceClient(cfg),
 		Initiative:           NewInitiativeClient(cfg),
 		InitiativeDependency: NewInitiativeDependencyClient(cfg),
 		JudgeResult:          NewJudgeResultClient(cfg),
 		JudgeRubric:          NewJudgeRubricClient(cfg),
+		MaturityAssessment:   NewMaturityAssessmentClient(cfg),
 		Phase:                NewPhaseClient(cfg),
 		Program:              NewProgramClient(cfg),
 		RMIDependency:        NewRMIDependencyClient(cfg),
@@ -251,9 +263,10 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Assignment, c.DeliveryEvidence, c.Initiative, c.InitiativeDependency,
-		c.JudgeResult, c.JudgeRubric, c.Phase, c.Program, c.RMIDependency,
-		c.Repository, c.RepositoryDependency, c.RoadmapItem, c.SpecWorkflow,
+		c.Assignment, c.CapabilityModel, c.DeliveryEvidence, c.Initiative,
+		c.InitiativeDependency, c.JudgeResult, c.JudgeRubric, c.MaturityAssessment,
+		c.Phase, c.Program, c.RMIDependency, c.Repository, c.RepositoryDependency,
+		c.RoadmapItem, c.SpecWorkflow,
 	} {
 		n.Use(hooks...)
 	}
@@ -263,9 +276,10 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Assignment, c.DeliveryEvidence, c.Initiative, c.InitiativeDependency,
-		c.JudgeResult, c.JudgeRubric, c.Phase, c.Program, c.RMIDependency,
-		c.Repository, c.RepositoryDependency, c.RoadmapItem, c.SpecWorkflow,
+		c.Assignment, c.CapabilityModel, c.DeliveryEvidence, c.Initiative,
+		c.InitiativeDependency, c.JudgeResult, c.JudgeRubric, c.MaturityAssessment,
+		c.Phase, c.Program, c.RMIDependency, c.Repository, c.RepositoryDependency,
+		c.RoadmapItem, c.SpecWorkflow,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -276,6 +290,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *AssignmentMutation:
 		return c.Assignment.mutate(ctx, m)
+	case *CapabilityModelMutation:
+		return c.CapabilityModel.mutate(ctx, m)
 	case *DeliveryEvidenceMutation:
 		return c.DeliveryEvidence.mutate(ctx, m)
 	case *InitiativeMutation:
@@ -286,6 +302,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.JudgeResult.mutate(ctx, m)
 	case *JudgeRubricMutation:
 		return c.JudgeRubric.mutate(ctx, m)
+	case *MaturityAssessmentMutation:
+		return c.MaturityAssessment.mutate(ctx, m)
 	case *PhaseMutation:
 		return c.Phase.mutate(ctx, m)
 	case *ProgramMutation:
@@ -451,6 +469,155 @@ func (c *AssignmentClient) mutate(ctx context.Context, m *AssignmentMutation) (V
 		return (&AssignmentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Assignment mutation op: %q", m.Op())
+	}
+}
+
+// CapabilityModelClient is a client for the CapabilityModel schema.
+type CapabilityModelClient struct {
+	config
+}
+
+// NewCapabilityModelClient returns a client for the CapabilityModel from the given config.
+func NewCapabilityModelClient(c config) *CapabilityModelClient {
+	return &CapabilityModelClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `capabilitymodel.Hooks(f(g(h())))`.
+func (c *CapabilityModelClient) Use(hooks ...Hook) {
+	c.hooks.CapabilityModel = append(c.hooks.CapabilityModel, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `capabilitymodel.Intercept(f(g(h())))`.
+func (c *CapabilityModelClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CapabilityModel = append(c.inters.CapabilityModel, interceptors...)
+}
+
+// Create returns a builder for creating a CapabilityModel entity.
+func (c *CapabilityModelClient) Create() *CapabilityModelCreate {
+	mutation := newCapabilityModelMutation(c.config, OpCreate)
+	return &CapabilityModelCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CapabilityModel entities.
+func (c *CapabilityModelClient) CreateBulk(builders ...*CapabilityModelCreate) *CapabilityModelCreateBulk {
+	return &CapabilityModelCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CapabilityModelClient) MapCreateBulk(slice any, setFunc func(*CapabilityModelCreate, int)) *CapabilityModelCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CapabilityModelCreateBulk{err: fmt.Errorf("calling to CapabilityModelClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CapabilityModelCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CapabilityModelCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CapabilityModel.
+func (c *CapabilityModelClient) Update() *CapabilityModelUpdate {
+	mutation := newCapabilityModelMutation(c.config, OpUpdate)
+	return &CapabilityModelUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CapabilityModelClient) UpdateOne(_m *CapabilityModel) *CapabilityModelUpdateOne {
+	mutation := newCapabilityModelMutation(c.config, OpUpdateOne, withCapabilityModel(_m))
+	return &CapabilityModelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CapabilityModelClient) UpdateOneID(id string) *CapabilityModelUpdateOne {
+	mutation := newCapabilityModelMutation(c.config, OpUpdateOne, withCapabilityModelID(id))
+	return &CapabilityModelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CapabilityModel.
+func (c *CapabilityModelClient) Delete() *CapabilityModelDelete {
+	mutation := newCapabilityModelMutation(c.config, OpDelete)
+	return &CapabilityModelDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CapabilityModelClient) DeleteOne(_m *CapabilityModel) *CapabilityModelDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CapabilityModelClient) DeleteOneID(id string) *CapabilityModelDeleteOne {
+	builder := c.Delete().Where(capabilitymodel.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CapabilityModelDeleteOne{builder}
+}
+
+// Query returns a query builder for CapabilityModel.
+func (c *CapabilityModelClient) Query() *CapabilityModelQuery {
+	return &CapabilityModelQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCapabilityModel},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CapabilityModel entity by its id.
+func (c *CapabilityModelClient) Get(ctx context.Context, id string) (*CapabilityModel, error) {
+	return c.Query().Where(capabilitymodel.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CapabilityModelClient) GetX(ctx context.Context, id string) *CapabilityModel {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryAssessments queries the assessments edge of a CapabilityModel.
+func (c *CapabilityModelClient) QueryAssessments(_m *CapabilityModel) *MaturityAssessmentQuery {
+	query := (&MaturityAssessmentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(capabilitymodel.Table, capabilitymodel.FieldID, id),
+			sqlgraph.To(maturityassessment.Table, maturityassessment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, capabilitymodel.AssessmentsTable, capabilitymodel.AssessmentsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CapabilityModelClient) Hooks() []Hook {
+	return c.hooks.CapabilityModel
+}
+
+// Interceptors returns the client interceptors.
+func (c *CapabilityModelClient) Interceptors() []Interceptor {
+	return c.inters.CapabilityModel
+}
+
+func (c *CapabilityModelClient) mutate(ctx context.Context, m *CapabilityModelMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CapabilityModelCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CapabilityModelUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CapabilityModelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CapabilityModelDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CapabilityModel mutation op: %q", m.Op())
 	}
 }
 
@@ -1244,6 +1411,155 @@ func (c *JudgeRubricClient) mutate(ctx context.Context, m *JudgeRubricMutation) 
 		return (&JudgeRubricDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown JudgeRubric mutation op: %q", m.Op())
+	}
+}
+
+// MaturityAssessmentClient is a client for the MaturityAssessment schema.
+type MaturityAssessmentClient struct {
+	config
+}
+
+// NewMaturityAssessmentClient returns a client for the MaturityAssessment from the given config.
+func NewMaturityAssessmentClient(c config) *MaturityAssessmentClient {
+	return &MaturityAssessmentClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `maturityassessment.Hooks(f(g(h())))`.
+func (c *MaturityAssessmentClient) Use(hooks ...Hook) {
+	c.hooks.MaturityAssessment = append(c.hooks.MaturityAssessment, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `maturityassessment.Intercept(f(g(h())))`.
+func (c *MaturityAssessmentClient) Intercept(interceptors ...Interceptor) {
+	c.inters.MaturityAssessment = append(c.inters.MaturityAssessment, interceptors...)
+}
+
+// Create returns a builder for creating a MaturityAssessment entity.
+func (c *MaturityAssessmentClient) Create() *MaturityAssessmentCreate {
+	mutation := newMaturityAssessmentMutation(c.config, OpCreate)
+	return &MaturityAssessmentCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of MaturityAssessment entities.
+func (c *MaturityAssessmentClient) CreateBulk(builders ...*MaturityAssessmentCreate) *MaturityAssessmentCreateBulk {
+	return &MaturityAssessmentCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *MaturityAssessmentClient) MapCreateBulk(slice any, setFunc func(*MaturityAssessmentCreate, int)) *MaturityAssessmentCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &MaturityAssessmentCreateBulk{err: fmt.Errorf("calling to MaturityAssessmentClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*MaturityAssessmentCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &MaturityAssessmentCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for MaturityAssessment.
+func (c *MaturityAssessmentClient) Update() *MaturityAssessmentUpdate {
+	mutation := newMaturityAssessmentMutation(c.config, OpUpdate)
+	return &MaturityAssessmentUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *MaturityAssessmentClient) UpdateOne(_m *MaturityAssessment) *MaturityAssessmentUpdateOne {
+	mutation := newMaturityAssessmentMutation(c.config, OpUpdateOne, withMaturityAssessment(_m))
+	return &MaturityAssessmentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *MaturityAssessmentClient) UpdateOneID(id string) *MaturityAssessmentUpdateOne {
+	mutation := newMaturityAssessmentMutation(c.config, OpUpdateOne, withMaturityAssessmentID(id))
+	return &MaturityAssessmentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for MaturityAssessment.
+func (c *MaturityAssessmentClient) Delete() *MaturityAssessmentDelete {
+	mutation := newMaturityAssessmentMutation(c.config, OpDelete)
+	return &MaturityAssessmentDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *MaturityAssessmentClient) DeleteOne(_m *MaturityAssessment) *MaturityAssessmentDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *MaturityAssessmentClient) DeleteOneID(id string) *MaturityAssessmentDeleteOne {
+	builder := c.Delete().Where(maturityassessment.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &MaturityAssessmentDeleteOne{builder}
+}
+
+// Query returns a query builder for MaturityAssessment.
+func (c *MaturityAssessmentClient) Query() *MaturityAssessmentQuery {
+	return &MaturityAssessmentQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeMaturityAssessment},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a MaturityAssessment entity by its id.
+func (c *MaturityAssessmentClient) Get(ctx context.Context, id string) (*MaturityAssessment, error) {
+	return c.Query().Where(maturityassessment.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *MaturityAssessmentClient) GetX(ctx context.Context, id string) *MaturityAssessment {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryCapabilityModel queries the capability_model edge of a MaturityAssessment.
+func (c *MaturityAssessmentClient) QueryCapabilityModel(_m *MaturityAssessment) *CapabilityModelQuery {
+	query := (&CapabilityModelClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(maturityassessment.Table, maturityassessment.FieldID, id),
+			sqlgraph.To(capabilitymodel.Table, capabilitymodel.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, maturityassessment.CapabilityModelTable, maturityassessment.CapabilityModelColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *MaturityAssessmentClient) Hooks() []Hook {
+	return c.hooks.MaturityAssessment
+}
+
+// Interceptors returns the client interceptors.
+func (c *MaturityAssessmentClient) Interceptors() []Interceptor {
+	return c.inters.MaturityAssessment
+}
+
+func (c *MaturityAssessmentClient) mutate(ctx context.Context, m *MaturityAssessmentMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&MaturityAssessmentCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&MaturityAssessmentUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&MaturityAssessmentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&MaturityAssessmentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown MaturityAssessment mutation op: %q", m.Op())
 	}
 }
 
@@ -2357,13 +2673,13 @@ func (c *SpecWorkflowClient) mutate(ctx context.Context, m *SpecWorkflowMutation
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Assignment, DeliveryEvidence, Initiative, InitiativeDependency, JudgeResult,
-		JudgeRubric, Phase, Program, RMIDependency, Repository, RepositoryDependency,
-		RoadmapItem, SpecWorkflow []ent.Hook
+		Assignment, CapabilityModel, DeliveryEvidence, Initiative, InitiativeDependency,
+		JudgeResult, JudgeRubric, MaturityAssessment, Phase, Program, RMIDependency,
+		Repository, RepositoryDependency, RoadmapItem, SpecWorkflow []ent.Hook
 	}
 	inters struct {
-		Assignment, DeliveryEvidence, Initiative, InitiativeDependency, JudgeResult,
-		JudgeRubric, Phase, Program, RMIDependency, Repository, RepositoryDependency,
-		RoadmapItem, SpecWorkflow []ent.Interceptor
+		Assignment, CapabilityModel, DeliveryEvidence, Initiative, InitiativeDependency,
+		JudgeResult, JudgeRubric, MaturityAssessment, Phase, Program, RMIDependency,
+		Repository, RepositoryDependency, RoadmapItem, SpecWorkflow []ent.Interceptor
 	}
 )
