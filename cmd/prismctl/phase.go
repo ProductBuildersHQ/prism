@@ -15,8 +15,29 @@ func phaseCmd() *cobra.Command {
 		Use:   "phase",
 		Short: "Manage phases within an initiative",
 	}
-	cmd.AddCommand(phaseAddCmd(), phaseListCmd())
+	cmd.AddCommand(phaseAddCmd(), phaseListCmd(), phaseRemoveCmd())
 	return cmd
+}
+
+func phaseRemoveCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "remove <phase-id>",
+		Short: "Remove an empty phase (fails if it still has member RMIs)",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			svc, cleanup, err := connectService(cmd)
+			if err != nil {
+				return err
+			}
+			defer cleanup()
+
+			if err := svc.RemovePhase(cmd.Context(), args[0]); err != nil {
+				return err
+			}
+			cmd.Printf("Removed phase %s\n", args[0])
+			return nil
+		},
+	}
 }
 
 func phaseAddCmd() *cobra.Command {

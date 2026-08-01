@@ -41,6 +41,7 @@ func rootCmd() *cobra.Command {
 		phaseCmd(),
 		rmiCmd(),
 		workCmd(),
+		contextCmd(),
 		exportCmd(),
 		ingestCmd(),
 		reportCmd(),

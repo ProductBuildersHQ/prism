@@ -6,18 +6,20 @@ import (
 	_ "embed"
 	"fmt"
 	"path/filepath"
+	"time"
 
 	"github.com/spf13/cobra"
 
 	"github.com/ProductBuildersHQ/prism-control/pkg/service"
 	"github.com/ProductBuildersHQ/prism-control/pkg/store/doltstore"
+	"github.com/ProductBuildersHQ/prism-control/pkg/tokens"
 )
 
 //go:embed views.sql
 var viewsSQL string
 
 func addDoltDBCommands(cmd *cobra.Command) {
-	cmd.AddCommand(dbInitCmd(), dbCreateViewsCmd())
+	cmd.AddCommand(dbInitCmd(), dbCreateViewsCmd(), dbIngestTokensCmd())
 }
 
 func dbInitCmd() *cobra.Command {
@@ -115,6 +117,9 @@ Views created:
   v_phase_progress      — per-phase progress with derived status
   v_rmi_detail          — flat RMI detail with denormalized references
   v_active_assignments  — currently active work assignments
+  v_initiative_tokens   — token spend per initiative (requires devx.token_events)
+  v_rmi_tokens          — token spend per RMI (requires devx.token_events)
+  v_unattributed_tokens — unattributed token events (requires devx.token_events)
 
 These views use only base tables (no Dolt system tables) and are safe
 for read-only consumers such as VisionStudio.`,
@@ -140,8 +145,98 @@ for read-only consumers such as VisionStudio.`,
 				}
 			}
 
-			cmd.Println("Created views: v_initiative_summary, v_phase_progress, v_rmi_detail, v_active_assignments")
+			cmd.Println("Created views: v_initiative_summary, v_phase_progress, v_rmi_detail, v_active_assignments, v_initiative_tokens, v_rmi_tokens, v_unattributed_tokens")
 			return nil
 		},
 	}
+}
+
+func dbIngestTokensCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "ingest-tokens",
+		Short: "Ingest token events from omnidevx JSONL files into devx.token_events",
+		Long: `Read AI token usage events from the local omnidevx JSONL store and
+write them to the devx.token_events table in Dolt.
+
+This enables SQL-based access to token data for VisionStudio and other
+consumers that cannot read the local JSONL files directly.
+
+The ingest is idempotent — duplicate event IDs are skipped via INSERT IGNORE.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			dataDir := getDataDir(cmd)
+			omnidevxDir, _ := cmd.Flags().GetString("omnidevx-dir")
+			since, _ := cmd.Flags().GetString("since")
+			until, _ := cmd.Flags().GetString("until")
+
+			// Parse time range
+			var period tokens.Period
+			if since != "" {
+				t, err := parseDate(since)
+				if err != nil {
+					return fmt.Errorf("parse --since: %w", err)
+				}
+				period.Start = t
+			} else {
+				// Default to 30 days ago
+				period.Start = time.Now().AddDate(0, 0, -30)
+			}
+			if until != "" {
+				t, err := parseDate(until)
+				if err != nil {
+					return fmt.Errorf("parse --until: %w", err)
+				}
+				period.End = t
+			} else {
+				period.End = time.Now()
+			}
+
+			// Connect to Dolt
+			var ds *doltstore.DoltStore
+			var err error
+			if dataDir != "" {
+				ds, err = doltstore.NewEmbedded(dataDir)
+			} else {
+				ds, err = doltstore.New(getDSN(cmd))
+			}
+			if err != nil {
+				return fmt.Errorf("connect to database: %w", err)
+			}
+			defer func() { printCloseWarning(ds.Close()) }()
+
+			// Create JSONL source
+			source, err := tokens.NewJSONLSource(omnidevxDir)
+			if err != nil {
+				return fmt.Errorf("create JSONL source: %w", err)
+			}
+
+			cmd.Printf("Ingesting token events from %s to %s...\n",
+				period.Start.Format("2006-01-02"),
+				period.End.Format("2006-01-02"))
+
+			// Run ingest
+			n, err := tokens.Ingest(cmd.Context(), ds.DB(), source, tokens.Query{Period: period})
+			if err != nil {
+				return fmt.Errorf("ingest: %w", err)
+			}
+
+			cmd.Printf("Ingested %d token events into devx.token_events\n", n)
+			return nil
+		},
+	}
+	cmd.Flags().String("omnidevx-dir", "", "omnidevx data directory (default: ~/.plexusone/omnidevx/data)")
+	cmd.Flags().String("since", "", "Start date (YYYY-MM-DD, default: 30 days ago)")
+	cmd.Flags().String("until", "", "End date (YYYY-MM-DD, default: today)")
+	return cmd
+}
+
+func parseDate(s string) (time.Time, error) {
+	// Try full datetime first
+	if t, err := time.Parse(time.RFC3339, s); err == nil {
+		return t, nil
+	}
+	// Try date only
+	if t, err := time.Parse("2006-01-02", s); err == nil {
+		return t, nil
+	}
+	return time.Time{}, fmt.Errorf("invalid date format: %s (expected YYYY-MM-DD)", s)
 }
