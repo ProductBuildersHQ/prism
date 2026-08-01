@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/specworkflow"
+	"github.com/ProductBuildersHQ/prism-build/pkg/specworkflow"
 )
 
 func workflowCmd() *cobra.Command {

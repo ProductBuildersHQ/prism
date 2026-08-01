@@ -12,13 +12,13 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
-	"github.com/ProductBuildersHQ/prism-control/ent/assignment"
-	"github.com/ProductBuildersHQ/prism-control/ent/deliveryevidence"
-	"github.com/ProductBuildersHQ/prism-control/ent/initiative"
-	"github.com/ProductBuildersHQ/prism-control/ent/phase"
-	"github.com/ProductBuildersHQ/prism-control/ent/predicate"
-	"github.com/ProductBuildersHQ/prism-control/ent/repository"
-	"github.com/ProductBuildersHQ/prism-control/ent/roadmapitem"
+	"github.com/ProductBuildersHQ/prism-build/ent/assignment"
+	"github.com/ProductBuildersHQ/prism-build/ent/deliveryevidence"
+	"github.com/ProductBuildersHQ/prism-build/ent/initiative"
+	"github.com/ProductBuildersHQ/prism-build/ent/phase"
+	"github.com/ProductBuildersHQ/prism-build/ent/predicate"
+	"github.com/ProductBuildersHQ/prism-build/ent/repository"
+	"github.com/ProductBuildersHQ/prism-build/ent/roadmapitem"
 )
 
 // RoadmapItemUpdate is the builder for updating RoadmapItem entities.

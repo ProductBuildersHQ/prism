@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/pcerr"
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/pcerr"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
 )
 
 func setupClaimTest(t *testing.T) (*Service, context.Context, string) {

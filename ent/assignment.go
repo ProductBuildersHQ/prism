@@ -10,8 +10,8 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/ProductBuildersHQ/prism-control/ent/assignment"
-	"github.com/ProductBuildersHQ/prism-control/ent/roadmapitem"
+	"github.com/ProductBuildersHQ/prism-build/ent/assignment"
+	"github.com/ProductBuildersHQ/prism-build/ent/roadmapitem"
 )
 
 // Assignment is the model entity for the Assignment schema.

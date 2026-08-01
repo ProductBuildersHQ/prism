@@ -8,8 +8,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProductBuildersHQ/prism-control/ent/predicate"
-	"github.com/ProductBuildersHQ/prism-control/ent/repositorydependency"
+	"github.com/ProductBuildersHQ/prism-build/ent/predicate"
+	"github.com/ProductBuildersHQ/prism-build/ent/repositorydependency"
 )
 
 // RepositoryDependencyDelete is the builder for deleting a RepositoryDependency entity.

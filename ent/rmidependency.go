@@ -8,7 +8,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/ProductBuildersHQ/prism-control/ent/rmidependency"
+	"github.com/ProductBuildersHQ/prism-build/ent/rmidependency"
 )
 
 // RMIDependency is the model entity for the RMIDependency schema.

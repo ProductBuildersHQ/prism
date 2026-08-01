@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
 )
 
 func TestValidTransition(t *testing.T) {

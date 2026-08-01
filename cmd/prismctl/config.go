@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/config"
+	"github.com/ProductBuildersHQ/prism-build/pkg/config"
 )
 
 func configCmd() *cobra.Command {

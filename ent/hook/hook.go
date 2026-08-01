@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ProductBuildersHQ/prism-control/ent"
+	"github.com/ProductBuildersHQ/prism-build/ent"
 )
 
 // The AssignmentFunc type is an adapter to allow the use of ordinary

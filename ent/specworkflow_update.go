@@ -11,10 +11,10 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
-	"github.com/ProductBuildersHQ/prism-control/ent/initiative"
-	"github.com/ProductBuildersHQ/prism-control/ent/judgerubric"
-	"github.com/ProductBuildersHQ/prism-control/ent/predicate"
-	"github.com/ProductBuildersHQ/prism-control/ent/specworkflow"
+	"github.com/ProductBuildersHQ/prism-build/ent/initiative"
+	"github.com/ProductBuildersHQ/prism-build/ent/judgerubric"
+	"github.com/ProductBuildersHQ/prism-build/ent/predicate"
+	"github.com/ProductBuildersHQ/prism-build/ent/specworkflow"
 )
 
 // SpecWorkflowUpdate is the builder for updating SpecWorkflow entities.

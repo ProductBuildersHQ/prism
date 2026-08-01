@@ -10,11 +10,11 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProductBuildersHQ/prism-control/ent/initiative"
-	"github.com/ProductBuildersHQ/prism-control/ent/phase"
-	"github.com/ProductBuildersHQ/prism-control/ent/program"
-	"github.com/ProductBuildersHQ/prism-control/ent/roadmapitem"
-	"github.com/ProductBuildersHQ/prism-control/ent/specworkflow"
+	"github.com/ProductBuildersHQ/prism-build/ent/initiative"
+	"github.com/ProductBuildersHQ/prism-build/ent/phase"
+	"github.com/ProductBuildersHQ/prism-build/ent/program"
+	"github.com/ProductBuildersHQ/prism-build/ent/roadmapitem"
+	"github.com/ProductBuildersHQ/prism-build/ent/specworkflow"
 )
 
 // InitiativeCreate is the builder for creating a Initiative entity.

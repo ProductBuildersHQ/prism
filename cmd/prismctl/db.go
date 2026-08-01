@@ -13,8 +13,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/config"
-	"github.com/ProductBuildersHQ/prism-control/pkg/service"
+	"github.com/ProductBuildersHQ/prism-build/pkg/config"
+	"github.com/ProductBuildersHQ/prism-build/pkg/service"
 )
 
 const pidFileName = "server.pid"

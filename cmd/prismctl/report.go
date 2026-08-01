@@ -8,8 +8,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/report"
-	"github.com/ProductBuildersHQ/prism-control/pkg/tokens"
+	"github.com/ProductBuildersHQ/prism-build/pkg/report"
+	"github.com/ProductBuildersHQ/prism-build/pkg/tokens"
 )
 
 func reportCmd() *cobra.Command {

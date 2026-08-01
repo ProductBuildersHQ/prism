@@ -12,9 +12,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProductBuildersHQ/prism-control/ent/capabilitymodel"
-	"github.com/ProductBuildersHQ/prism-control/ent/maturityassessment"
-	"github.com/ProductBuildersHQ/prism-control/ent/predicate"
+	"github.com/ProductBuildersHQ/prism-build/ent/capabilitymodel"
+	"github.com/ProductBuildersHQ/prism-build/ent/maturityassessment"
+	"github.com/ProductBuildersHQ/prism-build/ent/predicate"
 )
 
 // CapabilityModelQuery is the builder for querying CapabilityModel entities.

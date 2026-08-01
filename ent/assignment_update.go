@@ -11,9 +11,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProductBuildersHQ/prism-control/ent/assignment"
-	"github.com/ProductBuildersHQ/prism-control/ent/predicate"
-	"github.com/ProductBuildersHQ/prism-control/ent/roadmapitem"
+	"github.com/ProductBuildersHQ/prism-build/ent/assignment"
+	"github.com/ProductBuildersHQ/prism-build/ent/predicate"
+	"github.com/ProductBuildersHQ/prism-build/ent/roadmapitem"
 )
 
 // AssignmentUpdate is the builder for updating Assignment entities.

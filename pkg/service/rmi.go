@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
 )
 
 // RMI status constants.

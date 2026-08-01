@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
 )
 
 func setupWorkReadyTest(t *testing.T) (*Service, context.Context) {

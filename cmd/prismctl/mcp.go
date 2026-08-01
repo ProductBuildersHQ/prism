@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/mcpserver"
+	"github.com/ProductBuildersHQ/prism-build/pkg/mcpserver"
 )
 
 func mcpCmd() *cobra.Command {
@@ -15,7 +15,7 @@ Register it in .mcp.json for automatic agent integration:
 
   {
     "mcpServers": {
-      "prism-control": {
+      "prism-build": {
         "command": "prismctl",
         "args": ["mcp", "--dsn", "root:@tcp(127.0.0.1:3306)/prismcontrol"]
       }

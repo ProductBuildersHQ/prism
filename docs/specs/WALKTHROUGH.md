@@ -181,7 +181,7 @@ args: {
   "evidence": [
     {"type": "commit", "reference": "abc123def"},
     {"type": "commit", "reference": "def456abc"},
-    {"type": "pr", "reference": "https://github.com/ProductBuildersHQ/prism-control/pull/7"}
+    {"type": "pr", "reference": "https://github.com/ProductBuildersHQ/prism-build/pull/7"}
   ]
 }
 ```
@@ -288,5 +288,5 @@ For repos participating in PRISM-tracked work, add to their `CLAUDE.md`:
 ```markdown
 ## PRISM Control
 
-This repo's roadmap items are tracked in [prism-control](https://github.com/ProductBuildersHQ/prism-control). Use `prismctl work ready --repo github.com/ProductBuildersHQ/<this-repo>` to find claimable work, and carry the `Refs: RMI-<REPOSLUG>-<NNN>` trailer on every commit.
+This repo's roadmap items are tracked in [prism-control](https://github.com/ProductBuildersHQ/prism-build). Use `prismctl work ready --repo github.com/ProductBuildersHQ/<this-repo>` to find claimable work, and carry the `Refs: RMI-<REPOSLUG>-<NNN>` trailer on every commit.
 ```

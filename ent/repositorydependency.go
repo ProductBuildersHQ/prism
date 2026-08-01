@@ -8,7 +8,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/ProductBuildersHQ/prism-control/ent/repositorydependency"
+	"github.com/ProductBuildersHQ/prism-build/ent/repositorydependency"
 )
 
 // RepositoryDependency is the model entity for the RepositoryDependency schema.

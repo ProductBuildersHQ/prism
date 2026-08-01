@@ -1,12 +1,12 @@
-// Package prismcontrol is the SDK facade for PRISM Control, a product
+// Package prismbuild is the SDK facade for PRISM Build, a product
 // delivery control plane for cross-repository initiative coordination.
 //
 // All behavior lives in the pkg/* subpackages; this root package provides
 // the high-level Client that CLI, MCP, and external importers use.
-package prismcontrol
+package prismbuild
 
 import (
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
 )
 
 // Client is the top-level entry point for the PRISM Control SDK.

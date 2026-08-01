@@ -317,7 +317,7 @@ CI runs `go test ./pkg/...` (no dolt tag) — all domain logic is tested via Mem
 | Phase | `<INIT-ID>/phase-<N>` | `INIT-PRISMCONTROL-001/phase-3` |
 | RMI | `RMI-<REPOSLUG>-<NNN>` | `RMI-PRISMCONTROL-042` |
 | Assignment | `ASSIGN-<UUID>` | auto-generated |
-| Repository | `github.com/<org>/<repo>` | `github.com/ProductBuildersHQ/prism-control` |
+| Repository | `github.com/<org>/<repo>` | `github.com/ProductBuildersHQ/prism-build` |
 
 ### CLI Command Pattern
 
@@ -376,7 +376,7 @@ Product repos that participate in PRISM-tracked initiatives add this block to th
 ```markdown
 ## PRISM Control
 
-This repo's roadmap items are tracked in [prism-control](https://github.com/ProductBuildersHQ/prism-control).
+This repo's roadmap items are tracked in [prism-build](https://github.com/ProductBuildersHQ/prism-build).
 
 ### Finding and Claiming Work
 

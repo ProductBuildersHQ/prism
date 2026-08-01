@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/maturity"
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/maturity"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
 )
 
 func TestBuiltInModels(t *testing.T) {

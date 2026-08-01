@@ -10,9 +10,9 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/ProductBuildersHQ/prism-control/ent/capabilitymodel"
-	"github.com/ProductBuildersHQ/prism-control/ent/maturityassessment"
-	"github.com/ProductBuildersHQ/prism-control/ent/schema"
+	"github.com/ProductBuildersHQ/prism-build/ent/capabilitymodel"
+	"github.com/ProductBuildersHQ/prism-build/ent/maturityassessment"
+	"github.com/ProductBuildersHQ/prism-build/ent/schema"
 )
 
 // MaturityAssessment is the model entity for the MaturityAssessment schema.

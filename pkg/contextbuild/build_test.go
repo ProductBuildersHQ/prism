@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
 )
 
 func TestBuildForPhase_ByteIdentical(t *testing.T) {

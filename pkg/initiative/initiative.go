@@ -7,7 +7,7 @@ import (
 	"slices"
 	"time"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
 )
 
 // Lifecycle statuses in order.

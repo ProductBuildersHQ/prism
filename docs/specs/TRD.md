@@ -178,7 +178,7 @@ Deferred to a later phase (designed in the ideation doc, not built in v1): `rele
 
 ## 5. Package Layout (SDK)
 
-Module: `github.com/ProductBuildersHQ/prism-control`. Root package `prismcontrol` is the SDK facade (mirrors the omnidevx pattern): `prismcontrol.New(cfg) (*Client, error)` exposing the service API consumed by CLI, MCP, and external importers.
+Module: `github.com/ProductBuildersHQ/prism-build`. Root package `prismcontrol` is the SDK facade (mirrors the omnidevx pattern): `prismcontrol.New(cfg) (*Client, error)` exposing the service API consumed by CLI, MCP, and external importers.
 
 ```text
 prism-control/

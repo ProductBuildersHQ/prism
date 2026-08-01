@@ -12,16 +12,16 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/contextbuild"
-	"github.com/ProductBuildersHQ/prism-control/pkg/report"
-	"github.com/ProductBuildersHQ/prism-control/pkg/service"
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/contextbuild"
+	"github.com/ProductBuildersHQ/prism-build/pkg/report"
+	"github.com/ProductBuildersHQ/prism-build/pkg/service"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
 )
 
 // New creates an MCP server with all PRISM Control tools registered.
 func New(svc *service.Service) *mcp.Server {
 	s := mcp.NewServer(
-		&mcp.Implementation{Name: "prism-control", Version: "0.1.0"},
+		&mcp.Implementation{Name: "prism-build", Version: "0.1.0"},
 		&mcp.ServerOptions{
 			Instructions: "PRISM Control — Product Delivery Control Plane. " +
 				"Browse initiatives, claim roadmap items, and update work status.",

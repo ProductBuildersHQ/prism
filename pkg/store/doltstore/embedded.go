@@ -14,7 +14,7 @@ import (
 	entsql "entgo.io/ent/dialect/sql"
 	_ "github.com/dolthub/driver"
 
-	"github.com/ProductBuildersHQ/prism-control/ent"
+	"github.com/ProductBuildersHQ/prism-build/ent"
 )
 
 const defaultDBName = "prismcontrol"

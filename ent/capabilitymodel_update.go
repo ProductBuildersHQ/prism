@@ -11,10 +11,10 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
-	"github.com/ProductBuildersHQ/prism-control/ent/capabilitymodel"
-	"github.com/ProductBuildersHQ/prism-control/ent/maturityassessment"
-	"github.com/ProductBuildersHQ/prism-control/ent/predicate"
-	"github.com/ProductBuildersHQ/prism-control/ent/schema"
+	"github.com/ProductBuildersHQ/prism-build/ent/capabilitymodel"
+	"github.com/ProductBuildersHQ/prism-build/ent/maturityassessment"
+	"github.com/ProductBuildersHQ/prism-build/ent/predicate"
+	"github.com/ProductBuildersHQ/prism-build/ent/schema"
 )
 
 // CapabilityModelUpdate is the builder for updating CapabilityModel entities.

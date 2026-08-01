@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/initiative"
-	"github.com/ProductBuildersHQ/prism-control/pkg/specworkflow"
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/initiative"
+	"github.com/ProductBuildersHQ/prism-build/pkg/specworkflow"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
 )
 
 func TestBuiltInWorkflows(t *testing.T) {

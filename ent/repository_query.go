@@ -12,9 +12,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProductBuildersHQ/prism-control/ent/predicate"
-	"github.com/ProductBuildersHQ/prism-control/ent/repository"
-	"github.com/ProductBuildersHQ/prism-control/ent/roadmapitem"
+	"github.com/ProductBuildersHQ/prism-build/ent/predicate"
+	"github.com/ProductBuildersHQ/prism-build/ent/repository"
+	"github.com/ProductBuildersHQ/prism-build/ent/roadmapitem"
 )
 
 // RepositoryQuery is the builder for querying Repository entities.

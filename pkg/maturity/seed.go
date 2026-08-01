@@ -5,7 +5,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
 )
 
 // BuiltInModels returns the predefined capability maturity models.

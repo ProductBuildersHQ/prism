@@ -3,7 +3,7 @@ package rmi
 import (
 	"testing"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
 )
 
 func TestValidID(t *testing.T) {

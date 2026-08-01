@@ -3,7 +3,7 @@ package roadmap
 import (
 	"fmt"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
 )
 
 // DiffKind classifies a difference.

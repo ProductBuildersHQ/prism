@@ -5,12 +5,12 @@ package enttest
 import (
 	"context"
 
-	"github.com/ProductBuildersHQ/prism-control/ent"
+	"github.com/ProductBuildersHQ/prism-build/ent"
 	// required by schema hooks.
-	_ "github.com/ProductBuildersHQ/prism-control/ent/runtime"
+	_ "github.com/ProductBuildersHQ/prism-build/ent/runtime"
 
 	"entgo.io/ent/dialect/sql/schema"
-	"github.com/ProductBuildersHQ/prism-control/ent/migrate"
+	"github.com/ProductBuildersHQ/prism-build/ent/migrate"
 )
 
 type (

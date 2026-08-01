@@ -29,7 +29,7 @@ devfolio contributor profiles
 ### RMI record
 
 ```json
-{"kind":"rmi","rmi":{"id":"RMI-PRISMCONTROL-005","repo":"github.com/ProductBuildersHQ/prism-control","initiative":"INIT-PRISMCONTROL-001","phase":"INIT-PRISMCONTROL-001/phase-1","title":"Unit-of-work with Dolt commit","type":"capability","status":"in_progress","required":true,"assignedTo":"session-1234"},"exportedAt":"2026-07-20T10:00:00Z"}
+{"kind":"rmi","rmi":{"id":"RMI-PRISMCONTROL-005","repo":"github.com/ProductBuildersHQ/prism-build","initiative":"INIT-PRISMCONTROL-001","phase":"INIT-PRISMCONTROL-001/phase-1","title":"Unit-of-work with Dolt commit","type":"capability","status":"in_progress","required":true,"assignedTo":"session-1234"},"exportedAt":"2026-07-20T10:00:00Z"}
 ```
 
 ### Fields

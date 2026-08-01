@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
 )
 
 func validRMI(id, repoID, status string) *store.RoadmapItem {

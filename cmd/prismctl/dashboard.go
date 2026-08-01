@@ -18,10 +18,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/report"
-	"github.com/ProductBuildersHQ/prism-control/pkg/service"
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
-	"github.com/ProductBuildersHQ/prism-control/pkg/tokens"
+	"github.com/ProductBuildersHQ/prism-build/pkg/report"
+	"github.com/ProductBuildersHQ/prism-build/pkg/service"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/tokens"
 )
 
 func dashboardCmd() *cobra.Command {

@@ -280,7 +280,7 @@ Repos participating in PRISM-tracked initiatives add a pointer to their `CLAUDE.
 ```markdown
 ## PRISM Control
 
-This repo's roadmap items are tracked in [prism-control](https://github.com/ProductBuildersHQ/prism-control).
+This repo's roadmap items are tracked in [prism-control](https://github.com/ProductBuildersHQ/prism-build).
 Use `prismctl work ready --repo github.com/org/<this-repo>` to find claimable work,
 and carry the `Refs: RMI-<REPOSLUG>-<NNN>` trailer on every commit.
 ```

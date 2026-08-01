@@ -30,7 +30,7 @@ func PhaseHandoffSchema() []byte {
 //	package main
 //	import (
 //		"fmt"
-//		"github.com/ProductBuildersHQ/prism-control/pkg/contextbuild"
+//		"github.com/ProductBuildersHQ/prism-build/pkg/contextbuild"
 //	)
 //	func main() {
 //		out, _ := contextbuild.GenerateSchema()
@@ -43,7 +43,7 @@ func GenerateSchema() ([]byte, error) {
 	}
 
 	schema := r.Reflect(&ContextPackage{})
-	schema.ID = "https://github.com/ProductBuildersHQ/prism-control/schema/contextpackage"
+	schema.ID = "https://github.com/ProductBuildersHQ/prism-build/schema/contextpackage"
 	schema.Title = "ContextPackage"
 	schema.Description = "Deterministic context package for agent sessions, assembled from the PRISM execution graph and repository specs."
 

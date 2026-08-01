@@ -7,8 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/evidence"
-	"github.com/ProductBuildersHQ/prism-control/pkg/service"
+	"github.com/ProductBuildersHQ/prism-build/pkg/evidence"
+	"github.com/ProductBuildersHQ/prism-build/pkg/service"
 )
 
 // ChangelogResult summarizes what a changelog ingest found.

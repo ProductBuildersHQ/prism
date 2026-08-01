@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
 )
 
 // Service wraps the store with business logic shared by all adapters.

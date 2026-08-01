@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
 )
 
 var rmiIDPattern = regexp.MustCompile(`^RMI-[A-Z0-9]+-\d{3,}$`)

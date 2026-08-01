@@ -9,7 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/ProductBuildersHQ/prism-control/ent/specworkflow"
+	"github.com/ProductBuildersHQ/prism-build/ent/specworkflow"
 )
 
 // SpecWorkflow is the model entity for the SpecWorkflow schema.

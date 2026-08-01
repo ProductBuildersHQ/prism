@@ -9,9 +9,9 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProductBuildersHQ/prism-control/ent/initiative"
-	"github.com/ProductBuildersHQ/prism-control/ent/phase"
-	"github.com/ProductBuildersHQ/prism-control/ent/roadmapitem"
+	"github.com/ProductBuildersHQ/prism-build/ent/initiative"
+	"github.com/ProductBuildersHQ/prism-build/ent/phase"
+	"github.com/ProductBuildersHQ/prism-build/ent/roadmapitem"
 )
 
 // PhaseCreate is the builder for creating a Phase entity.

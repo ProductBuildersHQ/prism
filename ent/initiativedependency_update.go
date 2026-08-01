@@ -10,8 +10,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProductBuildersHQ/prism-control/ent/initiativedependency"
-	"github.com/ProductBuildersHQ/prism-control/ent/predicate"
+	"github.com/ProductBuildersHQ/prism-build/ent/initiativedependency"
+	"github.com/ProductBuildersHQ/prism-build/ent/predicate"
 )
 
 // InitiativeDependencyUpdate is the builder for updating InitiativeDependency entities.

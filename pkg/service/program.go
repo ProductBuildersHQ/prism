@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
 )
 
 func (s *Service) CreateProgram(ctx context.Context, id, name, org, description string) (*store.Program, error) {

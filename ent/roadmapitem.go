@@ -10,10 +10,10 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/ProductBuildersHQ/prism-control/ent/initiative"
-	"github.com/ProductBuildersHQ/prism-control/ent/phase"
-	"github.com/ProductBuildersHQ/prism-control/ent/repository"
-	"github.com/ProductBuildersHQ/prism-control/ent/roadmapitem"
+	"github.com/ProductBuildersHQ/prism-build/ent/initiative"
+	"github.com/ProductBuildersHQ/prism-build/ent/phase"
+	"github.com/ProductBuildersHQ/prism-build/ent/repository"
+	"github.com/ProductBuildersHQ/prism-build/ent/roadmapitem"
 )
 
 // RoadmapItem is the model entity for the RoadmapItem schema.

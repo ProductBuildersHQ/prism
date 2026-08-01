@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
 )
 
 // GenerateInput holds the data needed to generate a ROADMAP.md.

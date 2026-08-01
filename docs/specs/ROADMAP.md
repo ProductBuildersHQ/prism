@@ -1,7 +1,7 @@
 # PRISM Control — Roadmap
 
 **Initiative:** `INIT-PRISMCONTROL-001`
-**Repository:** `github.com/ProductBuildersHQ/prism-control`
+**Repository:** `github.com/ProductBuildersHQ/prism-build`
 **Status:** All 6 phases completed (delivery_complete)
 
 Follow-on work is tracked as separate initiatives under `PROG-PRISM-CONTROL`:

@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
 )
 
 func TestBuildPhaseHandoff_Basic(t *testing.T) {

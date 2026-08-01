@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/validate"
+	"github.com/ProductBuildersHQ/prism-build/pkg/validate"
 )
 
 func validateCmd() *cobra.Command {

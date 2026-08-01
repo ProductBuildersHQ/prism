@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
 )
 
 // ReleaseSet groups component releases for one initiative.

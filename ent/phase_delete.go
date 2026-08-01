@@ -8,8 +8,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProductBuildersHQ/prism-control/ent/phase"
-	"github.com/ProductBuildersHQ/prism-control/ent/predicate"
+	"github.com/ProductBuildersHQ/prism-build/ent/phase"
+	"github.com/ProductBuildersHQ/prism-build/ent/predicate"
 )
 
 // PhaseDelete is the builder for deleting a Phase entity.

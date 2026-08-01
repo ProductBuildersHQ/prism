@@ -9,7 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProductBuildersHQ/prism-control/ent/rmidependency"
+	"github.com/ProductBuildersHQ/prism-build/ent/rmidependency"
 )
 
 // RMIDependencyCreate is the builder for creating a RMIDependency entity.

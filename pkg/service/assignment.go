@@ -7,9 +7,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/assignment"
-	"github.com/ProductBuildersHQ/prism-control/pkg/pcerr"
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/assignment"
+	"github.com/ProductBuildersHQ/prism-build/pkg/pcerr"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
 )
 
 var evidenceSeq atomic.Int64

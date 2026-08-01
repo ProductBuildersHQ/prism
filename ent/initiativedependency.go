@@ -8,7 +8,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/ProductBuildersHQ/prism-control/ent/initiativedependency"
+	"github.com/ProductBuildersHQ/prism-build/ent/initiativedependency"
 )
 
 // InitiativeDependency is the model entity for the InitiativeDependency schema.

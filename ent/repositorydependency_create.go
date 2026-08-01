@@ -9,7 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProductBuildersHQ/prism-control/ent/repositorydependency"
+	"github.com/ProductBuildersHQ/prism-build/ent/repositorydependency"
 )
 
 // RepositoryDependencyCreate is the builder for creating a RepositoryDependency entity.

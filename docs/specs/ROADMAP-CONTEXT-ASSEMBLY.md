@@ -1,7 +1,7 @@
 # Deterministic Context Assembly — Roadmap
 
 **Initiative:** `INIT-PRISMCONTROL-002`
-**Repository:** `github.com/ProductBuildersHQ/prism-control`
+**Repository:** `github.com/ProductBuildersHQ/prism-build`
 **Program:** `PROG-PRISM-CONTROL`
 **Status:** Proposed
 

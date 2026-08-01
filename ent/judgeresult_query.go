@@ -11,9 +11,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProductBuildersHQ/prism-control/ent/judgeresult"
-	"github.com/ProductBuildersHQ/prism-control/ent/judgerubric"
-	"github.com/ProductBuildersHQ/prism-control/ent/predicate"
+	"github.com/ProductBuildersHQ/prism-build/ent/judgeresult"
+	"github.com/ProductBuildersHQ/prism-build/ent/judgerubric"
+	"github.com/ProductBuildersHQ/prism-build/ent/predicate"
 )
 
 // JudgeResultQuery is the builder for querying JudgeResult entities.

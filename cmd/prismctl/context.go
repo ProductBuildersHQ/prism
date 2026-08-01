@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/contextbuild"
+	"github.com/ProductBuildersHQ/prism-build/pkg/contextbuild"
 )
 
 func contextCmd() *cobra.Command {

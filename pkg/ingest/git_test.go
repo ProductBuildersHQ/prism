@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/service"
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/service"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
 )
 
 func initRepo(t *testing.T, dir string) {

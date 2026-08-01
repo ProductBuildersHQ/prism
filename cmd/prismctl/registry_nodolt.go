@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/service"
+	"github.com/ProductBuildersHQ/prism-build/pkg/service"
 )
 
 func connectService(_ *cobra.Command) (*service.Service, func(), error) {

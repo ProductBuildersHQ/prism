@@ -9,9 +9,9 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/report"
-	"github.com/ProductBuildersHQ/prism-control/pkg/service"
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/report"
+	"github.com/ProductBuildersHQ/prism-build/pkg/service"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
 )
 
 func setup(t *testing.T) (*mcp.ClientSession, *service.Service) {

@@ -1,4 +1,4 @@
-module github.com/ProductBuildersHQ/prism-control
+module github.com/ProductBuildersHQ/prism-build
 
 go 1.26.4
 

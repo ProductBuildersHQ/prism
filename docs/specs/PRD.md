@@ -3,7 +3,7 @@
 **Status:** Draft
 **Date:** 2026-07-23
 **Initiative:** `INIT-PRISMCONTROL-001`
-**Repository:** `github.com/ProductBuildersHQ/prism-control`
+**Repository:** `github.com/ProductBuildersHQ/prism-build`
 
 ## 1. Problem
 

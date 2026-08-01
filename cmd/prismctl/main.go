@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/config"
+	"github.com/ProductBuildersHQ/prism-build/pkg/config"
 )
 
 const defaultDSN = "root:@tcp(127.0.0.1:3306)/prismcontrol"

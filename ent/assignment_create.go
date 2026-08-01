@@ -10,8 +10,8 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProductBuildersHQ/prism-control/ent/assignment"
-	"github.com/ProductBuildersHQ/prism-control/ent/roadmapitem"
+	"github.com/ProductBuildersHQ/prism-build/ent/assignment"
+	"github.com/ProductBuildersHQ/prism-build/ent/roadmapitem"
 )
 
 // AssignmentCreate is the builder for creating a Assignment entity.

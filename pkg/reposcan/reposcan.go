@@ -10,8 +10,8 @@ import (
 
 	"github.com/grokify/gogit/scanner"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/service"
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/service"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
 )
 
 // ScanResult summarizes what a scan imported.

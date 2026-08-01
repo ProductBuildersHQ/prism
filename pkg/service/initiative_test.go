@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/initiative"
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/initiative"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
 )
 
 func TestCreateInitiative(t *testing.T) {

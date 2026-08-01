@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
 )
 
 // WorkReadyFilters controls which RMIs are considered by WorkReady.

@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/export"
+	"github.com/ProductBuildersHQ/prism-build/pkg/export"
 )
 
 func exportCmd() *cobra.Command {

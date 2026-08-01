@@ -8,8 +8,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/reposcan"
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/reposcan"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
 )
 
 func registryCmd() *cobra.Command {

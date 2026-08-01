@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
-	"github.com/ProductBuildersHQ/prism-control/pkg/tokens"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/tokens"
 )
 
 // TokenReport is the token attribution report for an initiative or period.

@@ -9,8 +9,8 @@ import (
 
 	"github.com/grokify/gogit"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/evidence"
-	"github.com/ProductBuildersHQ/prism-control/pkg/service"
+	"github.com/ProductBuildersHQ/prism-build/pkg/evidence"
+	"github.com/ProductBuildersHQ/prism-build/pkg/service"
 )
 
 // GitResult summarizes what a git ingest run found.

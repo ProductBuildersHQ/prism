@@ -10,9 +10,9 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/ProductBuildersHQ/prism-control/ent/initiative"
-	"github.com/ProductBuildersHQ/prism-control/ent/program"
-	"github.com/ProductBuildersHQ/prism-control/ent/specworkflow"
+	"github.com/ProductBuildersHQ/prism-build/ent/initiative"
+	"github.com/ProductBuildersHQ/prism-build/ent/program"
+	"github.com/ProductBuildersHQ/prism-build/ent/specworkflow"
 )
 
 // Initiative is the model entity for the Initiative schema.

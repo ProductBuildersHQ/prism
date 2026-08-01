@@ -3,7 +3,7 @@ package release
 import (
 	"testing"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
 )
 
 func TestPlanNoDeps(t *testing.T) {

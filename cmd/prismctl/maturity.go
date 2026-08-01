@@ -10,8 +10,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/maturity"
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/maturity"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
 )
 
 func maturityCmd() *cobra.Command {

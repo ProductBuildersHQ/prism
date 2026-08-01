@@ -9,8 +9,8 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/ProductBuildersHQ/prism-control/ent/judgeresult"
-	"github.com/ProductBuildersHQ/prism-control/ent/judgerubric"
+	"github.com/ProductBuildersHQ/prism-build/ent/judgeresult"
+	"github.com/ProductBuildersHQ/prism-build/ent/judgerubric"
 )
 
 // JudgeResult is the model entity for the JudgeResult schema.

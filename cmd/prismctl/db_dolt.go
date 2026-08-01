@@ -10,9 +10,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/service"
-	"github.com/ProductBuildersHQ/prism-control/pkg/store/doltstore"
-	"github.com/ProductBuildersHQ/prism-control/pkg/tokens"
+	"github.com/ProductBuildersHQ/prism-build/pkg/service"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store/doltstore"
+	"github.com/ProductBuildersHQ/prism-build/pkg/tokens"
 )
 
 //go:embed views.sql

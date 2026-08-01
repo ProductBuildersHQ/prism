@@ -9,8 +9,8 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/ProductBuildersHQ/prism-control/ent/deliveryevidence"
-	"github.com/ProductBuildersHQ/prism-control/ent/roadmapitem"
+	"github.com/ProductBuildersHQ/prism-build/ent/deliveryevidence"
+	"github.com/ProductBuildersHQ/prism-build/ent/roadmapitem"
 )
 
 // DeliveryEvidence is the model entity for the DeliveryEvidence schema.

@@ -9,7 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProductBuildersHQ/prism-control/ent/initiativedependency"
+	"github.com/ProductBuildersHQ/prism-build/ent/initiativedependency"
 )
 
 // InitiativeDependencyCreate is the builder for creating a InitiativeDependency entity.

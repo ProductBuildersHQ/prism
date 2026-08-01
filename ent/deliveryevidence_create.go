@@ -10,8 +10,8 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProductBuildersHQ/prism-control/ent/deliveryevidence"
-	"github.com/ProductBuildersHQ/prism-control/ent/roadmapitem"
+	"github.com/ProductBuildersHQ/prism-build/ent/deliveryevidence"
+	"github.com/ProductBuildersHQ/prism-build/ent/roadmapitem"
 )
 
 // DeliveryEvidenceCreate is the builder for creating a DeliveryEvidence entity.

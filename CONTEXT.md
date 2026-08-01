@@ -131,7 +131,7 @@ PRISMCTL_DSN="root:@tcp(127.0.0.1:13306)/prismcontrol" prismctl initiative get I
 PRISMCTL_DSN="root:@tcp(127.0.0.1:13306)/prismcontrol" prismctl rmi list --initiative INIT-PRISMCONTROL-003
 
 # Regenerate ent after schema changes
-cd ~/go/src/github.com/ProductBuildersHQ/prism-control
+cd ~/go/src/github.com/ProductBuildersHQ/prism-build
 go generate ./ent
 go build ./...
 go test ./...

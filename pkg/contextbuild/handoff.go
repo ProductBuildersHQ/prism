@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ProductBuildersHQ/prism-control/pkg/initiative"
-	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-build/pkg/initiative"
+	"github.com/ProductBuildersHQ/prism-build/pkg/store"
 )
 
 // PhaseHandoffProjection is the complete handoff artifact for a phase.
