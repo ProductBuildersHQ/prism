@@ -17,6 +17,7 @@ func (Program) Fields() []ent.Field {
 		field.String("name").MaxLen(128),
 		field.String("organization").MaxLen(128),
 		field.Text("description").Optional(),
+		field.Bool("hidden").Default(false),
 		field.Time("created_at"),
 		field.Time("updated_at"),
 	}

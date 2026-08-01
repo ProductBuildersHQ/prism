@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 	"text/tabwriter"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -21,9 +22,66 @@ func programCmd() *cobra.Command {
 		programListCmd(),
 		programGetCmd(),
 		programUpdateCmd(),
+		programHideCmd(),
+		programShowCmd(),
 		programMigrateCmd(),
 	)
 	return cmd
+}
+
+// setProgramHidden loads a program, sets its hidden flag, and persists it.
+func setProgramHidden(cmd *cobra.Command, id string, hidden bool) error {
+	svc, cleanup, err := connectService(cmd)
+	if err != nil {
+		return err
+	}
+	defer cleanup()
+
+	prog, err := svc.Store.GetProgram(cmd.Context(), id)
+	if err != nil {
+		return err
+	}
+	if prog.Hidden == hidden {
+		state := "shown"
+		if hidden {
+			state = "hidden"
+		}
+		cmd.Printf("Program %s is already %s\n", prog.ID, state)
+		return nil
+	}
+	prog.Hidden = hidden
+	prog.UpdatedAt = time.Now()
+	if err := svc.UpdateProgram(cmd.Context(), prog); err != nil {
+		return err
+	}
+	verb := "shown on"
+	if hidden {
+		verb = "hidden from"
+	}
+	cmd.Printf("Program %s %s the dashboard homepage\n", prog.ID, verb)
+	return nil
+}
+
+func programHideCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "hide <program-id>",
+		Short: "Hide a program from the dashboard homepage",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return setProgramHidden(cmd, args[0], true)
+		},
+	}
+}
+
+func programShowCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "show <program-id>",
+		Short: "Show a previously hidden program on the dashboard homepage",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return setProgramHidden(cmd, args[0], false)
+		},
+	}
 }
 
 func programCreateCmd() *cobra.Command {
@@ -85,13 +143,17 @@ func programListCmd() *cobra.Command {
 			}
 
 			w := tabwriter.NewWriter(os.Stdout, 0, 4, 2, ' ', 0)
-			_, _ = fmt.Fprintln(w, "ID\tNAME\tORG\tDESCRIPTION")
+			_, _ = fmt.Fprintln(w, "ID\tNAME\tORG\tHIDDEN\tDESCRIPTION")
 			for _, p := range progs {
 				desc := p.Description
 				if desc == "" {
 					desc = "-"
 				}
-				_, _ = fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", p.ID, p.Name, p.Organization, desc)
+				hidden := "no"
+				if p.Hidden {
+					hidden = "yes"
+				}
+				_, _ = fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n", p.ID, p.Name, p.Organization, hidden, desc)
 			}
 			return w.Flush()
 		},
@@ -120,6 +182,7 @@ func programGetCmd() *cobra.Command {
 			if prog.Description != "" {
 				cmd.Printf("Description:  %s\n", prog.Description)
 			}
+			cmd.Printf("Hidden:       %v\n", prog.Hidden)
 			cmd.Printf("Created:      %s\n", prog.CreatedAt.Format("2006-01-02 15:04"))
 			return nil
 		},

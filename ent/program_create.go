@@ -47,6 +47,20 @@ func (_c *ProgramCreate) SetNillableDescription(v *string) *ProgramCreate {
 	return _c
 }
 
+// SetHidden sets the "hidden" field.
+func (_c *ProgramCreate) SetHidden(v bool) *ProgramCreate {
+	_c.mutation.SetHidden(v)
+	return _c
+}
+
+// SetNillableHidden sets the "hidden" field if the given value is not nil.
+func (_c *ProgramCreate) SetNillableHidden(v *bool) *ProgramCreate {
+	if v != nil {
+		_c.SetHidden(*v)
+	}
+	return _c
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (_c *ProgramCreate) SetCreatedAt(v time.Time) *ProgramCreate {
 	_c.mutation.SetCreatedAt(v)
@@ -87,6 +101,7 @@ func (_c *ProgramCreate) Mutation() *ProgramMutation {
 
 // Save creates the Program in the database.
 func (_c *ProgramCreate) Save(ctx context.Context) (*Program, error) {
+	_c.defaults()
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -112,6 +127,14 @@ func (_c *ProgramCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (_c *ProgramCreate) defaults() {
+	if _, ok := _c.mutation.Hidden(); !ok {
+		v := program.DefaultHidden
+		_c.mutation.SetHidden(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (_c *ProgramCreate) check() error {
 	if _, ok := _c.mutation.Name(); !ok {
@@ -129,6 +152,9 @@ func (_c *ProgramCreate) check() error {
 		if err := program.OrganizationValidator(v); err != nil {
 			return &ValidationError{Name: "organization", err: fmt.Errorf(`ent: validator failed for field "Program.organization": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.Hidden(); !ok {
+		return &ValidationError{Name: "hidden", err: errors.New(`ent: missing required field "Program.hidden"`)}
 	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Program.created_at"`)}
@@ -188,6 +214,10 @@ func (_c *ProgramCreate) createSpec() (*Program, *sqlgraph.CreateSpec) {
 		_spec.SetField(program.FieldDescription, field.TypeString, value)
 		_node.Description = value
 	}
+	if value, ok := _c.mutation.Hidden(); ok {
+		_spec.SetField(program.FieldHidden, field.TypeBool, value)
+		_node.Hidden = value
+	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(program.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
@@ -233,6 +263,7 @@ func (_c *ProgramCreateBulk) Save(ctx context.Context) ([]*Program, error) {
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ProgramMutation)
 				if !ok {

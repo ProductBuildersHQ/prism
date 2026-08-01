@@ -77,6 +77,20 @@ func (_u *ProgramUpdate) ClearDescription() *ProgramUpdate {
 	return _u
 }
 
+// SetHidden sets the "hidden" field.
+func (_u *ProgramUpdate) SetHidden(v bool) *ProgramUpdate {
+	_u.mutation.SetHidden(v)
+	return _u
+}
+
+// SetNillableHidden sets the "hidden" field if the given value is not nil.
+func (_u *ProgramUpdate) SetNillableHidden(v *bool) *ProgramUpdate {
+	if v != nil {
+		_u.SetHidden(*v)
+	}
+	return _u
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (_u *ProgramUpdate) SetCreatedAt(v time.Time) *ProgramUpdate {
 	_u.mutation.SetCreatedAt(v)
@@ -212,6 +226,9 @@ func (_u *ProgramUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.DescriptionCleared() {
 		_spec.ClearField(program.FieldDescription, field.TypeString)
 	}
+	if value, ok := _u.mutation.Hidden(); ok {
+		_spec.SetField(program.FieldHidden, field.TypeBool, value)
+	}
 	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(program.FieldCreatedAt, field.TypeTime, value)
 	}
@@ -328,6 +345,20 @@ func (_u *ProgramUpdateOne) SetNillableDescription(v *string) *ProgramUpdateOne 
 // ClearDescription clears the value of the "description" field.
 func (_u *ProgramUpdateOne) ClearDescription() *ProgramUpdateOne {
 	_u.mutation.ClearDescription()
+	return _u
+}
+
+// SetHidden sets the "hidden" field.
+func (_u *ProgramUpdateOne) SetHidden(v bool) *ProgramUpdateOne {
+	_u.mutation.SetHidden(v)
+	return _u
+}
+
+// SetNillableHidden sets the "hidden" field if the given value is not nil.
+func (_u *ProgramUpdateOne) SetNillableHidden(v *bool) *ProgramUpdateOne {
+	if v != nil {
+		_u.SetHidden(*v)
+	}
 	return _u
 }
 
@@ -495,6 +526,9 @@ func (_u *ProgramUpdateOne) sqlSave(ctx context.Context) (_node *Program, err er
 	}
 	if _u.mutation.DescriptionCleared() {
 		_spec.ClearField(program.FieldDescription, field.TypeString)
+	}
+	if value, ok := _u.mutation.Hidden(); ok {
+		_spec.SetField(program.FieldHidden, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(program.FieldCreatedAt, field.TypeTime, value)

@@ -18,6 +18,8 @@ const (
 	FieldOrganization = "organization"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
+	// FieldHidden holds the string denoting the hidden field in the database.
+	FieldHidden = "hidden"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -43,6 +45,7 @@ var Columns = []string{
 	FieldName,
 	FieldOrganization,
 	FieldDescription,
+	FieldHidden,
 	FieldCreatedAt,
 	FieldUpdatedAt,
 }
@@ -62,6 +65,8 @@ var (
 	NameValidator func(string) error
 	// OrganizationValidator is a validator for the "organization" field. It is called by the builders before save.
 	OrganizationValidator func(string) error
+	// DefaultHidden holds the default value on creation for the "hidden" field.
+	DefaultHidden bool
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(string) error
 )
@@ -87,6 +92,11 @@ func ByOrganization(opts ...sql.OrderTermOption) OrderOption {
 // ByDescription orders the results by the description field.
 func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
+}
+
+// ByHidden orders the results by the hidden field.
+func ByHidden(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHidden, opts...).ToFunc()
 }
 
 // ByCreatedAt orders the results by the created_at field.

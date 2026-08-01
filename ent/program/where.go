@@ -80,6 +80,11 @@ func Description(v string) predicate.Program {
 	return predicate.Program(sql.FieldEQ(FieldDescription, v))
 }
 
+// Hidden applies equality check predicate on the "hidden" field. It's identical to HiddenEQ.
+func Hidden(v bool) predicate.Program {
+	return predicate.Program(sql.FieldEQ(FieldHidden, v))
+}
+
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.Program {
 	return predicate.Program(sql.FieldEQ(FieldCreatedAt, v))
@@ -293,6 +298,16 @@ func DescriptionEqualFold(v string) predicate.Program {
 // DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
 func DescriptionContainsFold(v string) predicate.Program {
 	return predicate.Program(sql.FieldContainsFold(FieldDescription, v))
+}
+
+// HiddenEQ applies the EQ predicate on the "hidden" field.
+func HiddenEQ(v bool) predicate.Program {
+	return predicate.Program(sql.FieldEQ(FieldHidden, v))
+}
+
+// HiddenNEQ applies the NEQ predicate on the "hidden" field.
+func HiddenNEQ(v bool) predicate.Program {
+	return predicate.Program(sql.FieldNEQ(FieldHidden, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
