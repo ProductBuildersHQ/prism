@@ -318,10 +318,10 @@ func loadDashboardData(ctx context.Context, svc *service.Service, dataDir string
 				}
 			}
 		} else {
-			tokenDataNote = "No omnidevx events directory found"
+			tokenDataNote = "No omnidevx events directory found" //nolint:gosec // G101 false positive: not a credential
 		}
 	} else {
-		tokenDataNote = "Token data unavailable"
+		tokenDataNote = "Token data unavailable" //nolint:gosec // G101 false positive: not a credential
 	}
 
 	globalStatusCounts := map[string]int{}

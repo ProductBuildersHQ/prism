@@ -22,7 +22,7 @@ func TestJSONLSource_Read(t *testing.T) {
 {"id":"evt-3","type":"ai.session.started","timestamp":"2026-07-15T09:00:00Z","context":{"sessionId":"session-abc"}}
 {"id":"evt-4","type":"ai.message.completed","timestamp":"2026-07-15T12:00:00Z","context":{"sessionId":"session-xyz","workspace":"/home/user/other"},"attributes":{"model":"claude-sonnet-5","input_tokens":50,"output_tokens":300,"cache_read_tokens":500,"cache_creation_tokens":25}}
 `
-	if err := os.WriteFile(filepath.Join(eventsDir, "claude-code.jsonl"), []byte(fixture), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(eventsDir, "claude-code.jsonl"), []byte(fixture), 0o600); err != nil {
 		t.Fatal(err)
 	}
 
@@ -173,7 +173,7 @@ func TestJSONLSource_ReadMultipleDays(t *testing.T) {
 		}
 
 		fixture := `{"id":"` + d.eventID + `","type":"ai.message.completed","timestamp":"` + d.date[:4] + `-` + d.date[5:7] + `-` + d.date[8:10] + `T10:00:00Z","context":{"sessionId":"session-1","workspace":"/project"},"attributes":{"model":"claude-opus-4-8","input_tokens":100,"output_tokens":200}}`
-		if err := os.WriteFile(filepath.Join(eventsDir, "claude-code.jsonl"), []byte(fixture), 0o644); err != nil {
+		if err := os.WriteFile(filepath.Join(eventsDir, "claude-code.jsonl"), []byte(fixture), 0o600); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -210,7 +210,7 @@ func TestJSONLSource_MalformedLine(t *testing.T) {
 not valid json
 {"id":"evt-2","type":"ai.message.completed","timestamp":"2026-07-15T11:00:00Z","context":{"sessionId":"s1","workspace":"/p"},"attributes":{"model":"opus","input_tokens":200}}
 `
-	if err := os.WriteFile(filepath.Join(eventsDir, "claude-code.jsonl"), []byte(fixture), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(eventsDir, "claude-code.jsonl"), []byte(fixture), 0o600); err != nil {
 		t.Fatal(err)
 	}
 

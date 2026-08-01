@@ -203,6 +203,7 @@ func insertBatch(ctx context.Context, db *sql.DB, events []Event) (int, error) {
 		)
 	}
 
+	//nolint:gosec // G202: values are placeholders, not user input; args holds actual values
 	query := `INSERT IGNORE INTO devx.token_events
 		(event_id, timestamp, session_id, workspace, model,
 		 input_tokens, output_tokens, cache_read_tokens, cache_creation_tokens)

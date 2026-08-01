@@ -1,4 +1,6 @@
 // Package maturity provides capability maturity model definitions and assessment logic.
+//
+//nolint:dupl // Model builder functions intentionally share structure
 package maturity
 
 import (

@@ -74,7 +74,7 @@ func specInitCmd() *cobra.Command {
 					skipped = append(skipped, name)
 					continue
 				}
-				if err := os.WriteFile(path, []byte(scaffoldTemplate(name, init)), 0o644); err != nil {
+				if err := os.WriteFile(path, []byte(scaffoldTemplate(name, init)), 0o600); err != nil {
 					return fmt.Errorf("write %s: %w", name, err)
 				}
 				created = append(created, name)
