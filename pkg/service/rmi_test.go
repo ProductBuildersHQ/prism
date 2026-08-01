@@ -225,3 +225,132 @@ func TestGetRMIDetail(t *testing.T) {
 		t.Fatalf("expected target RMI-DT-002, got %s", detail.Dependencies[0].TargetRMIID)
 	}
 }
+
+func TestMoveRMI(t *testing.T) {
+	ctx := context.Background()
+	svc := newTestService()
+
+	if _, err := svc.CreateInitiative(ctx, "INIT-A-001", "org", "Source", "", "", ""); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := svc.CreatePhase(ctx, "INIT-A-001/phase-1", "INIT-A-001", 1, "Phase 1", ""); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := svc.CreateInitiative(ctx, "INIT-B-001", "org", "Target", "", "", ""); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := svc.CreatePhase(ctx, "INIT-B-001/phase-1", "INIT-B-001", 1, "Phase 1", ""); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := svc.CreateRMI(ctx, "RMI-MOVE-001", "github.com/test/repo", "INIT-A-001", "INIT-A-001/phase-1",
+		"Movable", "", "capability", "", true, 3, nil); err != nil {
+		t.Fatal(err)
+	}
+
+	moved, err := svc.MoveRMI(ctx, "RMI-MOVE-001", "INIT-B-001/phase-1", 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if moved.InitiativeID != "INIT-B-001" {
+		t.Fatalf("expected initiative INIT-B-001, got %s", moved.InitiativeID)
+	}
+	if moved.PhaseID != "INIT-B-001/phase-1" {
+		t.Fatalf("expected phase INIT-B-001/phase-1, got %s", moved.PhaseID)
+	}
+	if moved.SequenceNumber != 5 {
+		t.Fatalf("expected sequence 5, got %d", moved.SequenceNumber)
+	}
+
+	got, err := svc.GetRMI(ctx, "RMI-MOVE-001")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.InitiativeID != "INIT-B-001" || got.PhaseID != "INIT-B-001/phase-1" {
+		t.Fatalf("move not persisted: initiative=%s phase=%s", got.InitiativeID, got.PhaseID)
+	}
+
+	// seq 0 leaves sequence unchanged
+	if _, err := svc.MoveRMI(ctx, "RMI-MOVE-001", "INIT-A-001/phase-1", 0); err != nil {
+		t.Fatal(err)
+	}
+	got, err = svc.GetRMI(ctx, "RMI-MOVE-001")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.SequenceNumber != 5 {
+		t.Fatalf("expected sequence preserved at 5, got %d", got.SequenceNumber)
+	}
+}
+
+func TestMoveRMIValidation(t *testing.T) {
+	ctx := context.Background()
+	svc := newTestService()
+
+	if _, err := svc.CreateInitiative(ctx, "INIT-A-001", "org", "Source", "", "", ""); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := svc.CreatePhase(ctx, "INIT-A-001/phase-1", "INIT-A-001", 1, "Phase 1", ""); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := svc.CreateRMI(ctx, "RMI-MOVE-002", "github.com/test/repo", "INIT-A-001", "INIT-A-001/phase-1",
+		"Movable", "", "capability", "", true, 1, nil); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := svc.MoveRMI(ctx, "RMI-MOVE-002", "not-a-phase-id", 0); err == nil {
+		t.Fatal("expected error for malformed phase ID")
+	}
+	if _, err := svc.MoveRMI(ctx, "RMI-MOVE-002", "INIT-MISSING-001/phase-1", 0); err == nil {
+		t.Fatal("expected error for missing initiative")
+	}
+	if _, err := svc.MoveRMI(ctx, "RMI-MOVE-002", "INIT-A-001/phase-9", 0); err == nil {
+		t.Fatal("expected error for missing phase")
+	}
+	if _, err := svc.MoveRMI(ctx, "RMI-MISSING-001", "INIT-A-001/phase-1", 0); err == nil {
+		t.Fatal("expected error for missing RMI")
+	}
+}
+
+func TestRemovePhase(t *testing.T) {
+	ctx := context.Background()
+	svc := newTestService()
+
+	if _, err := svc.CreateInitiative(ctx, "INIT-A-001", "org", "Source", "", "", ""); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := svc.CreatePhase(ctx, "INIT-A-001/phase-1", "INIT-A-001", 1, "Phase 1", ""); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := svc.CreatePhase(ctx, "INIT-A-001/phase-2", "INIT-A-001", 2, "Phase 2", ""); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := svc.CreateRMI(ctx, "RMI-RP-001", "github.com/test/repo", "INIT-A-001", "INIT-A-001/phase-1",
+		"Occupant", "", "capability", "", true, 1, nil); err != nil {
+		t.Fatal(err)
+	}
+
+	// phase with members refuses removal
+	if err := svc.RemovePhase(ctx, "INIT-A-001/phase-1"); err == nil {
+		t.Fatal("expected error removing phase with member RMIs")
+	}
+
+	// empty phase removes cleanly
+	if err := svc.RemovePhase(ctx, "INIT-A-001/phase-2"); err != nil {
+		t.Fatal(err)
+	}
+	phases, err := svc.ListPhases(ctx, "INIT-A-001")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(phases) != 1 {
+		t.Fatalf("expected 1 phase remaining, got %d", len(phases))
+	}
+
+	// malformed and missing IDs
+	if err := svc.RemovePhase(ctx, "not-a-phase"); err == nil {
+		t.Fatal("expected error for malformed phase ID")
+	}
+	if err := svc.RemovePhase(ctx, "INIT-A-001/phase-9"); err == nil {
+		t.Fatal("expected error for missing phase")
+	}
+}

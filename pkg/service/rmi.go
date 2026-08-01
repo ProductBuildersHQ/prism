@@ -103,6 +103,50 @@ func (s *Service) UpdateRMI(ctx context.Context, rmi *store.RoadmapItem) error {
 	return s.Store.UpdateRMI(ctx, rmi)
 }
 
+// MoveRMI re-parents an RMI to another phase (and its initiative). The target
+// phase ID must be of the form INITIATIVE-ID/phase-N; the initiative and phase
+// must both exist. A seq > 0 also updates the RMI's sequence number.
+func (s *Service) MoveRMI(ctx context.Context, id, phaseID string, seq int) (*store.RoadmapItem, error) {
+	parts := strings.SplitN(phaseID, "/", 2)
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid phase ID %q (expected INITIATIVE-ID/phase-N)", phaseID)
+	}
+	initiativeID := parts[0]
+
+	if _, err := s.Store.GetInitiative(ctx, initiativeID); err != nil {
+		return nil, fmt.Errorf("target initiative %s: %w", initiativeID, err)
+	}
+	phases, err := s.Store.ListPhases(ctx, initiativeID)
+	if err != nil {
+		return nil, fmt.Errorf("list phases for %s: %w", initiativeID, err)
+	}
+	found := false
+	for _, p := range phases {
+		if p.ID == phaseID {
+			found = true
+			break
+		}
+	}
+	if !found {
+		return nil, fmt.Errorf("phase %s not found in initiative %s", phaseID, initiativeID)
+	}
+
+	rmi, err := s.Store.GetRMI(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	rmi.InitiativeID = initiativeID
+	rmi.PhaseID = phaseID
+	if seq > 0 {
+		rmi.SequenceNumber = seq
+	}
+	rmi.UpdatedAt = time.Now()
+	if err := s.Store.UpdateRMI(ctx, rmi); err != nil {
+		return nil, fmt.Errorf("move RMI %s: %w", id, err)
+	}
+	return rmi, nil
+}
+
 // CreateDependency adds a dependency edge between two RMIs.
 func (s *Service) CreateDependency(ctx context.Context, sourceID, targetID, relationship string) error {
 	if relationship == "" {

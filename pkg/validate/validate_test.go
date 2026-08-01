@@ -340,3 +340,51 @@ func TestEvidenceRefsMissingRMI(t *testing.T) {
 		t.Fatal("expected evidence_ref finding")
 	}
 }
+
+func TestContextSpecInvalidRepo(t *testing.T) {
+	s := store.NewMemStore()
+	ctx := context.Background()
+	now := time.Now()
+
+	if err := s.CreateRepository(ctx, &store.Repository{
+		ID: "github.com/test/repo", Organization: "test",
+		RepositoryName: "repo", DefaultBranch: "main", Status: "active",
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := s.CreateInitiative(ctx, &store.Initiative{
+		ID: "INIT-TEST-001", Organization: "test", Title: "Test",
+		Status: "executing", CreatedAt: now, UpdatedAt: now,
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.CreatePhase(ctx, &store.Phase{
+		ID: "INIT-TEST-001/phase-1", InitiativeID: "INIT-TEST-001",
+		SequenceNumber: 1, Title: "P1",
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	rmi := validRMI("RMI-TEST-001", "github.com/test/repo", "ready")
+	rmi.ContextSpec = &store.ContextSpec{
+		ExtraRepos: []string{"github.com/nonexistent/repo"},
+	}
+	if err := s.CreateRMI(ctx, rmi); err != nil {
+		t.Fatal(err)
+	}
+
+	r, err := Run(ctx, s, now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, f := range r.Findings {
+		if f.Check == "context_spec" && f.Level == "error" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("expected context_spec error for non-existent repo in extra_repos")
+	}
+}

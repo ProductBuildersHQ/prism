@@ -80,6 +80,15 @@ func Run(ctx context.Context, s store.Store, now time.Time) (*Result, error) {
 		rmiByID[rmi.ID] = rmi
 	}
 
+	repos, err := s.ListRepositories(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("list repositories: %w", err)
+	}
+	repoByID := make(map[string]*store.Repository, len(repos))
+	for _, repo := range repos {
+		repoByID[repo.ID] = repo
+	}
+
 	r := &Result{}
 	checkIDFormat(r, rmis)
 	checkDuplicateIDs(r, rmis)
@@ -87,6 +96,7 @@ func Run(ctx context.Context, s store.Store, now time.Time) (*Result, error) {
 	checkDependencies(r, deps, rmiByID)
 	checkExpiredLeases(r, assignments, now)
 	checkStatusCoherence(r, initiatives, rmis, evidence)
+	checkContextSpecs(r, rmis, repoByID)
 	return r, nil
 }
 
@@ -217,6 +227,21 @@ func checkStatusCoherence(r *Result, initiatives []*store.Initiative, rmis []*st
 	for _, rmi := range rmis {
 		if rmi.Status == "completed" && !evidenceByRMI[rmi.ID] {
 			r.warnf("status_coherence", "RMI %s is completed but has no delivery evidence", rmi.ID)
+		}
+	}
+}
+
+// Check 7: ContextSpec validation — extra_repos must reference existing repositories.
+func checkContextSpecs(r *Result, rmis []*store.RoadmapItem, repoByID map[string]*store.Repository) {
+	for _, rmi := range rmis {
+		if rmi.ContextSpec == nil {
+			continue
+		}
+
+		for _, repoID := range rmi.ContextSpec.ExtraRepos {
+			if _, ok := repoByID[repoID]; !ok {
+				r.errorf("context_spec", "RMI %s context_spec.extra_repos references non-existent repository %q", rmi.ID, repoID)
+			}
 		}
 	}
 }
