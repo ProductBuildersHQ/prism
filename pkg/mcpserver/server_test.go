@@ -3,6 +3,7 @@ package mcpserver
 import (
 	"context"
 	"encoding/json"
+	"strings"
 	"testing"
 	"time"
 
@@ -68,7 +69,7 @@ func seedInitiative(t *testing.T, svc *service.Service) {
 		t.Fatal(err)
 	}
 
-	if _, err := svc.CreateInitiative(ctx, "INIT-TEST-001", "test", "Test Initiative", "A test", "high"); err != nil {
+	if _, err := svc.CreateInitiative(ctx, "INIT-TEST-001", "test", "Test Initiative", "A test", "high", ""); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := svc.CreatePhase(ctx, "INIT-TEST-001/phase-1", "INIT-TEST-001", 1, "Foundation", ""); err != nil {
@@ -378,5 +379,84 @@ func TestTaskUpdateStatusOnly(t *testing.T) {
 	}
 	if result.RMIStatus != "ready" {
 		t.Fatalf("expected ready, got %s", result.RMIStatus)
+	}
+}
+
+func TestContextBuildPhase(t *testing.T) {
+	cs, svc := setup(t)
+	seedInitiative(t, svc)
+
+	text := callTool(t, cs, "context_build", map[string]any{
+		"target_id": "INIT-TEST-001/phase-1",
+		"format":    "json",
+	})
+
+	var pkg struct {
+		Version    string `json:"version"`
+		TargetType string `json:"target_type"`
+		TargetID   string `json:"target_id"`
+		Sections   struct {
+			Phase struct {
+				ID string `json:"id"`
+			} `json:"phase"`
+		} `json:"sections"`
+	}
+	if err := json.Unmarshal([]byte(text), &pkg); err != nil {
+		t.Fatal(err)
+	}
+	if pkg.TargetType != "phase" {
+		t.Fatalf("expected phase target_type, got %s", pkg.TargetType)
+	}
+	if pkg.TargetID != "INIT-TEST-001/phase-1" {
+		t.Fatalf("expected INIT-TEST-001/phase-1, got %s", pkg.TargetID)
+	}
+	if pkg.Sections.Phase.ID != "INIT-TEST-001/phase-1" {
+		t.Fatalf("expected phase ID INIT-TEST-001/phase-1, got %s", pkg.Sections.Phase.ID)
+	}
+}
+
+func TestContextBuildRMI(t *testing.T) {
+	cs, svc := setup(t)
+	seedInitiative(t, svc)
+
+	text := callTool(t, cs, "context_build", map[string]any{
+		"target_id": "RMI-TEST-001",
+	})
+
+	var pkg struct {
+		TargetType string `json:"target_type"`
+		TargetID   string `json:"target_id"`
+		Sections   struct {
+			CurrentRMI struct {
+				ID    string `json:"id"`
+				Title string `json:"title"`
+			} `json:"current_rmi"`
+		} `json:"sections"`
+	}
+	if err := json.Unmarshal([]byte(text), &pkg); err != nil {
+		t.Fatal(err)
+	}
+	if pkg.TargetType != "rmi" {
+		t.Fatalf("expected rmi target_type, got %s", pkg.TargetType)
+	}
+	if pkg.Sections.CurrentRMI.ID != "RMI-TEST-001" {
+		t.Fatalf("expected RMI-TEST-001, got %s", pkg.Sections.CurrentRMI.ID)
+	}
+}
+
+func TestContextBuildMarkdown(t *testing.T) {
+	cs, svc := setup(t)
+	seedInitiative(t, svc)
+
+	text := callTool(t, cs, "context_build", map[string]any{
+		"target_id": "RMI-TEST-001",
+		"format":    "markdown",
+	})
+
+	if !strings.Contains(text, "# Context Package:") {
+		t.Error("markdown output missing title")
+	}
+	if !strings.Contains(text, "RMI-TEST-001") {
+		t.Error("markdown output missing RMI ID")
 	}
 }

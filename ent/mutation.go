@@ -1621,6 +1621,8 @@ type InitiativeMutation struct {
 	title                *string
 	description          *string
 	status               *string
+	init_type            *string
+	workflow_id          *string
 	priority             *string
 	home_repo            *string
 	workspace            *string
@@ -1905,6 +1907,91 @@ func (m *InitiativeMutation) OldStatus(ctx context.Context) (v string, err error
 // ResetStatus resets all changes to the "status" field.
 func (m *InitiativeMutation) ResetStatus() {
 	m.status = nil
+}
+
+// SetInitType sets the "init_type" field.
+func (m *InitiativeMutation) SetInitType(s string) {
+	m.init_type = &s
+}
+
+// InitType returns the value of the "init_type" field in the mutation.
+func (m *InitiativeMutation) InitType() (r string, exists bool) {
+	v := m.init_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldInitType returns the old "init_type" field's value of the Initiative entity.
+// If the Initiative object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InitiativeMutation) OldInitType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldInitType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldInitType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInitType: %w", err)
+	}
+	return oldValue.InitType, nil
+}
+
+// ResetInitType resets all changes to the "init_type" field.
+func (m *InitiativeMutation) ResetInitType() {
+	m.init_type = nil
+}
+
+// SetWorkflowID sets the "workflow_id" field.
+func (m *InitiativeMutation) SetWorkflowID(s string) {
+	m.workflow_id = &s
+}
+
+// WorkflowID returns the value of the "workflow_id" field in the mutation.
+func (m *InitiativeMutation) WorkflowID() (r string, exists bool) {
+	v := m.workflow_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWorkflowID returns the old "workflow_id" field's value of the Initiative entity.
+// If the Initiative object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InitiativeMutation) OldWorkflowID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWorkflowID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWorkflowID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWorkflowID: %w", err)
+	}
+	return oldValue.WorkflowID, nil
+}
+
+// ClearWorkflowID clears the value of the "workflow_id" field.
+func (m *InitiativeMutation) ClearWorkflowID() {
+	m.workflow_id = nil
+	m.clearedFields[initiative.FieldWorkflowID] = struct{}{}
+}
+
+// WorkflowIDCleared returns if the "workflow_id" field was cleared in this mutation.
+func (m *InitiativeMutation) WorkflowIDCleared() bool {
+	_, ok := m.clearedFields[initiative.FieldWorkflowID]
+	return ok
+}
+
+// ResetWorkflowID resets all changes to the "workflow_id" field.
+func (m *InitiativeMutation) ResetWorkflowID() {
+	m.workflow_id = nil
+	delete(m.clearedFields, initiative.FieldWorkflowID)
 }
 
 // SetPriority sets the "priority" field.
@@ -2601,7 +2688,7 @@ func (m *InitiativeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *InitiativeMutation) Fields() []string {
-	fields := make([]string, 0, 15)
+	fields := make([]string, 0, 17)
 	if m.organization != nil {
 		fields = append(fields, initiative.FieldOrganization)
 	}
@@ -2613,6 +2700,12 @@ func (m *InitiativeMutation) Fields() []string {
 	}
 	if m.status != nil {
 		fields = append(fields, initiative.FieldStatus)
+	}
+	if m.init_type != nil {
+		fields = append(fields, initiative.FieldInitType)
+	}
+	if m.workflow_id != nil {
+		fields = append(fields, initiative.FieldWorkflowID)
 	}
 	if m.priority != nil {
 		fields = append(fields, initiative.FieldPriority)
@@ -2663,6 +2756,10 @@ func (m *InitiativeMutation) Field(name string) (ent.Value, bool) {
 		return m.Description()
 	case initiative.FieldStatus:
 		return m.Status()
+	case initiative.FieldInitType:
+		return m.InitType()
+	case initiative.FieldWorkflowID:
+		return m.WorkflowID()
 	case initiative.FieldPriority:
 		return m.Priority()
 	case initiative.FieldHomeRepo:
@@ -2702,6 +2799,10 @@ func (m *InitiativeMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldDescription(ctx)
 	case initiative.FieldStatus:
 		return m.OldStatus(ctx)
+	case initiative.FieldInitType:
+		return m.OldInitType(ctx)
+	case initiative.FieldWorkflowID:
+		return m.OldWorkflowID(ctx)
 	case initiative.FieldPriority:
 		return m.OldPriority(ctx)
 	case initiative.FieldHomeRepo:
@@ -2760,6 +2861,20 @@ func (m *InitiativeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetStatus(v)
+		return nil
+	case initiative.FieldInitType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetInitType(v)
+		return nil
+	case initiative.FieldWorkflowID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWorkflowID(v)
 		return nil
 	case initiative.FieldPriority:
 		v, ok := value.(string)
@@ -2871,6 +2986,9 @@ func (m *InitiativeMutation) ClearedFields() []string {
 	if m.FieldCleared(initiative.FieldDescription) {
 		fields = append(fields, initiative.FieldDescription)
 	}
+	if m.FieldCleared(initiative.FieldWorkflowID) {
+		fields = append(fields, initiative.FieldWorkflowID)
+	}
 	if m.FieldCleared(initiative.FieldPriority) {
 		fields = append(fields, initiative.FieldPriority)
 	}
@@ -2914,6 +3032,9 @@ func (m *InitiativeMutation) ClearField(name string) error {
 	switch name {
 	case initiative.FieldDescription:
 		m.ClearDescription()
+		return nil
+	case initiative.FieldWorkflowID:
+		m.ClearWorkflowID()
 		return nil
 	case initiative.FieldPriority:
 		m.ClearPriority()
@@ -2961,6 +3082,12 @@ func (m *InitiativeMutation) ResetField(name string) error {
 		return nil
 	case initiative.FieldStatus:
 		m.ResetStatus()
+		return nil
+	case initiative.FieldInitType:
+		m.ResetInitType()
+		return nil
+	case initiative.FieldWorkflowID:
+		m.ResetWorkflowID()
 		return nil
 	case initiative.FieldPriority:
 		m.ResetPriority()
@@ -4220,6 +4347,7 @@ type ProgramMutation struct {
 	name               *string
 	organization       *string
 	description        *string
+	hidden             *bool
 	created_at         *time.Time
 	updated_at         *time.Time
 	clearedFields      map[string]struct{}
@@ -4456,6 +4584,42 @@ func (m *ProgramMutation) ResetDescription() {
 	delete(m.clearedFields, program.FieldDescription)
 }
 
+// SetHidden sets the "hidden" field.
+func (m *ProgramMutation) SetHidden(b bool) {
+	m.hidden = &b
+}
+
+// Hidden returns the value of the "hidden" field in the mutation.
+func (m *ProgramMutation) Hidden() (r bool, exists bool) {
+	v := m.hidden
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHidden returns the old "hidden" field's value of the Program entity.
+// If the Program object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProgramMutation) OldHidden(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHidden is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHidden requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHidden: %w", err)
+	}
+	return oldValue.Hidden, nil
+}
+
+// ResetHidden resets all changes to the "hidden" field.
+func (m *ProgramMutation) ResetHidden() {
+	m.hidden = nil
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (m *ProgramMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
@@ -4616,7 +4780,7 @@ func (m *ProgramMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ProgramMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.name != nil {
 		fields = append(fields, program.FieldName)
 	}
@@ -4625,6 +4789,9 @@ func (m *ProgramMutation) Fields() []string {
 	}
 	if m.description != nil {
 		fields = append(fields, program.FieldDescription)
+	}
+	if m.hidden != nil {
+		fields = append(fields, program.FieldHidden)
 	}
 	if m.created_at != nil {
 		fields = append(fields, program.FieldCreatedAt)
@@ -4646,6 +4813,8 @@ func (m *ProgramMutation) Field(name string) (ent.Value, bool) {
 		return m.Organization()
 	case program.FieldDescription:
 		return m.Description()
+	case program.FieldHidden:
+		return m.Hidden()
 	case program.FieldCreatedAt:
 		return m.CreatedAt()
 	case program.FieldUpdatedAt:
@@ -4665,6 +4834,8 @@ func (m *ProgramMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldOrganization(ctx)
 	case program.FieldDescription:
 		return m.OldDescription(ctx)
+	case program.FieldHidden:
+		return m.OldHidden(ctx)
 	case program.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	case program.FieldUpdatedAt:
@@ -4698,6 +4869,13 @@ func (m *ProgramMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDescription(v)
+		return nil
+	case program.FieldHidden:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHidden(v)
 		return nil
 	case program.FieldCreatedAt:
 		v, ok := value.(time.Time)
@@ -4779,6 +4957,9 @@ func (m *ProgramMutation) ResetField(name string) error {
 		return nil
 	case program.FieldDescription:
 		m.ResetDescription()
+		return nil
+	case program.FieldHidden:
+		m.ResetHidden()
 		return nil
 	case program.FieldCreatedAt:
 		m.ResetCreatedAt()

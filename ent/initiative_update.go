@@ -93,6 +93,40 @@ func (_u *InitiativeUpdate) SetNillableStatus(v *string) *InitiativeUpdate {
 	return _u
 }
 
+// SetInitType sets the "init_type" field.
+func (_u *InitiativeUpdate) SetInitType(v string) *InitiativeUpdate {
+	_u.mutation.SetInitType(v)
+	return _u
+}
+
+// SetNillableInitType sets the "init_type" field if the given value is not nil.
+func (_u *InitiativeUpdate) SetNillableInitType(v *string) *InitiativeUpdate {
+	if v != nil {
+		_u.SetInitType(*v)
+	}
+	return _u
+}
+
+// SetWorkflowID sets the "workflow_id" field.
+func (_u *InitiativeUpdate) SetWorkflowID(v string) *InitiativeUpdate {
+	_u.mutation.SetWorkflowID(v)
+	return _u
+}
+
+// SetNillableWorkflowID sets the "workflow_id" field if the given value is not nil.
+func (_u *InitiativeUpdate) SetNillableWorkflowID(v *string) *InitiativeUpdate {
+	if v != nil {
+		_u.SetWorkflowID(*v)
+	}
+	return _u
+}
+
+// ClearWorkflowID clears the value of the "workflow_id" field.
+func (_u *InitiativeUpdate) ClearWorkflowID() *InitiativeUpdate {
+	_u.mutation.ClearWorkflowID()
+	return _u
+}
+
 // SetPriority sets the "priority" field.
 func (_u *InitiativeUpdate) SetPriority(v string) *InitiativeUpdate {
 	_u.mutation.SetPriority(v)
@@ -439,6 +473,16 @@ func (_u *InitiativeUpdate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Initiative.status": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.InitType(); ok {
+		if err := initiative.InitTypeValidator(v); err != nil {
+			return &ValidationError{Name: "init_type", err: fmt.Errorf(`ent: validator failed for field "Initiative.init_type": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.WorkflowID(); ok {
+		if err := initiative.WorkflowIDValidator(v); err != nil {
+			return &ValidationError{Name: "workflow_id", err: fmt.Errorf(`ent: validator failed for field "Initiative.workflow_id": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Priority(); ok {
 		if err := initiative.PriorityValidator(v); err != nil {
 			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Initiative.priority": %w`, err)}
@@ -483,6 +527,15 @@ func (_u *InitiativeUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(initiative.FieldStatus, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.InitType(); ok {
+		_spec.SetField(initiative.FieldInitType, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.WorkflowID(); ok {
+		_spec.SetField(initiative.FieldWorkflowID, field.TypeString, value)
+	}
+	if _u.mutation.WorkflowIDCleared() {
+		_spec.ClearField(initiative.FieldWorkflowID, field.TypeString)
 	}
 	if value, ok := _u.mutation.Priority(); ok {
 		_spec.SetField(initiative.FieldPriority, field.TypeString, value)
@@ -742,6 +795,40 @@ func (_u *InitiativeUpdateOne) SetNillableStatus(v *string) *InitiativeUpdateOne
 	if v != nil {
 		_u.SetStatus(*v)
 	}
+	return _u
+}
+
+// SetInitType sets the "init_type" field.
+func (_u *InitiativeUpdateOne) SetInitType(v string) *InitiativeUpdateOne {
+	_u.mutation.SetInitType(v)
+	return _u
+}
+
+// SetNillableInitType sets the "init_type" field if the given value is not nil.
+func (_u *InitiativeUpdateOne) SetNillableInitType(v *string) *InitiativeUpdateOne {
+	if v != nil {
+		_u.SetInitType(*v)
+	}
+	return _u
+}
+
+// SetWorkflowID sets the "workflow_id" field.
+func (_u *InitiativeUpdateOne) SetWorkflowID(v string) *InitiativeUpdateOne {
+	_u.mutation.SetWorkflowID(v)
+	return _u
+}
+
+// SetNillableWorkflowID sets the "workflow_id" field if the given value is not nil.
+func (_u *InitiativeUpdateOne) SetNillableWorkflowID(v *string) *InitiativeUpdateOne {
+	if v != nil {
+		_u.SetWorkflowID(*v)
+	}
+	return _u
+}
+
+// ClearWorkflowID clears the value of the "workflow_id" field.
+func (_u *InitiativeUpdateOne) ClearWorkflowID() *InitiativeUpdateOne {
+	_u.mutation.ClearWorkflowID()
 	return _u
 }
 
@@ -1104,6 +1191,16 @@ func (_u *InitiativeUpdateOne) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Initiative.status": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.InitType(); ok {
+		if err := initiative.InitTypeValidator(v); err != nil {
+			return &ValidationError{Name: "init_type", err: fmt.Errorf(`ent: validator failed for field "Initiative.init_type": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.WorkflowID(); ok {
+		if err := initiative.WorkflowIDValidator(v); err != nil {
+			return &ValidationError{Name: "workflow_id", err: fmt.Errorf(`ent: validator failed for field "Initiative.workflow_id": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Priority(); ok {
 		if err := initiative.PriorityValidator(v); err != nil {
 			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Initiative.priority": %w`, err)}
@@ -1165,6 +1262,15 @@ func (_u *InitiativeUpdateOne) sqlSave(ctx context.Context) (_node *Initiative, 
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(initiative.FieldStatus, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.InitType(); ok {
+		_spec.SetField(initiative.FieldInitType, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.WorkflowID(); ok {
+		_spec.SetField(initiative.FieldWorkflowID, field.TypeString, value)
+	}
+	if _u.mutation.WorkflowIDCleared() {
+		_spec.ClearField(initiative.FieldWorkflowID, field.TypeString)
 	}
 	if value, ok := _u.mutation.Priority(); ok {
 		_spec.SetField(initiative.FieldPriority, field.TypeString, value)

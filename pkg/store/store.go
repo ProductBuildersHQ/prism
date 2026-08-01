@@ -37,6 +37,8 @@ type Initiative struct {
 	Title              string
 	Description        string
 	Status             string
+	InitType           string // feature, maintenance, migration, compliance, refactor
+	WorkflowID         string // SpecWorkflow override; empty means use the type's default
 	Priority           string
 	HomeRepo           string
 	Workspace          string
@@ -75,9 +77,26 @@ type RoadmapItem struct {
 	Required           bool
 	SequenceNumber     int
 	AcceptanceCriteria []string
+	ContextSpec        *ContextSpec
 	CreatedAt          time.Time
 	CompletedAt        *time.Time
 	UpdatedAt          time.Time
+}
+
+// ContextSpec contains explicit overrides for context assembly.
+// When present, these settings augment or filter the derived context.
+type ContextSpec struct {
+	// ExtraRepos lists additional repository IDs to include in the context.
+	// These are added to the derived repo set with role "explicit".
+	ExtraRepos []string `json:"extra_repos,omitempty"`
+
+	// IncludeSpecs lists spec file paths to explicitly include.
+	// Paths are relative to the RMI's repository root.
+	IncludeSpecs []string `json:"include_specs,omitempty"`
+
+	// ExcludeSpecs lists spec file paths to exclude from the context.
+	// Takes precedence over initiative-level specs and IncludeSpecs.
+	ExcludeSpecs []string `json:"exclude_specs,omitempty"`
 }
 
 // RMIDependency is a directed edge between two RMIs.
@@ -147,6 +166,7 @@ type Program struct {
 	Name         string
 	Organization string
 	Description  string
+	Hidden       bool // when true, omitted from the dashboard homepage by default
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }
@@ -182,6 +202,7 @@ type InitiativeStore interface {
 type PhaseStore interface {
 	CreatePhase(ctx context.Context, phase *Phase) error
 	ListPhases(ctx context.Context, initiativeID string) ([]*Phase, error)
+	DeletePhase(ctx context.Context, id string) error
 }
 
 // RMIStore defines persistence for roadmap items and dependencies.

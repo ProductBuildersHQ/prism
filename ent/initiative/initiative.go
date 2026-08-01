@@ -20,6 +20,10 @@ const (
 	FieldDescription = "description"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
+	// FieldInitType holds the string denoting the init_type field in the database.
+	FieldInitType = "init_type"
+	// FieldWorkflowID holds the string denoting the workflow_id field in the database.
+	FieldWorkflowID = "workflow_id"
 	// FieldPriority holds the string denoting the priority field in the database.
 	FieldPriority = "priority"
 	// FieldHomeRepo holds the string denoting the home_repo field in the database.
@@ -86,6 +90,8 @@ var Columns = []string{
 	FieldTitle,
 	FieldDescription,
 	FieldStatus,
+	FieldInitType,
+	FieldWorkflowID,
 	FieldPriority,
 	FieldHomeRepo,
 	FieldWorkspace,
@@ -127,6 +133,12 @@ var (
 	TitleValidator func(string) error
 	// StatusValidator is a validator for the "status" field. It is called by the builders before save.
 	StatusValidator func(string) error
+	// DefaultInitType holds the default value on creation for the "init_type" field.
+	DefaultInitType string
+	// InitTypeValidator is a validator for the "init_type" field. It is called by the builders before save.
+	InitTypeValidator func(string) error
+	// WorkflowIDValidator is a validator for the "workflow_id" field. It is called by the builders before save.
+	WorkflowIDValidator func(string) error
 	// PriorityValidator is a validator for the "priority" field. It is called by the builders before save.
 	PriorityValidator func(string) error
 	// HomeRepoValidator is a validator for the "home_repo" field. It is called by the builders before save.
@@ -163,6 +175,16 @@ func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 // ByStatus orders the results by the status field.
 func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+}
+
+// ByInitType orders the results by the init_type field.
+func ByInitType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldInitType, opts...).ToFunc()
+}
+
+// ByWorkflowID orders the results by the workflow_id field.
+func ByWorkflowID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWorkflowID, opts...).ToFunc()
 }
 
 // ByPriority orders the results by the priority field.

@@ -57,6 +57,7 @@ func initiativeCreateCmd() *cobra.Command {
 			title, _ := cmd.Flags().GetString("title")
 			desc, _ := cmd.Flags().GetString("description")
 			priority, _ := cmd.Flags().GetString("priority")
+			initType, _ := cmd.Flags().GetString("type")
 			homeRepo, _ := cmd.Flags().GetString("home-repo")
 			workspace, _ := cmd.Flags().GetString("workspace")
 			program, _ := cmd.Flags().GetString("program")
@@ -71,7 +72,7 @@ func initiativeCreateCmd() *cobra.Command {
 
 			specs := parseSpecs(specFlags)
 
-			init, err := svc.CreateInitiative(cmd.Context(), id, org, title, desc, priority)
+			init, err := svc.CreateInitiative(cmd.Context(), id, org, title, desc, priority, initType)
 			if err != nil {
 				return err
 			}
@@ -95,6 +96,7 @@ func initiativeCreateCmd() *cobra.Command {
 	cmd.Flags().String("title", "", "Initiative title (required)")
 	cmd.Flags().String("description", "", "Description")
 	cmd.Flags().String("priority", "", "Priority (high, medium, low)")
+	cmd.Flags().String("type", "", "Initiative type (feature, maintenance, migration, compliance, refactor); default: feature")
 	cmd.Flags().String("home-repo", "", "Home repository ID (where specs live)")
 	cmd.Flags().String("workspace", "", "Workspace identifier (e.g. tmux session name)")
 	cmd.Flags().String("program", "", "Program ID (e.g. PROG-DELIVERY)")

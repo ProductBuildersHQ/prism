@@ -22,6 +22,24 @@ const (
 	StatusCancelled        = "cancelled"
 )
 
+// Initiative types. Type determines the default spec workflow.
+const (
+	TypeFeature     = "feature"
+	TypeMaintenance = "maintenance"
+	TypeMigration   = "migration"
+	TypeCompliance  = "compliance"
+	TypeRefactor    = "refactor"
+)
+
+// Types lists all valid initiative types.
+var Types = []string{TypeFeature, TypeMaintenance, TypeMigration, TypeCompliance, TypeRefactor}
+
+// ValidType reports whether t is a recognized initiative type.
+// The empty string is valid and means the default (feature).
+func ValidType(t string) bool {
+	return t == "" || slices.Contains(Types, t)
+}
+
 var forwardTransitions = map[string][]string{
 	StatusProposed:         {StatusPlanned, StatusCancelled},
 	StatusPlanned:          {StatusExecuting, StatusCancelled},

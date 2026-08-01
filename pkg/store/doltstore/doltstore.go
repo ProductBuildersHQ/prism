@@ -144,6 +144,8 @@ func entInitiativeToStore(e *ent.Initiative) *store.Initiative {
 		Title:              e.Title,
 		Description:        e.Description,
 		Status:             e.Status,
+		InitType:           e.InitType,
+		WorkflowID:         e.WorkflowID,
 		Priority:           e.Priority,
 		HomeRepo:           e.HomeRepo,
 		Workspace:          e.Workspace,
@@ -170,6 +172,12 @@ func (d *DoltStore) CreateInitiative(ctx context.Context, init *store.Initiative
 		SetStatus(init.Status).
 		SetCreatedAt(init.CreatedAt).
 		SetUpdatedAt(init.UpdatedAt)
+	if init.InitType != "" {
+		b.SetInitType(init.InitType)
+	}
+	if init.WorkflowID != "" {
+		b.SetWorkflowID(init.WorkflowID)
+	}
 	if init.Description != "" {
 		b.SetDescription(init.Description)
 	}
@@ -229,6 +237,14 @@ func (d *DoltStore) UpdateInitiative(ctx context.Context, init *store.Initiative
 		SetTitle(init.Title).
 		SetStatus(init.Status).
 		SetUpdatedAt(init.UpdatedAt)
+	if init.InitType != "" {
+		b.SetInitType(init.InitType)
+	}
+	if init.WorkflowID != "" {
+		b.SetWorkflowID(init.WorkflowID)
+	} else {
+		b.ClearWorkflowID()
+	}
 	if init.Description != "" {
 		b.SetDescription(init.Description)
 	} else {
@@ -367,6 +383,13 @@ func (d *DoltStore) ListPhases(ctx context.Context, initiativeID string) ([]*sto
 		result[i] = entPhaseToStore(e, initiativeID)
 	}
 	return result, nil
+}
+
+func (d *DoltStore) DeletePhase(ctx context.Context, id string) error {
+	if err := d.client.Phase.DeleteOneID(id).Exec(ctx); err != nil {
+		return fmt.Errorf("delete phase %s: %w", id, err)
+	}
+	return nil
 }
 
 // ---------------------------------------------------------------------------
@@ -854,6 +877,7 @@ func entProgramToStore(e *ent.Program) *store.Program {
 		Name:         e.Name,
 		Organization: e.Organization,
 		Description:  e.Description,
+		Hidden:       e.Hidden,
 		CreatedAt:    e.CreatedAt,
 		UpdatedAt:    e.UpdatedAt,
 	}
@@ -864,6 +888,7 @@ func (d *DoltStore) CreateProgram(ctx context.Context, prog *store.Program) erro
 		SetID(prog.ID).
 		SetName(prog.Name).
 		SetOrganization(prog.Organization).
+		SetHidden(prog.Hidden).
 		SetCreatedAt(prog.CreatedAt).
 		SetUpdatedAt(prog.UpdatedAt)
 	if prog.Description != "" {
@@ -900,6 +925,7 @@ func (d *DoltStore) UpdateProgram(ctx context.Context, prog *store.Program) erro
 	b := d.client.Program.UpdateOneID(prog.ID).
 		SetName(prog.Name).
 		SetOrganization(prog.Organization).
+		SetHidden(prog.Hidden).
 		SetUpdatedAt(prog.UpdatedAt)
 	if prog.Description != "" {
 		b.SetDescription(prog.Description)

@@ -7,10 +7,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
+	"github.com/ProductBuildersHQ/prism-control/pkg/contextbuild"
 	"github.com/ProductBuildersHQ/prism-control/pkg/report"
 	"github.com/ProductBuildersHQ/prism-control/pkg/service"
 	"github.com/ProductBuildersHQ/prism-control/pkg/store"
@@ -48,6 +50,7 @@ func registerTools(s *mcp.Server, svc *service.Service) {
 	s.AddTool(taskReleaseTool(), taskReleaseHandler(svc))
 	s.AddTool(taskUpdateTool(), taskUpdateHandler(svc))
 	s.AddTool(reportInitiativeTool(), reportInitiativeHandler(svc))
+	s.AddTool(contextBuildTool(), contextBuildHandler(svc))
 }
 
 // ---------- program_list ----------
@@ -189,12 +192,13 @@ func initiativeCreateHandler(svc *service.Service) mcp.ToolHandler {
 			Title        string `json:"title"`
 			Description  string `json:"description"`
 			Priority     string `json:"priority"`
+			InitType     string `json:"init_type"`
 			ProgramID    string `json:"program_id"`
 		}
 		if err := json.Unmarshal(req.Params.Arguments, &args); err != nil {
 			return nil, fmt.Errorf("parse arguments: %w", err)
 		}
-		init, err := svc.CreateInitiative(ctx, args.ID, args.Organization, args.Title, args.Description, args.Priority)
+		init, err := svc.CreateInitiative(ctx, args.ID, args.Organization, args.Title, args.Description, args.Priority, args.InitType)
 		if err != nil {
 			return nil, err
 		}
@@ -227,7 +231,8 @@ func rmiCreateTool() *mcp.Tool {
 				"priority":{"type":"string","description":"Priority level"},
 				"required":{"type":"boolean","description":"Whether this RMI is required for phase completion","default":true},
 				"sequence_number":{"type":"integer","description":"Order within the phase"},
-				"acceptance_criteria":{"type":"array","items":{"type":"string"},"description":"List of acceptance criteria"}
+				"acceptance_criteria":{"type":"array","items":{"type":"string"},"description":"List of acceptance criteria"},
+				"context_spec":{"type":"object","description":"Context assembly overrides","properties":{"extra_repos":{"type":"array","items":{"type":"string"},"description":"Additional repos to include"},"include_specs":{"type":"array","items":{"type":"string"},"description":"Spec files to include"},"exclude_specs":{"type":"array","items":{"type":"string"},"description":"Spec files to exclude"}}}
 			},
 			"required":["id","repository_id","title","item_type"]
 		}`),
@@ -237,17 +242,18 @@ func rmiCreateTool() *mcp.Tool {
 func rmiCreateHandler(svc *service.Service) mcp.ToolHandler {
 	return func(ctx context.Context, req *mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		var args struct {
-			ID                 string   `json:"id"`
-			RepositoryID       string   `json:"repository_id"`
-			InitiativeID       string   `json:"initiative_id"`
-			PhaseID            string   `json:"phase_id"`
-			Title              string   `json:"title"`
-			Description        string   `json:"description"`
-			ItemType           string   `json:"item_type"`
-			Priority           string   `json:"priority"`
-			Required           *bool    `json:"required"`
-			SequenceNumber     int      `json:"sequence_number"`
-			AcceptanceCriteria []string `json:"acceptance_criteria"`
+			ID                 string             `json:"id"`
+			RepositoryID       string             `json:"repository_id"`
+			InitiativeID       string             `json:"initiative_id"`
+			PhaseID            string             `json:"phase_id"`
+			Title              string             `json:"title"`
+			Description        string             `json:"description"`
+			ItemType           string             `json:"item_type"`
+			Priority           string             `json:"priority"`
+			Required           *bool              `json:"required"`
+			SequenceNumber     int                `json:"sequence_number"`
+			AcceptanceCriteria []string           `json:"acceptance_criteria"`
+			ContextSpec        *store.ContextSpec `json:"context_spec"`
 		}
 		if err := json.Unmarshal(req.Params.Arguments, &args); err != nil {
 			return nil, fmt.Errorf("parse arguments: %w", err)
@@ -263,6 +269,12 @@ func rmiCreateHandler(svc *service.Service) mcp.ToolHandler {
 		)
 		if err != nil {
 			return nil, err
+		}
+		if args.ContextSpec != nil {
+			rmi.ContextSpec = args.ContextSpec
+			if err := svc.UpdateRMI(ctx, rmi); err != nil {
+				return nil, err
+			}
 		}
 		return jsonResult(rmi)
 	}
@@ -525,6 +537,85 @@ func reportInitiativeHandler(svc *service.Service) mcp.ToolHandler {
 		}
 		return jsonResult(r)
 	}
+}
+
+// ---------- context_build ----------
+
+func contextBuildTool() *mcp.Tool {
+	return &mcp.Tool{
+		Name: "context_build",
+		Description: `Build a deterministic context package for a phase or RMI.
+
+For a phase (e.g., INIT-FOO-001/phase-1): returns program/initiative context,
+phase objectives and member RMIs, prerequisite phase handoffs, spec file
+references with git revisions, and derived repository set.
+
+For an RMI (e.g., RMI-REPO-001): includes all of the above plus current RMI
+details with acceptance criteria and active assignment state.
+
+Output is byte-identical across runs at the same Dolt/git revisions.`,
+		InputSchema: json.RawMessage(`{
+			"type":"object",
+			"properties":{
+				"target_id":{"type":"string","description":"Phase ID (e.g. INIT-FOO-001/phase-1) or RMI ID (e.g. RMI-REPO-001)"},
+				"format":{"type":"string","enum":["json","markdown"],"default":"json","description":"Output format"}
+			},
+			"required":["target_id"]
+		}`),
+	}
+}
+
+func contextBuildHandler(svc *service.Service) mcp.ToolHandler {
+	return func(ctx context.Context, req *mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		var args struct {
+			TargetID string `json:"target_id"`
+			Format   string `json:"format"`
+		}
+		if err := json.Unmarshal(req.Params.Arguments, &args); err != nil {
+			return nil, fmt.Errorf("parse arguments: %w", err)
+		}
+
+		if args.Format == "" {
+			args.Format = "json"
+		}
+
+		builder := contextbuild.NewBuilder(svc.Store, "unknown")
+
+		if isPhaseID(args.TargetID) {
+			pkg, err := builder.BuildForPhase(ctx, args.TargetID)
+			if err != nil {
+				return nil, fmt.Errorf("build phase context: %w", err)
+			}
+			return renderContextResult(pkg, args.Format)
+		}
+
+		pkg, err := builder.BuildForRMI(ctx, args.TargetID)
+		if err != nil {
+			return nil, fmt.Errorf("build RMI context: %w", err)
+		}
+		return renderContextResult(pkg, args.Format)
+	}
+}
+
+func isPhaseID(id string) bool {
+	return strings.Contains(id, "/phase-")
+}
+
+func renderContextResult(pkg *contextbuild.ContextPackage, format string) (*mcp.CallToolResult, error) {
+	var content string
+	switch format {
+	case "markdown":
+		content = pkg.RenderMarkdown()
+	default:
+		data, err := pkg.RenderJSON()
+		if err != nil {
+			return nil, fmt.Errorf("render JSON: %w", err)
+		}
+		content = string(data)
+	}
+	return &mcp.CallToolResult{
+		Content: []mcp.Content{&mcp.TextContent{Text: content}},
+	}, nil
 }
 
 // ---------- helpers ----------

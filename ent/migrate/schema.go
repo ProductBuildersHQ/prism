@@ -67,6 +67,8 @@ var (
 		{Name: "title", Type: field.TypeString, Size: 255},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "status", Type: field.TypeString, Size: 32},
+		{Name: "init_type", Type: field.TypeString, Size: 32, Default: "feature"},
+		{Name: "workflow_id", Type: field.TypeString, Nullable: true, Size: 64},
 		{Name: "priority", Type: field.TypeString, Nullable: true, Size: 32},
 		{Name: "home_repo", Type: field.TypeString, Nullable: true, Size: 255},
 		{Name: "workspace", Type: field.TypeString, Nullable: true, Size: 128},
@@ -88,7 +90,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "initiatives_programs_initiatives",
-				Columns:    []*schema.Column{InitiativesColumns[16]},
+				Columns:    []*schema.Column{InitiativesColumns[18]},
 				RefColumns: []*schema.Column{ProgramsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -142,6 +144,7 @@ var (
 		{Name: "name", Type: field.TypeString, Size: 128},
 		{Name: "organization", Type: field.TypeString, Size: 128},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "hidden", Type: field.TypeBool, Default: false},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 	}

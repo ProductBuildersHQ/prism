@@ -171,6 +171,16 @@ func (m *MemStore) ListPhases(_ context.Context, initiativeID string) ([]*Phase,
 	return result, nil
 }
 
+func (m *MemStore) DeletePhase(_ context.Context, id string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if _, exists := m.phases[id]; !exists {
+		return fmt.Errorf("phase %s not found", id)
+	}
+	delete(m.phases, id)
+	return nil
+}
+
 func (m *MemStore) CreateRMI(_ context.Context, rmi *RoadmapItem) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()

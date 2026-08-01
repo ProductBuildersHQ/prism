@@ -85,6 +85,16 @@ func Status(v string) predicate.Initiative {
 	return predicate.Initiative(sql.FieldEQ(FieldStatus, v))
 }
 
+// InitType applies equality check predicate on the "init_type" field. It's identical to InitTypeEQ.
+func InitType(v string) predicate.Initiative {
+	return predicate.Initiative(sql.FieldEQ(FieldInitType, v))
+}
+
+// WorkflowID applies equality check predicate on the "workflow_id" field. It's identical to WorkflowIDEQ.
+func WorkflowID(v string) predicate.Initiative {
+	return predicate.Initiative(sql.FieldEQ(FieldWorkflowID, v))
+}
+
 // Priority applies equality check predicate on the "priority" field. It's identical to PriorityEQ.
 func Priority(v string) predicate.Initiative {
 	return predicate.Initiative(sql.FieldEQ(FieldPriority, v))
@@ -403,6 +413,146 @@ func StatusEqualFold(v string) predicate.Initiative {
 // StatusContainsFold applies the ContainsFold predicate on the "status" field.
 func StatusContainsFold(v string) predicate.Initiative {
 	return predicate.Initiative(sql.FieldContainsFold(FieldStatus, v))
+}
+
+// InitTypeEQ applies the EQ predicate on the "init_type" field.
+func InitTypeEQ(v string) predicate.Initiative {
+	return predicate.Initiative(sql.FieldEQ(FieldInitType, v))
+}
+
+// InitTypeNEQ applies the NEQ predicate on the "init_type" field.
+func InitTypeNEQ(v string) predicate.Initiative {
+	return predicate.Initiative(sql.FieldNEQ(FieldInitType, v))
+}
+
+// InitTypeIn applies the In predicate on the "init_type" field.
+func InitTypeIn(vs ...string) predicate.Initiative {
+	return predicate.Initiative(sql.FieldIn(FieldInitType, vs...))
+}
+
+// InitTypeNotIn applies the NotIn predicate on the "init_type" field.
+func InitTypeNotIn(vs ...string) predicate.Initiative {
+	return predicate.Initiative(sql.FieldNotIn(FieldInitType, vs...))
+}
+
+// InitTypeGT applies the GT predicate on the "init_type" field.
+func InitTypeGT(v string) predicate.Initiative {
+	return predicate.Initiative(sql.FieldGT(FieldInitType, v))
+}
+
+// InitTypeGTE applies the GTE predicate on the "init_type" field.
+func InitTypeGTE(v string) predicate.Initiative {
+	return predicate.Initiative(sql.FieldGTE(FieldInitType, v))
+}
+
+// InitTypeLT applies the LT predicate on the "init_type" field.
+func InitTypeLT(v string) predicate.Initiative {
+	return predicate.Initiative(sql.FieldLT(FieldInitType, v))
+}
+
+// InitTypeLTE applies the LTE predicate on the "init_type" field.
+func InitTypeLTE(v string) predicate.Initiative {
+	return predicate.Initiative(sql.FieldLTE(FieldInitType, v))
+}
+
+// InitTypeContains applies the Contains predicate on the "init_type" field.
+func InitTypeContains(v string) predicate.Initiative {
+	return predicate.Initiative(sql.FieldContains(FieldInitType, v))
+}
+
+// InitTypeHasPrefix applies the HasPrefix predicate on the "init_type" field.
+func InitTypeHasPrefix(v string) predicate.Initiative {
+	return predicate.Initiative(sql.FieldHasPrefix(FieldInitType, v))
+}
+
+// InitTypeHasSuffix applies the HasSuffix predicate on the "init_type" field.
+func InitTypeHasSuffix(v string) predicate.Initiative {
+	return predicate.Initiative(sql.FieldHasSuffix(FieldInitType, v))
+}
+
+// InitTypeEqualFold applies the EqualFold predicate on the "init_type" field.
+func InitTypeEqualFold(v string) predicate.Initiative {
+	return predicate.Initiative(sql.FieldEqualFold(FieldInitType, v))
+}
+
+// InitTypeContainsFold applies the ContainsFold predicate on the "init_type" field.
+func InitTypeContainsFold(v string) predicate.Initiative {
+	return predicate.Initiative(sql.FieldContainsFold(FieldInitType, v))
+}
+
+// WorkflowIDEQ applies the EQ predicate on the "workflow_id" field.
+func WorkflowIDEQ(v string) predicate.Initiative {
+	return predicate.Initiative(sql.FieldEQ(FieldWorkflowID, v))
+}
+
+// WorkflowIDNEQ applies the NEQ predicate on the "workflow_id" field.
+func WorkflowIDNEQ(v string) predicate.Initiative {
+	return predicate.Initiative(sql.FieldNEQ(FieldWorkflowID, v))
+}
+
+// WorkflowIDIn applies the In predicate on the "workflow_id" field.
+func WorkflowIDIn(vs ...string) predicate.Initiative {
+	return predicate.Initiative(sql.FieldIn(FieldWorkflowID, vs...))
+}
+
+// WorkflowIDNotIn applies the NotIn predicate on the "workflow_id" field.
+func WorkflowIDNotIn(vs ...string) predicate.Initiative {
+	return predicate.Initiative(sql.FieldNotIn(FieldWorkflowID, vs...))
+}
+
+// WorkflowIDGT applies the GT predicate on the "workflow_id" field.
+func WorkflowIDGT(v string) predicate.Initiative {
+	return predicate.Initiative(sql.FieldGT(FieldWorkflowID, v))
+}
+
+// WorkflowIDGTE applies the GTE predicate on the "workflow_id" field.
+func WorkflowIDGTE(v string) predicate.Initiative {
+	return predicate.Initiative(sql.FieldGTE(FieldWorkflowID, v))
+}
+
+// WorkflowIDLT applies the LT predicate on the "workflow_id" field.
+func WorkflowIDLT(v string) predicate.Initiative {
+	return predicate.Initiative(sql.FieldLT(FieldWorkflowID, v))
+}
+
+// WorkflowIDLTE applies the LTE predicate on the "workflow_id" field.
+func WorkflowIDLTE(v string) predicate.Initiative {
+	return predicate.Initiative(sql.FieldLTE(FieldWorkflowID, v))
+}
+
+// WorkflowIDContains applies the Contains predicate on the "workflow_id" field.
+func WorkflowIDContains(v string) predicate.Initiative {
+	return predicate.Initiative(sql.FieldContains(FieldWorkflowID, v))
+}
+
+// WorkflowIDHasPrefix applies the HasPrefix predicate on the "workflow_id" field.
+func WorkflowIDHasPrefix(v string) predicate.Initiative {
+	return predicate.Initiative(sql.FieldHasPrefix(FieldWorkflowID, v))
+}
+
+// WorkflowIDHasSuffix applies the HasSuffix predicate on the "workflow_id" field.
+func WorkflowIDHasSuffix(v string) predicate.Initiative {
+	return predicate.Initiative(sql.FieldHasSuffix(FieldWorkflowID, v))
+}
+
+// WorkflowIDIsNil applies the IsNil predicate on the "workflow_id" field.
+func WorkflowIDIsNil() predicate.Initiative {
+	return predicate.Initiative(sql.FieldIsNull(FieldWorkflowID))
+}
+
+// WorkflowIDNotNil applies the NotNil predicate on the "workflow_id" field.
+func WorkflowIDNotNil() predicate.Initiative {
+	return predicate.Initiative(sql.FieldNotNull(FieldWorkflowID))
+}
+
+// WorkflowIDEqualFold applies the EqualFold predicate on the "workflow_id" field.
+func WorkflowIDEqualFold(v string) predicate.Initiative {
+	return predicate.Initiative(sql.FieldEqualFold(FieldWorkflowID, v))
+}
+
+// WorkflowIDContainsFold applies the ContainsFold predicate on the "workflow_id" field.
+func WorkflowIDContainsFold(v string) predicate.Initiative {
+	return predicate.Initiative(sql.FieldContainsFold(FieldWorkflowID, v))
 }
 
 // PriorityEQ applies the EQ predicate on the "priority" field.

@@ -55,6 +55,34 @@ func (_c *InitiativeCreate) SetStatus(v string) *InitiativeCreate {
 	return _c
 }
 
+// SetInitType sets the "init_type" field.
+func (_c *InitiativeCreate) SetInitType(v string) *InitiativeCreate {
+	_c.mutation.SetInitType(v)
+	return _c
+}
+
+// SetNillableInitType sets the "init_type" field if the given value is not nil.
+func (_c *InitiativeCreate) SetNillableInitType(v *string) *InitiativeCreate {
+	if v != nil {
+		_c.SetInitType(*v)
+	}
+	return _c
+}
+
+// SetWorkflowID sets the "workflow_id" field.
+func (_c *InitiativeCreate) SetWorkflowID(v string) *InitiativeCreate {
+	_c.mutation.SetWorkflowID(v)
+	return _c
+}
+
+// SetNillableWorkflowID sets the "workflow_id" field if the given value is not nil.
+func (_c *InitiativeCreate) SetNillableWorkflowID(v *string) *InitiativeCreate {
+	if v != nil {
+		_c.SetWorkflowID(*v)
+	}
+	return _c
+}
+
 // SetPriority sets the "priority" field.
 func (_c *InitiativeCreate) SetPriority(v string) *InitiativeCreate {
 	_c.mutation.SetPriority(v)
@@ -247,6 +275,7 @@ func (_c *InitiativeCreate) Mutation() *InitiativeMutation {
 
 // Save creates the Initiative in the database.
 func (_c *InitiativeCreate) Save(ctx context.Context) (*Initiative, error) {
+	_c.defaults()
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -269,6 +298,14 @@ func (_c *InitiativeCreate) Exec(ctx context.Context) error {
 func (_c *InitiativeCreate) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (_c *InitiativeCreate) defaults() {
+	if _, ok := _c.mutation.InitType(); !ok {
+		v := initiative.DefaultInitType
+		_c.mutation.SetInitType(v)
 	}
 }
 
@@ -296,6 +333,19 @@ func (_c *InitiativeCreate) check() error {
 	if v, ok := _c.mutation.Status(); ok {
 		if err := initiative.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Initiative.status": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.InitType(); !ok {
+		return &ValidationError{Name: "init_type", err: errors.New(`ent: missing required field "Initiative.init_type"`)}
+	}
+	if v, ok := _c.mutation.InitType(); ok {
+		if err := initiative.InitTypeValidator(v); err != nil {
+			return &ValidationError{Name: "init_type", err: fmt.Errorf(`ent: validator failed for field "Initiative.init_type": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.WorkflowID(); ok {
+		if err := initiative.WorkflowIDValidator(v); err != nil {
+			return &ValidationError{Name: "workflow_id", err: fmt.Errorf(`ent: validator failed for field "Initiative.workflow_id": %w`, err)}
 		}
 	}
 	if v, ok := _c.mutation.Priority(); ok {
@@ -374,6 +424,14 @@ func (_c *InitiativeCreate) createSpec() (*Initiative, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(initiative.FieldStatus, field.TypeString, value)
 		_node.Status = value
+	}
+	if value, ok := _c.mutation.InitType(); ok {
+		_spec.SetField(initiative.FieldInitType, field.TypeString, value)
+		_node.InitType = value
+	}
+	if value, ok := _c.mutation.WorkflowID(); ok {
+		_spec.SetField(initiative.FieldWorkflowID, field.TypeString, value)
+		_node.WorkflowID = value
 	}
 	if value, ok := _c.mutation.Priority(); ok {
 		_spec.SetField(initiative.FieldPriority, field.TypeString, value)
@@ -489,6 +547,7 @@ func (_c *InitiativeCreateBulk) Save(ctx context.Context) ([]*Initiative, error)
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*InitiativeMutation)
 				if !ok {

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/ProductBuildersHQ/prism-control/pkg/initiative"
@@ -10,7 +11,14 @@ import (
 )
 
 // CreateInitiative creates a new initiative in "proposed" status.
-func (s *Service) CreateInitiative(ctx context.Context, id, org, title, description, priority string) (*store.Initiative, error) {
+// initType defaults to "feature" if empty.
+func (s *Service) CreateInitiative(ctx context.Context, id, org, title, description, priority, initType string) (*store.Initiative, error) {
+	if !initiative.ValidType(initType) {
+		return nil, fmt.Errorf("invalid initiative type %q", initType)
+	}
+	if initType == "" {
+		initType = initiative.TypeFeature
+	}
 	now := time.Now()
 	init := &store.Initiative{
 		ID:           id,
@@ -18,6 +26,7 @@ func (s *Service) CreateInitiative(ctx context.Context, id, org, title, descript
 		Title:        title,
 		Description:  description,
 		Status:       initiative.StatusProposed,
+		InitType:     initType,
 		Priority:     priority,
 		CreatedAt:    now,
 		UpdatedAt:    now,
@@ -131,4 +140,23 @@ func (s *Service) CreatePhase(ctx context.Context, id, initiativeID string, seq 
 // ListPhases returns phases for an initiative.
 func (s *Service) ListPhases(ctx context.Context, initiativeID string) ([]*store.Phase, error) {
 	return s.Store.ListPhases(ctx, initiativeID)
+}
+
+// RemovePhase deletes a phase that has no member RMIs. Phases with members
+// must have their RMIs moved (or the phase kept) — deletion never cascades.
+func (s *Service) RemovePhase(ctx context.Context, phaseID string) error {
+	parts := strings.SplitN(phaseID, "/", 2)
+	if len(parts) != 2 {
+		return fmt.Errorf("invalid phase ID %q (expected INITIATIVE-ID/phase-N)", phaseID)
+	}
+	rmis, err := s.Store.ListRMIs(ctx, parts[0])
+	if err != nil {
+		return fmt.Errorf("list RMIs: %w", err)
+	}
+	for _, r := range rmis {
+		if r.PhaseID == phaseID {
+			return fmt.Errorf("phase %s still has member RMIs (e.g. %s); move them first", phaseID, r.ID)
+		}
+	}
+	return s.Store.DeletePhase(ctx, phaseID)
 }

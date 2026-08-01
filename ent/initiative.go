@@ -27,6 +27,10 @@ type Initiative struct {
 	Description string `json:"description,omitempty"`
 	// Status holds the value of the "status" field.
 	Status string `json:"status,omitempty"`
+	// InitType holds the value of the "init_type" field.
+	InitType string `json:"init_type,omitempty"`
+	// WorkflowID holds the value of the "workflow_id" field.
+	WorkflowID string `json:"workflow_id,omitempty"`
 	// Priority holds the value of the "priority" field.
 	Priority string `json:"priority,omitempty"`
 	// HomeRepo holds the value of the "home_repo" field.
@@ -105,7 +109,7 @@ func (*Initiative) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case initiative.FieldSpecs:
 			values[i] = new([]byte)
-		case initiative.FieldID, initiative.FieldOrganization, initiative.FieldTitle, initiative.FieldDescription, initiative.FieldStatus, initiative.FieldPriority, initiative.FieldHomeRepo, initiative.FieldWorkspace:
+		case initiative.FieldID, initiative.FieldOrganization, initiative.FieldTitle, initiative.FieldDescription, initiative.FieldStatus, initiative.FieldInitType, initiative.FieldWorkflowID, initiative.FieldPriority, initiative.FieldHomeRepo, initiative.FieldWorkspace:
 			values[i] = new(sql.NullString)
 		case initiative.FieldCreatedAt, initiative.FieldPlannedAt, initiative.FieldExecutingAt, initiative.FieldDeliveryCompleteAt, initiative.FieldReleasedAt, initiative.FieldClosedAt, initiative.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -155,6 +159,18 @@ func (_m *Initiative) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
 				_m.Status = value.String
+			}
+		case initiative.FieldInitType:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field init_type", values[i])
+			} else if value.Valid {
+				_m.InitType = value.String
+			}
+		case initiative.FieldWorkflowID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field workflow_id", values[i])
+			} else if value.Valid {
+				_m.WorkflowID = value.String
 			}
 		case initiative.FieldPriority:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -298,6 +314,12 @@ func (_m *Initiative) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(_m.Status)
+	builder.WriteString(", ")
+	builder.WriteString("init_type=")
+	builder.WriteString(_m.InitType)
+	builder.WriteString(", ")
+	builder.WriteString("workflow_id=")
+	builder.WriteString(_m.WorkflowID)
 	builder.WriteString(", ")
 	builder.WriteString("priority=")
 	builder.WriteString(_m.Priority)
