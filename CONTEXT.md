@@ -5,11 +5,15 @@
 
 ## Current State
 
-**Initiative Status:** executing (1/21 RMIs completed)
+**Initiative Status:** executing (5/21 RMIs completed)
 
 ### Completed This Session
 
 1. **RMI-PRISMCONTROL-101** — Initiative.type enum field (committed, pushed)
+2. **RMI-PRISMCONTROL-102** — SpecWorkflow entity (committed, pushed)
+3. **RMI-PRISMCONTROL-103** — JudgeRubric entity (committed, pushed)
+4. **RMI-PRISMCONTROL-104** — JudgeResult entity (committed, pushed)
+5. **RMI-PRISMCONTROL-120** — Seed built-in workflows (committed, pushed)
    - Schema: `ent/schema/initiative.go` — added `init_type`, `workflow_id` fields
    - Constants: `pkg/initiative/initiative.go` — TypeFeature/Maintenance/Migration/Compliance/Refactor
    - Store: `pkg/store/store.go`, `pkg/store/doltstore/doltstore.go` — field mappings
@@ -20,14 +24,15 @@
 2. **Cancelled (duplicates INIT-TOKENATTRIB-001):**
    - RMI-105, RMI-106, RMI-110, RMI-111 — token entities/commands already delivered
 
-### Remaining Phase 1 RMIs
+### Phase 1 Complete
 
-| RMI | Title | Status |
-|-----|-------|--------|
-| RMI-102 | Add SpecWorkflow entity | proposed |
-| RMI-103 | Add JudgeRubric entity | proposed |
-| RMI-104 | Add JudgeResult entity | proposed |
-| RMI-120 | Seed built-in spec workflows | proposed |
+All Phase 1 schema RMIs delivered:
+
+- RMI-101: Initiative.type
+- RMI-102: SpecWorkflow entity
+- RMI-103: JudgeRubric entity
+- RMI-104: JudgeResult entity
+- RMI-120: Seed built-in workflows
 
 ### Phase 2-4 Summary
 
@@ -63,69 +68,31 @@ docs/specs/initiatives/{INIT-ID}/
 
 ## Next Steps
 
-### Immediate (Phase 1 completion)
+### Phase 2 — CLI spec commands
 
-1. **RMI-102: SpecWorkflow entity**
-   ```go
-   // ent/schema/specworkflow.go
-   SpecWorkflow {
-       id            string  // "pbhq-lite"
-       name          string
-       description   string
-       specs_required []string  // JSON: ["PLAN.md", "ROADMAP.md"]
-       specs_optional []string  // JSON: ["PRD.md", "TRD.md"]
-       init_types    []string  // JSON: ["refactor", "migration"]
-   }
-   ```
+| RMI | Title |
+|-----|-------|
+| RMI-107 | `prismctl spec init` scaffolds specs from workflow |
+| RMI-108 | `prismctl spec validate` checks specs exist |
+| RMI-109 | `prismctl spec judge` runs LLM evaluation |
+| RMI-112 | Standardize spec path in initiative (canonical path) |
 
-2. **RMI-103: JudgeRubric entity**
-   ```go
-   // FK to SpecWorkflow
-   JudgeRubric {
-       id              string
-       workflow_id     string  // FK
-       spec_type       string  // "PRD.md"
-       criteria        JSON    // scoring dimensions
-       prompt_template string  // LLM prompt
-   }
-   ```
+### Phase 3 — Maturity model
 
-3. **RMI-104: JudgeResult entity**
-   ```go
-   JudgeResult {
-       id              string
-       initiative_id   string  // FK
-       spec_path       string
-       rubric_id       string  // FK
-       score           float
-       rationale       string
-       model           string
-       evaluated_at    time
-   }
-   ```
+| RMI | Title |
+|-----|-------|
+| RMI-113 | Add CapabilityModel entity |
+| RMI-114 | Add MaturityAssessment entity |
+| RMI-115 | `prismctl assess` command |
+| RMI-116 | `prismctl maturity report` command |
 
-4. **RMI-120: Seed workflows**
-   - Add to `pkg/store/doltstore/` or `cmd/prismctl/db.go` init
-   - quick-fix, pbhq-lite, pbhq-standard, aws-working-backwards
-   - Map Initiative.type → default workflow
+### Phase 4 — visionstudio UI extraction
 
-### Files to Create/Modify
-
-```
-ent/schema/
-├── specworkflow.go      # NEW
-├── judgerubric.go       # NEW
-├── judgeresult.go       # NEW
-└── initiative.go        # Add edge to workflow
-
-pkg/store/
-├── store.go             # Add SpecWorkflow, JudgeRubric, JudgeResult types
-└── doltstore/doltstore.go  # Add CRUD for new entities
-
-cmd/prismctl/
-├── workflow.go          # NEW: workflow list/get commands
-└── spec.go              # NEW (Phase 2): spec init/validate/judge
-```
+| RMI | Title |
+|-----|-------|
+| RMI-117 | Extract UI components from visionstudio |
+| RMI-118 | Integrate spend visualization |
+| RMI-119 | Add radar chart for maturity
 
 ## Related Context
 
