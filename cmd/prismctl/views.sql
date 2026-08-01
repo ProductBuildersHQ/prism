@@ -101,3 +101,91 @@ SELECT
 FROM assignments a
 JOIN roadmap_items r ON r.rmi_id = a.roadmap_item_assignments
 WHERE a.status = 'active';
+
+-- ---------------------------------------------------------------------------
+-- Token Attribution Views (TRD §16)
+-- Cross-database views joining devx.token_events with prismcontrol tables.
+-- These require the devx database to be populated via 'prismctl db ingest-tokens'.
+-- ---------------------------------------------------------------------------
+
+-- v_initiative_tokens
+-- Token spend attributed to initiatives via assignment session matching.
+-- Groups by initiative with totals and cost.
+-- ---------------------------------------------------------------------------
+CREATE OR REPLACE VIEW v_initiative_tokens AS
+SELECT
+    i.initiative_id,
+    i.title                                                           AS initiative_title,
+    COUNT(DISTINCT t.event_id)                                        AS event_count,
+    COALESCE(SUM(t.input_tokens), 0)                                  AS input_tokens,
+    COALESCE(SUM(t.output_tokens), 0)                                 AS output_tokens,
+    COALESCE(SUM(t.cache_read_tokens), 0)                             AS cache_read_tokens,
+    COALESCE(SUM(t.cache_creation_tokens), 0)                         AS cache_creation_tokens,
+    COALESCE(SUM(t.input_tokens + t.output_tokens +
+                 t.cache_read_tokens + t.cache_creation_tokens), 0)   AS total_tokens
+FROM prismcontrol.initiatives i
+LEFT JOIN prismcontrol.roadmap_items r
+    ON r.initiative_roadmap_items = i.initiative_id
+LEFT JOIN prismcontrol.assignments a
+    ON a.roadmap_item_assignments = r.rmi_id
+LEFT JOIN devx.token_events t
+    ON t.session_id = a.worker
+    AND t.timestamp >= a.created_at
+    AND (a.completed_at IS NULL OR t.timestamp <= a.completed_at)
+GROUP BY i.initiative_id, i.title;
+
+-- v_rmi_tokens
+-- Token spend per RMI via assignment session matching.
+-- ---------------------------------------------------------------------------
+CREATE OR REPLACE VIEW v_rmi_tokens AS
+SELECT
+    r.rmi_id,
+    r.title                                                           AS rmi_title,
+    r.initiative_roadmap_items                                        AS initiative_id,
+    r.phase_roadmap_items                                             AS phase_id,
+    COUNT(DISTINCT t.event_id)                                        AS event_count,
+    COALESCE(SUM(t.input_tokens), 0)                                  AS input_tokens,
+    COALESCE(SUM(t.output_tokens), 0)                                 AS output_tokens,
+    COALESCE(SUM(t.cache_read_tokens), 0)                             AS cache_read_tokens,
+    COALESCE(SUM(t.cache_creation_tokens), 0)                         AS cache_creation_tokens,
+    COALESCE(SUM(t.input_tokens + t.output_tokens +
+                 t.cache_read_tokens + t.cache_creation_tokens), 0)   AS total_tokens
+FROM prismcontrol.roadmap_items r
+LEFT JOIN prismcontrol.assignments a
+    ON a.roadmap_item_assignments = r.rmi_id
+LEFT JOIN devx.token_events t
+    ON t.session_id = a.worker
+    AND t.timestamp >= a.created_at
+    AND (a.completed_at IS NULL OR t.timestamp <= a.completed_at)
+GROUP BY r.rmi_id, r.title, r.initiative_roadmap_items, r.phase_roadmap_items;
+
+-- v_unattributed_tokens
+-- Token events that don't match any assignment (repository-level or unmanaged).
+-- Useful for identifying coverage gaps.
+-- ---------------------------------------------------------------------------
+CREATE OR REPLACE VIEW v_unattributed_tokens AS
+SELECT
+    t.event_id,
+    t.timestamp,
+    t.session_id,
+    t.workspace,
+    t.model,
+    t.input_tokens,
+    t.output_tokens,
+    t.cache_read_tokens,
+    t.cache_creation_tokens,
+    t.input_tokens + t.output_tokens +
+        t.cache_read_tokens + t.cache_creation_tokens                 AS total_tokens,
+    CASE
+        WHEN repo.repository_id IS NOT NULL THEN 'repository'
+        ELSE 'unmanaged'
+    END                                                               AS attribution_bucket,
+    repo.repository_id
+FROM devx.token_events t
+LEFT JOIN prismcontrol.assignments a
+    ON t.session_id = a.worker
+    AND t.timestamp >= a.created_at
+    AND (a.completed_at IS NULL OR t.timestamp <= a.completed_at)
+LEFT JOIN prismcontrol.repositories repo
+    ON t.workspace LIKE CONCAT(repo.local_path, '%')
+WHERE a.assignment_id IS NULL;

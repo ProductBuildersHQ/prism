@@ -161,6 +161,21 @@ const dashboardCSS = `
     color: var(--accent);
     margin-left: 8px;
   }
+  .hidden-toggle a {
+    display: inline-block;
+    padding: 6px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .hidden-toggle a:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
 
   /* initiative cards */
   .init-cards {
@@ -330,7 +345,7 @@ const dashboardCSS = `
   .rmi-list { padding: 0; }
   .rmi-row {
     display: grid;
-    grid-template-columns: 80px 180px 1fr 90px 90px 70px;
+    grid-template-columns: 80px 180px 1fr 90px 80px 80px;
     gap: 12px;
     padding: 10px 24px 10px 64px;
     align-items: center;
@@ -376,7 +391,7 @@ const dashboardCSS = `
   .rmi-header-cols {
     flex: 1;
     display: grid;
-    grid-template-columns: 80px 180px 1fr 90px 90px 70px;
+    grid-template-columns: 80px 180px 1fr 90px 80px 80px;
     gap: 12px;
   }
   .rmi-header-cols span:nth-child(4),
@@ -423,6 +438,55 @@ const dashboardCSS = `
     font-size: 0.65rem;
     color: var(--text2);
     text-transform: uppercase;
+  }
+
+  /* token/cost display */
+  .token-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: var(--surface2);
+    border: 1px solid #10b981;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    color: #10b981;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+  .cost-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: var(--surface2);
+    border: 1px solid #f59e0b;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    color: #f59e0b;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+  .token-section {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .token-note {
+    font-size: 0.72rem;
+    color: var(--text2);
+    font-style: italic;
+  }
+  .description {
+    font-size: 0.85rem;
+    color: var(--text2);
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+  .init-description {
+    font-size: 0.8rem;
+    color: var(--text2);
+    line-height: 1.4;
+    margin-top: 4px;
   }
 `
 
@@ -524,7 +588,7 @@ const summaryHTML = `<!DOCTYPE html>
     <div class="stat-label">Initiatives</div>
   </div>
   <div class="stat-card">
-    <div class="stat-value">{{ len .Programs }}</div>
+    <div class="stat-value">{{ len .VisiblePrograms }}</div>
     <div class="stat-label">Programs</div>
   </div>
   <div class="stat-card">
@@ -539,7 +603,21 @@ const summaryHTML = `<!DOCTYPE html>
     <div class="stat-value">{{ $totalCompleted }}/{{ $totalRMIs }}</div>
     <div class="stat-label">Completed</div>
   </div>
+  {{- if .TotalTokens }}
+  <div class="stat-card">
+    <div class="stat-value" style="color:#10b981">{{ formatTokens .TotalTokens.TotalTokens }}</div>
+    <div class="stat-label">Total Tokens</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value" style="color:#f59e0b">{{ formatCost .TotalTokens.CostUSD }}</div>
+    <div class="stat-label">Total Cost</div>
+  </div>
+  {{- end }}
 </div>
+
+{{- if .TokenDataNote }}
+<p class="token-note" style="margin-bottom:16px">{{ .TokenDataNote }}</p>
+{{- end }}
 
 {{- if .StatusDist }}
 <div class="chart-card">
@@ -561,12 +639,30 @@ const summaryHTML = `<!DOCTYPE html>
 </div>
 {{- end }}
 
-{{- range .Programs }}
+{{- $hiddenCount := .HiddenProgramCount }}
+{{- if or $hiddenCount .ShowHidden }}
+<div class="hidden-toggle" style="margin-bottom:20px">
+  {{- if .ShowHidden }}
+  <a href="/">&#128065; Hiding {{ $hiddenCount }} hidden program{{ if ne $hiddenCount 1 }}s{{ end }} — click to hide</a>
+  {{- else }}
+  <a href="/?show_hidden=1">&#128065; Show {{ $hiddenCount }} hidden program{{ if ne $hiddenCount 1 }}s{{ end }}</a>
+  {{- end }}
+</div>
+{{- end }}
+
+{{- range .VisiblePrograms }}
 <div style="margin-bottom:32px">
   <h2 class="section-title">
     <a href="/program/{{ .ID }}">{{ .Name }}</a>
     <span class="program-pill">{{ len .Initiatives }} initiatives</span>
     <span class="init-card-id" style="margin-left:8px;vertical-align:middle">{{ .ID }}</span>
+    {{- if .Hidden }}
+    <span class="program-pill" style="background:#ef4444;color:#fff;margin-left:8px">hidden</span>
+    {{- end }}
+    {{- if .Tokens }}
+    <span class="token-badge" style="margin-left:8px">{{ formatTokens .Tokens.TotalTokens }}</span>
+    <span class="cost-badge">{{ formatCost .Tokens.CostUSD }}</span>
+    {{- end }}
   </h2>
   <div class="init-cards">
     {{- range .Initiatives }}
@@ -576,6 +672,9 @@ const summaryHTML = `<!DOCTYPE html>
         <span class="badge" style="background:{{ statusColor .Initiative.Status }}">{{ displayStatus .Initiative.Status }}</span>
       </div>
       <div class="init-card-id">{{ .Initiative.ID }}</div>
+      {{- if .Initiative.Description }}
+      <div class="init-description">{{ .Initiative.Description }}</div>
+      {{- end }}
       <div>
         <div class="progress-bar-bg">
           <div class="progress-bar-fill" style="width:{{ pct .CompletedRMIs .TotalRMIs }}%;background:{{ statusColor "completed" }}"></div>
@@ -587,6 +686,12 @@ const summaryHTML = `<!DOCTYPE html>
         {{- if .Initiative.HomeRepo }}<span>Home: {{ shortRepo .Initiative.HomeRepo }}</span>{{ end }}
         {{- if .Initiative.Workspace }}<span class="workspace-pill">{{ .Initiative.Workspace }}</span>{{ end }}
       </div>
+      {{- if .Tokens }}
+      <div class="token-section">
+        <span class="token-badge">{{ formatTokens .Tokens.TotalTokens }} tokens</span>
+        <span class="cost-badge">{{ formatCost .Tokens.CostUSD }}</span>
+      </div>
+      {{- end }}
       {{- if .Repos }}
       <div class="repo-pills">
         {{- range .Repos }}
@@ -614,6 +719,9 @@ const summaryHTML = `<!DOCTYPE html>
         <span class="badge" style="background:{{ statusColor .Initiative.Status }}">{{ displayStatus .Initiative.Status }}</span>
       </div>
       <div class="init-card-id">{{ .Initiative.ID }}</div>
+      {{- if .Initiative.Description }}
+      <div class="init-description">{{ .Initiative.Description }}</div>
+      {{- end }}
       <div>
         <div class="progress-bar-bg">
           <div class="progress-bar-fill" style="width:{{ pct .CompletedRMIs .TotalRMIs }}%;background:{{ statusColor "completed" }}"></div>
@@ -625,6 +733,12 @@ const summaryHTML = `<!DOCTYPE html>
         {{- if .Initiative.HomeRepo }}<span>Home: {{ shortRepo .Initiative.HomeRepo }}</span>{{ end }}
         {{- if .Initiative.Workspace }}<span class="workspace-pill">{{ .Initiative.Workspace }}</span>{{ end }}
       </div>
+      {{- if .Tokens }}
+      <div class="token-section">
+        <span class="token-badge">{{ formatTokens .Tokens.TotalTokens }} tokens</span>
+        <span class="cost-badge">{{ formatCost .Tokens.CostUSD }}</span>
+      </div>
+      {{- end }}
       {{- if .Repos }}
       <div class="repo-pills">
         {{- range .Repos }}
@@ -699,6 +813,10 @@ const detailHTML = `<!DOCTYPE html>
     </div>
   </div>
 
+  {{- if .Init.Initiative.Description }}
+  <div class="description" style="padding:0 24px 12px">{{ .Init.Initiative.Description }}</div>
+  {{- end }}
+
   {{- if .Init.Repos }}
   <div class="repo-pills" style="padding:16px 24px">
     {{- range .Init.Repos }}
@@ -715,6 +833,12 @@ const detailHTML = `<!DOCTYPE html>
       <div class="progress-bar-fill" style="width:{{ pct .Init.CompletedRMIs .Init.TotalRMIs }}%;background:{{ statusColor "completed" }}"></div>
     </div>
     <div class="progress-text">{{ .Init.CompletedRMIs }}/{{ .Init.TotalRMIs }} RMIs completed ({{ pct .Init.CompletedRMIs .Init.TotalRMIs }}%)</div>
+    {{- if .Init.Tokens }}
+    <div class="token-section" style="margin-top:8px">
+      <span class="token-badge">{{ formatTokens .Init.Tokens.TotalTokens }} tokens</span>
+      <span class="cost-badge">{{ formatCost .Init.Tokens.CostUSD }}</span>
+    </div>
+    {{- end }}
   </div>
 
   {{- if .Init.Phases }}
@@ -728,7 +852,7 @@ const detailHTML = `<!DOCTYPE html>
       <span>Title</span>
       <span>Repo</span>
       <span>Type</span>
-      <span>Req</span>
+      <span>Tokens</span>
     </div>
   </div>
   {{- end }}
@@ -744,6 +868,10 @@ const detailHTML = `<!DOCTYPE html>
       <span class="badge status-tooltip" style="background:{{ statusColor .Status }}" title="{{ $phaseTooltip }}">{{ displayStatus .Status }} {{ .Count }}</span>
       {{- end }}
       <span class="phase-count">{{ len .RMIs }} RMIs</span>
+      {{- if .Tokens }}
+      <span class="token-badge" style="margin-left:auto">{{ formatTokens .Tokens.TotalTokens }}</span>
+      <span class="cost-badge">{{ formatCost .Tokens.CostUSD }}</span>
+      {{- end }}
     </div>
     <div class="rmi-list">
       {{- range .RMIs }}
@@ -753,9 +881,7 @@ const detailHTML = `<!DOCTYPE html>
         <span class="rmi-title">{{ typeIcon .RMI.ItemType | safeHTML }} {{ .RMI.Title }}</span>
         <span class="rmi-repo">{{ shortRepo .RMI.RepositoryID }}</span>
         <span class="rmi-type">{{ .RMI.ItemType }}</span>
-        <span class="rmi-required {{ if .RMI.Required }}required-yes{{ else }}required-no{{ end }}">
-          {{ if .RMI.Required }}yes{{ else }}no{{ end }}
-        </span>
+        <span class="rmi-type">{{ if .Tokens }}{{ formatTokens .Tokens.TotalTokens }}{{ else }}-{{ end }}</span>
       </div>
       {{- end }}
     </div>
@@ -816,6 +942,9 @@ const programHTML = `<!DOCTYPE html>
 
 <h1>{{ .Program.Name }}</h1>
 <div class="init-card-id" style="margin-bottom:4px">{{ .Program.ID }}</div>
+{{- if .Program.Description }}
+<p class="description">{{ .Program.Description }}</p>
+{{- end }}
 <p class="subtitle">{{ len .Program.Initiatives }} initiatives in this program</p>
 
 {{- $totalRMIs := 0 }}
@@ -846,6 +975,16 @@ const programHTML = `<!DOCTYPE html>
     <div class="stat-value">{{ $totalCompleted }}/{{ $totalRMIs }}</div>
     <div class="stat-label">Completed</div>
   </div>
+  {{- if .Program.Tokens }}
+  <div class="stat-card">
+    <div class="stat-value" style="color:#10b981">{{ formatTokens .Program.Tokens.TotalTokens }}</div>
+    <div class="stat-label">Total Tokens</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value" style="color:#f59e0b">{{ formatCost .Program.Tokens.CostUSD }}</div>
+    <div class="stat-label">Total Cost</div>
+  </div>
+  {{- end }}
 </div>
 
 {{- if .InitDeps }}
@@ -882,6 +1021,10 @@ const programHTML = `<!DOCTYPE html>
       {{- end }}
     </div>
   </div>
+
+  {{- if .Initiative.Description }}
+  <div class="description" style="padding:0 24px 12px">{{ .Initiative.Description }}</div>
+  {{- end }}
 
   {{- if .Repos }}
   <div class="repo-pills" style="padding:16px 24px">
@@ -937,9 +1080,7 @@ const programHTML = `<!DOCTYPE html>
         <span class="rmi-title">{{ typeIcon .RMI.ItemType | safeHTML }} {{ .RMI.Title }}</span>
         <span class="rmi-repo">{{ shortRepo .RMI.RepositoryID }}</span>
         <span class="rmi-type">{{ .RMI.ItemType }}</span>
-        <span class="rmi-required {{ if .RMI.Required }}required-yes{{ else }}required-no{{ end }}">
-          {{ if .RMI.Required }}yes{{ else }}no{{ end }}
-        </span>
+        <span class="rmi-type">{{ if .Tokens }}{{ formatTokens .Tokens.TotalTokens }}{{ else }}-{{ end }}</span>
       </div>
       {{- end }}
     </div>

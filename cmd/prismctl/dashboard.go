@@ -18,8 +18,10 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/ProductBuildersHQ/prism-control/pkg/report"
 	"github.com/ProductBuildersHQ/prism-control/pkg/service"
 	"github.com/ProductBuildersHQ/prism-control/pkg/store"
+	"github.com/ProductBuildersHQ/prism-control/pkg/tokens"
 )
 
 func dashboardCmd() *cobra.Command {
@@ -47,6 +49,7 @@ Use --static to write a one-shot HTML file instead (summary only).`,
 	}
 	cmd.Flags().Bool("static", false, "Write a static HTML file instead of running a server")
 	cmd.Flags().Int("port", 9400, "Port for the dashboard server")
+	cmd.Flags().String("data-dir", "", "Path to omnidevx data directory (default: ~/.plexusone/omnidevx/data)")
 	return cmd
 }
 
@@ -57,7 +60,8 @@ func runDashboardStatic(cmd *cobra.Command) error {
 	}
 	defer cleanup()
 
-	data, err := loadDashboardData(cmd.Context(), svc)
+	dataDir, _ := cmd.Flags().GetString("data-dir")
+	data, err := loadDashboardData(cmd.Context(), svc, dataDir)
 	if err != nil {
 		return err
 	}
@@ -99,16 +103,20 @@ func runDashboardServer(cmd *cobra.Command, port int) error {
 		}
 	}
 
+	dataDir, _ := cmd.Flags().GetString("data-dir")
+
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
 			http.NotFound(w, r)
 			return
 		}
+		showHidden := r.URL.Query().Get("show_hidden") == "1"
 		serve(w, r, func(svc *service.Service) ([]byte, error) {
-			data, err := loadDashboardData(r.Context(), svc)
+			data, err := loadDashboardData(r.Context(), svc, dataDir)
 			if err != nil {
 				return nil, err
 			}
+			data.ShowHidden = showHidden
 			return renderSummary(data)
 		})
 	})
@@ -120,7 +128,7 @@ func runDashboardServer(cmd *cobra.Command, port int) error {
 			return
 		}
 		serve(w, r, func(svc *service.Service) ([]byte, error) {
-			data, err := loadDashboardData(r.Context(), svc)
+			data, err := loadDashboardData(r.Context(), svc, dataDir)
 			if err != nil {
 				return nil, err
 			}
@@ -135,7 +143,7 @@ func runDashboardServer(cmd *cobra.Command, port int) error {
 			return
 		}
 		serve(w, r, func(svc *service.Service) ([]byte, error) {
-			data, err := loadDashboardData(r.Context(), svc)
+			data, err := loadDashboardData(r.Context(), svc, dataDir)
 			if err != nil {
 				return nil, err
 			}
@@ -180,11 +188,13 @@ type dashboardRMI struct {
 	ClaimedAt string
 	ClaimedBy string
 	Tooltip   string
+	Tokens    *report.TokenTotals // nil if no token data
 }
 
 type phaseData struct {
-	Phase *store.Phase
-	RMIs  []dashboardRMI
+	Phase  *store.Phase
+	RMIs   []dashboardRMI
+	Tokens *report.TokenTotals // nil if no token data
 }
 
 type repoCount struct {
@@ -199,21 +209,58 @@ type initData struct {
 	Repos         []repoCount
 	TotalRMIs     int
 	CompletedRMIs int
+	Tokens        *report.TokenTotals // nil if no token data
 }
 
 type programData struct {
 	ID          string
 	Name        string
+	Description string
+	Hidden      bool
 	Initiatives []initData
+	Tokens      *report.TokenTotals // nil if no token data
 }
 
 type dashboardData struct {
-	Initiatives []initData
-	Programs    []programData
-	Standalone  []initData
-	AllDeps     []*store.RMIDependency
-	InitDeps    []*store.InitiativeDependency
-	StatusDist  []statusCount
+	Initiatives   []initData
+	Programs      []programData
+	Standalone    []initData
+	AllDeps       []*store.RMIDependency
+	InitDeps      []*store.InitiativeDependency
+	StatusDist    []statusCount
+	TotalTokens   *report.TokenTotals // nil if no token data
+	HasTokenData  bool
+	TokenDataNote string // e.g., "No omnidevx data found"
+
+	// ShowHidden, when true, reveals programs flagged Hidden on the homepage.
+	// Set per-request from the ?show_hidden query param.
+	ShowHidden bool
+}
+
+// VisiblePrograms returns the programs shown on the homepage: all of them when
+// ShowHidden is set, otherwise only those not flagged Hidden.
+func (d *dashboardData) VisiblePrograms() []programData {
+	if d.ShowHidden {
+		return d.Programs
+	}
+	visible := make([]programData, 0, len(d.Programs))
+	for _, p := range d.Programs {
+		if !p.Hidden {
+			visible = append(visible, p)
+		}
+	}
+	return visible
+}
+
+// HiddenProgramCount reports how many programs are flagged Hidden.
+func (d *dashboardData) HiddenProgramCount() int {
+	n := 0
+	for _, p := range d.Programs {
+		if p.Hidden {
+			n++
+		}
+	}
+	return n
 }
 
 type statusCount struct {
@@ -221,7 +268,7 @@ type statusCount struct {
 	Count  int
 }
 
-func loadDashboardData(ctx context.Context, svc *service.Service) (*dashboardData, error) {
+func loadDashboardData(ctx context.Context, svc *service.Service, dataDir string) (*dashboardData, error) {
 	initiatives, err := svc.Store.ListInitiatives(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("list initiatives: %w", err)
@@ -237,6 +284,44 @@ func loadDashboardData(ctx context.Context, svc *service.Service) (*dashboardDat
 		if !ok || a.CreatedAt.After(existing.CreatedAt) {
 			assignmentsByRMI[a.RMIID] = a
 		}
+	}
+
+	// Load token data if available
+	tokenReports := make(map[string]*report.TokenReport) // by initiative ID
+	var totalTokens *report.TokenTotals
+	hasTokenData := false
+	tokenDataNote := ""
+
+	tokenSource, err := tokens.NewJSONLSource(dataDir)
+	if err == nil {
+		// Check if data directory exists
+		eventsDir := filepath.Join(tokenSource.Dir, "events")
+		if _, statErr := os.Stat(eventsDir); statErr == nil {
+			hasTokenData = true
+			// Load token report for each initiative
+			for _, init := range initiatives {
+				tr, trErr := report.GenerateInitiativeTokenReport(ctx, svc.Store, tokenSource, init.ID)
+				if trErr == nil && tr.Totals.TotalTokens > 0 {
+					tokenReports[init.ID] = tr
+				}
+			}
+			// Calculate totals
+			if len(tokenReports) > 0 {
+				totalTokens = &report.TokenTotals{}
+				for _, tr := range tokenReports {
+					totalTokens.InputTokens += tr.Totals.InputTokens
+					totalTokens.OutputTokens += tr.Totals.OutputTokens
+					totalTokens.CacheReadTokens += tr.Totals.CacheReadTokens
+					totalTokens.CacheCreationTokens += tr.Totals.CacheCreationTokens
+					totalTokens.TotalTokens += tr.Totals.TotalTokens
+					totalTokens.CostUSD += tr.Totals.CostUSD
+				}
+			}
+		} else {
+			tokenDataNote = "No omnidevx events directory found"
+		}
+	} else {
+		tokenDataNote = "Token data unavailable"
 	}
 
 	globalStatusCounts := map[string]int{}
@@ -256,6 +341,28 @@ func loadDashboardData(ctx context.Context, svc *service.Service) (*dashboardDat
 			return nil, fmt.Errorf("list rmis for %s: %w", init.ID, err)
 		}
 
+		// Build RMI token lookup from token report
+		rmiTokens := make(map[string]*report.TokenTotals)
+		phaseTokens := make(map[string]*report.TokenTotals)
+		var initTokens *report.TokenTotals
+		if tr, ok := tokenReports[init.ID]; ok {
+			initTokens = &tr.Totals
+			for _, rmiT := range tr.ByRMI {
+				t := rmiT.Totals // copy
+				rmiTokens[rmiT.RMIID] = &t
+				// Aggregate to phase
+				if phaseTokens[rmiT.PhaseID] == nil {
+					phaseTokens[rmiT.PhaseID] = &report.TokenTotals{}
+				}
+				phaseTokens[rmiT.PhaseID].InputTokens += t.InputTokens
+				phaseTokens[rmiT.PhaseID].OutputTokens += t.OutputTokens
+				phaseTokens[rmiT.PhaseID].CacheReadTokens += t.CacheReadTokens
+				phaseTokens[rmiT.PhaseID].CacheCreationTokens += t.CacheCreationTokens
+				phaseTokens[rmiT.PhaseID].TotalTokens += t.TotalTokens
+				phaseTokens[rmiT.PhaseID].CostUSD += t.CostUSD
+			}
+		}
+
 		repoCounts := map[string]int{}
 		rmisByPhase := map[string][]dashboardRMI{}
 		totalRMIs := 0
@@ -267,7 +374,7 @@ func loadDashboardData(ctx context.Context, svc *service.Service) (*dashboardDat
 				completedRMIs++
 			}
 			repoCounts[r.RepositoryID]++
-			rd := dashboardRMI{RMI: r}
+			rd := dashboardRMI{RMI: r, Tokens: rmiTokens[r.ID]}
 			if a, ok := assignmentsByRMI[r.ID]; ok {
 				rd.ClaimedAt = a.CreatedAt.Format("2006-01-02 15:04")
 				rd.ClaimedBy = a.Worker
@@ -302,7 +409,7 @@ func loadDashboardData(ctx context.Context, svc *service.Service) (*dashboardDat
 
 		var pds []phaseData
 		for _, p := range phases {
-			pds = append(pds, phaseData{Phase: p, RMIs: rmisByPhase[p.ID]})
+			pds = append(pds, phaseData{Phase: p, RMIs: rmisByPhase[p.ID], Tokens: phaseTokens[p.ID]})
 		}
 		allInits = append(allInits, initData{
 			Initiative:    init,
@@ -310,6 +417,7 @@ func loadDashboardData(ctx context.Context, svc *service.Service) (*dashboardDat
 			Repos:         repos,
 			TotalRMIs:     totalRMIs,
 			CompletedRMIs: completedRMIs,
+			Tokens:        initTokens,
 		})
 	}
 
@@ -355,10 +463,29 @@ func loadDashboardData(ctx context.Context, svc *service.Service) (*dashboardDat
 	var programs []programData
 	for pid, inits := range progInitMap {
 		name := pid
+		description := ""
+		hidden := false
 		if p, ok := programByID[pid]; ok {
 			name = p.Name
+			description = p.Description
+			hidden = p.Hidden
 		}
-		programs = append(programs, programData{ID: pid, Name: name, Initiatives: inits})
+		// Aggregate tokens for program
+		var progTokens *report.TokenTotals
+		for _, ini := range inits {
+			if ini.Tokens != nil {
+				if progTokens == nil {
+					progTokens = &report.TokenTotals{}
+				}
+				progTokens.InputTokens += ini.Tokens.InputTokens
+				progTokens.OutputTokens += ini.Tokens.OutputTokens
+				progTokens.CacheReadTokens += ini.Tokens.CacheReadTokens
+				progTokens.CacheCreationTokens += ini.Tokens.CacheCreationTokens
+				progTokens.TotalTokens += ini.Tokens.TotalTokens
+				progTokens.CostUSD += ini.Tokens.CostUSD
+			}
+		}
+		programs = append(programs, programData{ID: pid, Name: name, Description: description, Hidden: hidden, Initiatives: inits, Tokens: progTokens})
 	}
 	sort.Slice(programs, func(i, j int) bool {
 		return programs[i].Name < programs[j].Name
@@ -376,12 +503,15 @@ func loadDashboardData(ctx context.Context, svc *service.Service) (*dashboardDat
 	})
 
 	return &dashboardData{
-		Initiatives: allInits,
-		Programs:    programs,
-		Standalone:  standalone,
-		AllDeps:     allDeps,
-		InitDeps:    initDeps,
-		StatusDist:  statusDist,
+		Initiatives:   allInits,
+		Programs:      programs,
+		Standalone:    standalone,
+		AllDeps:       allDeps,
+		InitDeps:      initDeps,
+		StatusDist:    statusDist,
+		TotalTokens:   totalTokens,
+		HasTokenData:  hasTokenData,
+		TokenDataNote: tokenDataNote,
 	}, nil
 }
 
@@ -402,7 +532,9 @@ var tmplFuncs = template.FuncMap{
 		}
 		return num * 100 / denom
 	},
-	"urlEncode": url.PathEscape,
+	"urlEncode":    url.PathEscape,
+	"formatTokens": formatTokens,
+	"formatCost":   formatCost,
 }
 
 func statusColor(status string) string {
@@ -496,6 +628,35 @@ func shortRepo(repoID string) string {
 		return parts[len(parts)-1]
 	}
 	return repoID
+}
+
+func formatTokens(n int64) string {
+	if n == 0 {
+		return "-"
+	}
+	if n >= 1_000_000_000 {
+		return fmt.Sprintf("%.1fB", float64(n)/1_000_000_000)
+	}
+	if n >= 1_000_000 {
+		return fmt.Sprintf("%.1fM", float64(n)/1_000_000)
+	}
+	if n >= 1_000 {
+		return fmt.Sprintf("%.1fK", float64(n)/1_000)
+	}
+	return fmt.Sprintf("%d", n)
+}
+
+func formatCost(usd float64) string {
+	if usd == 0 {
+		return "-"
+	}
+	if usd >= 1000 {
+		return fmt.Sprintf("$%.1fK", usd/1000)
+	}
+	if usd >= 1 {
+		return fmt.Sprintf("$%.2f", usd)
+	}
+	return fmt.Sprintf("$%.4f", usd)
 }
 
 func openBrowser(u string) error {
