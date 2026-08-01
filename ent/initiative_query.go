@@ -17,6 +17,7 @@ import (
 	"github.com/ProductBuildersHQ/prism-control/ent/predicate"
 	"github.com/ProductBuildersHQ/prism-control/ent/program"
 	"github.com/ProductBuildersHQ/prism-control/ent/roadmapitem"
+	"github.com/ProductBuildersHQ/prism-control/ent/specworkflow"
 )
 
 // InitiativeQuery is the builder for querying Initiative entities.
@@ -29,6 +30,7 @@ type InitiativeQuery struct {
 	withPhases       *PhaseQuery
 	withRoadmapItems *RoadmapItemQuery
 	withProgram      *ProgramQuery
+	withWorkflow     *SpecWorkflowQuery
 	withFKs          bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -125,6 +127,28 @@ func (_q *InitiativeQuery) QueryProgram() *ProgramQuery {
 			sqlgraph.From(initiative.Table, initiative.FieldID, selector),
 			sqlgraph.To(program.Table, program.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, initiative.ProgramTable, initiative.ProgramColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryWorkflow chains the current query on the "workflow" edge.
+func (_q *InitiativeQuery) QueryWorkflow() *SpecWorkflowQuery {
+	query := (&SpecWorkflowClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(initiative.Table, initiative.FieldID, selector),
+			sqlgraph.To(specworkflow.Table, specworkflow.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, initiative.WorkflowTable, initiative.WorkflowColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -327,6 +351,7 @@ func (_q *InitiativeQuery) Clone() *InitiativeQuery {
 		withPhases:       _q.withPhases.Clone(),
 		withRoadmapItems: _q.withRoadmapItems.Clone(),
 		withProgram:      _q.withProgram.Clone(),
+		withWorkflow:     _q.withWorkflow.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -363,6 +388,17 @@ func (_q *InitiativeQuery) WithProgram(opts ...func(*ProgramQuery)) *InitiativeQ
 		opt(query)
 	}
 	_q.withProgram = query
+	return _q
+}
+
+// WithWorkflow tells the query-builder to eager-load the nodes that are connected to
+// the "workflow" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *InitiativeQuery) WithWorkflow(opts ...func(*SpecWorkflowQuery)) *InitiativeQuery {
+	query := (&SpecWorkflowClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withWorkflow = query
 	return _q
 }
 
@@ -445,13 +481,14 @@ func (_q *InitiativeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*I
 		nodes       = []*Initiative{}
 		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [4]bool{
 			_q.withPhases != nil,
 			_q.withRoadmapItems != nil,
 			_q.withProgram != nil,
+			_q.withWorkflow != nil,
 		}
 	)
-	if _q.withProgram != nil {
+	if _q.withProgram != nil || _q.withWorkflow != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -492,6 +529,12 @@ func (_q *InitiativeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*I
 	if query := _q.withProgram; query != nil {
 		if err := _q.loadProgram(ctx, query, nodes, nil,
 			func(n *Initiative, e *Program) { n.Edges.Program = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withWorkflow; query != nil {
+		if err := _q.loadWorkflow(ctx, query, nodes, nil,
+			func(n *Initiative, e *SpecWorkflow) { n.Edges.Workflow = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -585,6 +628,38 @@ func (_q *InitiativeQuery) loadProgram(ctx context.Context, query *ProgramQuery,
 		nodes, ok := nodeids[n.ID]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "program_initiatives" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (_q *InitiativeQuery) loadWorkflow(ctx context.Context, query *SpecWorkflowQuery, nodes []*Initiative, init func(*Initiative), assign func(*Initiative, *SpecWorkflow)) error {
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*Initiative)
+	for i := range nodes {
+		if nodes[i].spec_workflow_initiatives == nil {
+			continue
+		}
+		fk := *nodes[i].spec_workflow_initiatives
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(specworkflow.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "spec_workflow_initiatives" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

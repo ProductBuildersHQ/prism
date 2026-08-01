@@ -50,6 +50,7 @@ func rootCmd() *cobra.Command {
 		dashboardCmd(),
 		roadmapCmd(),
 		releaseCmd(),
+		workflowCmd(),
 	)
 	return cmd
 }

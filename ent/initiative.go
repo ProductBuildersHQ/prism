@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/ProductBuildersHQ/prism-control/ent/initiative"
 	"github.com/ProductBuildersHQ/prism-control/ent/program"
+	"github.com/ProductBuildersHQ/prism-control/ent/specworkflow"
 )
 
 // Initiative is the model entity for the Initiative schema.
@@ -29,8 +30,6 @@ type Initiative struct {
 	Status string `json:"status,omitempty"`
 	// InitType holds the value of the "init_type" field.
 	InitType string `json:"init_type,omitempty"`
-	// WorkflowID holds the value of the "workflow_id" field.
-	WorkflowID string `json:"workflow_id,omitempty"`
 	// Priority holds the value of the "priority" field.
 	Priority string `json:"priority,omitempty"`
 	// HomeRepo holds the value of the "home_repo" field.
@@ -55,9 +54,10 @@ type Initiative struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the InitiativeQuery when eager-loading is set.
-	Edges               InitiativeEdges `json:"edges"`
-	program_initiatives *string
-	selectValues        sql.SelectValues
+	Edges                     InitiativeEdges `json:"edges"`
+	program_initiatives       *string
+	spec_workflow_initiatives *string
+	selectValues              sql.SelectValues
 }
 
 // InitiativeEdges holds the relations/edges for other nodes in the graph.
@@ -68,9 +68,11 @@ type InitiativeEdges struct {
 	RoadmapItems []*RoadmapItem `json:"roadmap_items,omitempty"`
 	// Program holds the value of the program edge.
 	Program *Program `json:"program,omitempty"`
+	// Workflow holds the value of the workflow edge.
+	Workflow *SpecWorkflow `json:"workflow,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // PhasesOrErr returns the Phases value or an error if the edge
@@ -102,6 +104,17 @@ func (e InitiativeEdges) ProgramOrErr() (*Program, error) {
 	return nil, &NotLoadedError{edge: "program"}
 }
 
+// WorkflowOrErr returns the Workflow value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e InitiativeEdges) WorkflowOrErr() (*SpecWorkflow, error) {
+	if e.Workflow != nil {
+		return e.Workflow, nil
+	} else if e.loadedTypes[3] {
+		return nil, &NotFoundError{label: specworkflow.Label}
+	}
+	return nil, &NotLoadedError{edge: "workflow"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Initiative) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -109,11 +122,13 @@ func (*Initiative) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case initiative.FieldSpecs:
 			values[i] = new([]byte)
-		case initiative.FieldID, initiative.FieldOrganization, initiative.FieldTitle, initiative.FieldDescription, initiative.FieldStatus, initiative.FieldInitType, initiative.FieldWorkflowID, initiative.FieldPriority, initiative.FieldHomeRepo, initiative.FieldWorkspace:
+		case initiative.FieldID, initiative.FieldOrganization, initiative.FieldTitle, initiative.FieldDescription, initiative.FieldStatus, initiative.FieldInitType, initiative.FieldPriority, initiative.FieldHomeRepo, initiative.FieldWorkspace:
 			values[i] = new(sql.NullString)
 		case initiative.FieldCreatedAt, initiative.FieldPlannedAt, initiative.FieldExecutingAt, initiative.FieldDeliveryCompleteAt, initiative.FieldReleasedAt, initiative.FieldClosedAt, initiative.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case initiative.ForeignKeys[0]: // program_initiatives
+			values[i] = new(sql.NullString)
+		case initiative.ForeignKeys[1]: // spec_workflow_initiatives
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -165,12 +180,6 @@ func (_m *Initiative) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field init_type", values[i])
 			} else if value.Valid {
 				_m.InitType = value.String
-			}
-		case initiative.FieldWorkflowID:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field workflow_id", values[i])
-			} else if value.Valid {
-				_m.WorkflowID = value.String
 			}
 		case initiative.FieldPriority:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -252,6 +261,13 @@ func (_m *Initiative) assignValues(columns []string, values []any) error {
 				_m.program_initiatives = new(string)
 				*_m.program_initiatives = value.String
 			}
+		case initiative.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field spec_workflow_initiatives", values[i])
+			} else if value.Valid {
+				_m.spec_workflow_initiatives = new(string)
+				*_m.spec_workflow_initiatives = value.String
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -278,6 +294,11 @@ func (_m *Initiative) QueryRoadmapItems() *RoadmapItemQuery {
 // QueryProgram queries the "program" edge of the Initiative entity.
 func (_m *Initiative) QueryProgram() *ProgramQuery {
 	return NewInitiativeClient(_m.config).QueryProgram(_m)
+}
+
+// QueryWorkflow queries the "workflow" edge of the Initiative entity.
+func (_m *Initiative) QueryWorkflow() *SpecWorkflowQuery {
+	return NewInitiativeClient(_m.config).QueryWorkflow(_m)
 }
 
 // Update returns a builder for updating this Initiative.
@@ -317,9 +338,6 @@ func (_m *Initiative) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("init_type=")
 	builder.WriteString(_m.InitType)
-	builder.WriteString(", ")
-	builder.WriteString("workflow_id=")
-	builder.WriteString(_m.WorkflowID)
 	builder.WriteString(", ")
 	builder.WriteString("priority=")
 	builder.WriteString(_m.Priority)

@@ -18,6 +18,12 @@ type Initiative func(*sql.Selector)
 // InitiativeDependency is the predicate function for initiativedependency builders.
 type InitiativeDependency func(*sql.Selector)
 
+// JudgeResult is the predicate function for judgeresult builders.
+type JudgeResult func(*sql.Selector)
+
+// JudgeRubric is the predicate function for judgerubric builders.
+type JudgeRubric func(*sql.Selector)
+
 // Phase is the predicate function for phase builders.
 type Phase func(*sql.Selector)
 
@@ -35,3 +41,6 @@ type RepositoryDependency func(*sql.Selector)
 
 // RoadmapItem is the predicate function for roadmapitem builders.
 type RoadmapItem func(*sql.Selector)
+
+// SpecWorkflow is the predicate function for specworkflow builders.
+type SpecWorkflow func(*sql.Selector)

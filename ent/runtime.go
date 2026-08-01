@@ -7,6 +7,8 @@ import (
 	"github.com/ProductBuildersHQ/prism-control/ent/deliveryevidence"
 	"github.com/ProductBuildersHQ/prism-control/ent/initiative"
 	"github.com/ProductBuildersHQ/prism-control/ent/initiativedependency"
+	"github.com/ProductBuildersHQ/prism-control/ent/judgeresult"
+	"github.com/ProductBuildersHQ/prism-control/ent/judgerubric"
 	"github.com/ProductBuildersHQ/prism-control/ent/phase"
 	"github.com/ProductBuildersHQ/prism-control/ent/program"
 	"github.com/ProductBuildersHQ/prism-control/ent/repository"
@@ -14,6 +16,7 @@ import (
 	"github.com/ProductBuildersHQ/prism-control/ent/rmidependency"
 	"github.com/ProductBuildersHQ/prism-control/ent/roadmapitem"
 	"github.com/ProductBuildersHQ/prism-control/ent/schema"
+	"github.com/ProductBuildersHQ/prism-control/ent/specworkflow"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -80,20 +83,16 @@ func init() {
 	initiative.DefaultInitType = initiativeDescInitType.Default.(string)
 	// initiative.InitTypeValidator is a validator for the "init_type" field. It is called by the builders before save.
 	initiative.InitTypeValidator = initiativeDescInitType.Validators[0].(func(string) error)
-	// initiativeDescWorkflowID is the schema descriptor for workflow_id field.
-	initiativeDescWorkflowID := initiativeFields[6].Descriptor()
-	// initiative.WorkflowIDValidator is a validator for the "workflow_id" field. It is called by the builders before save.
-	initiative.WorkflowIDValidator = initiativeDescWorkflowID.Validators[0].(func(string) error)
 	// initiativeDescPriority is the schema descriptor for priority field.
-	initiativeDescPriority := initiativeFields[7].Descriptor()
+	initiativeDescPriority := initiativeFields[6].Descriptor()
 	// initiative.PriorityValidator is a validator for the "priority" field. It is called by the builders before save.
 	initiative.PriorityValidator = initiativeDescPriority.Validators[0].(func(string) error)
 	// initiativeDescHomeRepo is the schema descriptor for home_repo field.
-	initiativeDescHomeRepo := initiativeFields[8].Descriptor()
+	initiativeDescHomeRepo := initiativeFields[7].Descriptor()
 	// initiative.HomeRepoValidator is a validator for the "home_repo" field. It is called by the builders before save.
 	initiative.HomeRepoValidator = initiativeDescHomeRepo.Validators[0].(func(string) error)
 	// initiativeDescWorkspace is the schema descriptor for workspace field.
-	initiativeDescWorkspace := initiativeFields[9].Descriptor()
+	initiativeDescWorkspace := initiativeFields[8].Descriptor()
 	// initiative.WorkspaceValidator is a validator for the "workspace" field. It is called by the builders before save.
 	initiative.WorkspaceValidator = initiativeDescWorkspace.Validators[0].(func(string) error)
 	// initiativeDescID is the schema descriptor for id field.
@@ -114,6 +113,34 @@ func init() {
 	initiativedependencyDescRelationship := initiativedependencyFields[2].Descriptor()
 	// initiativedependency.RelationshipValidator is a validator for the "relationship" field. It is called by the builders before save.
 	initiativedependency.RelationshipValidator = initiativedependencyDescRelationship.Validators[0].(func(string) error)
+	judgeresultFields := schema.JudgeResult{}.Fields()
+	_ = judgeresultFields
+	// judgeresultDescInitiativeID is the schema descriptor for initiative_id field.
+	judgeresultDescInitiativeID := judgeresultFields[1].Descriptor()
+	// judgeresult.InitiativeIDValidator is a validator for the "initiative_id" field. It is called by the builders before save.
+	judgeresult.InitiativeIDValidator = judgeresultDescInitiativeID.Validators[0].(func(string) error)
+	// judgeresultDescSpecPath is the schema descriptor for spec_path field.
+	judgeresultDescSpecPath := judgeresultFields[2].Descriptor()
+	// judgeresult.SpecPathValidator is a validator for the "spec_path" field. It is called by the builders before save.
+	judgeresult.SpecPathValidator = judgeresultDescSpecPath.Validators[0].(func(string) error)
+	// judgeresultDescModel is the schema descriptor for model field.
+	judgeresultDescModel := judgeresultFields[5].Descriptor()
+	// judgeresult.ModelValidator is a validator for the "model" field. It is called by the builders before save.
+	judgeresult.ModelValidator = judgeresultDescModel.Validators[0].(func(string) error)
+	// judgeresultDescID is the schema descriptor for id field.
+	judgeresultDescID := judgeresultFields[0].Descriptor()
+	// judgeresult.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	judgeresult.IDValidator = judgeresultDescID.Validators[0].(func(string) error)
+	judgerubricFields := schema.JudgeRubric{}.Fields()
+	_ = judgerubricFields
+	// judgerubricDescSpecType is the schema descriptor for spec_type field.
+	judgerubricDescSpecType := judgerubricFields[1].Descriptor()
+	// judgerubric.SpecTypeValidator is a validator for the "spec_type" field. It is called by the builders before save.
+	judgerubric.SpecTypeValidator = judgerubricDescSpecType.Validators[0].(func(string) error)
+	// judgerubricDescID is the schema descriptor for id field.
+	judgerubricDescID := judgerubricFields[0].Descriptor()
+	// judgerubric.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	judgerubric.IDValidator = judgerubricDescID.Validators[0].(func(string) error)
 	phaseFields := schema.Phase{}.Fields()
 	_ = phaseFields
 	// phaseDescTitle is the schema descriptor for title field.
@@ -240,4 +267,14 @@ func init() {
 	roadmapitemDescID := roadmapitemFields[0].Descriptor()
 	// roadmapitem.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	roadmapitem.IDValidator = roadmapitemDescID.Validators[0].(func(string) error)
+	specworkflowFields := schema.SpecWorkflow{}.Fields()
+	_ = specworkflowFields
+	// specworkflowDescName is the schema descriptor for name field.
+	specworkflowDescName := specworkflowFields[1].Descriptor()
+	// specworkflow.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	specworkflow.NameValidator = specworkflowDescName.Validators[0].(func(string) error)
+	// specworkflowDescID is the schema descriptor for id field.
+	specworkflowDescID := specworkflowFields[0].Descriptor()
+	// specworkflow.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	specworkflow.IDValidator = specworkflowDescID.Validators[0].(func(string) error)
 }

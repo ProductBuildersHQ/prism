@@ -9,17 +9,20 @@ import (
 // MemStore is an in-memory Store implementation for unit testing.
 // It is safe for concurrent use.
 type MemStore struct {
-	mu           sync.RWMutex
-	programs     map[string]*Program
-	initiatives  map[string]*Initiative
-	phases       map[string]*Phase
-	rmis         map[string]*RoadmapItem
-	deps         []*RMIDependency
-	initDeps     []*InitiativeDependency
-	assignments  map[string]*Assignment
-	evidence     map[string]*DeliveryEvidence
-	repositories map[string]*Repository
-	repoDeps     []*RepositoryDependency
+	mu            sync.RWMutex
+	programs      map[string]*Program
+	initiatives   map[string]*Initiative
+	phases        map[string]*Phase
+	rmis          map[string]*RoadmapItem
+	deps          []*RMIDependency
+	initDeps      []*InitiativeDependency
+	assignments   map[string]*Assignment
+	evidence      map[string]*DeliveryEvidence
+	repositories  map[string]*Repository
+	repoDeps      []*RepositoryDependency
+	workflows     map[string]*SpecWorkflow
+	judgeRubrics  map[string]*JudgeRubric
+	judgeResults  map[string]*JudgeResult
 }
 
 // NewMemStore creates a new in-memory store.
@@ -32,6 +35,9 @@ func NewMemStore() *MemStore {
 		assignments:  make(map[string]*Assignment),
 		evidence:     make(map[string]*DeliveryEvidence),
 		repositories: make(map[string]*Repository),
+		workflows:    make(map[string]*SpecWorkflow),
+		judgeRubrics: make(map[string]*JudgeRubric),
+		judgeResults: make(map[string]*JudgeResult),
 	}
 }
 
@@ -486,6 +492,112 @@ func (m *MemStore) ListAllRepoDependencies(_ context.Context) ([]*RepositoryDepe
 	defer m.mu.RUnlock()
 	result := make([]*RepositoryDependency, len(m.repoDeps))
 	copy(result, m.repoDeps)
+	return result, nil
+}
+
+// ---------------------------------------------------------------------------
+// SpecWorkflow CRUD
+// ---------------------------------------------------------------------------
+
+func (m *MemStore) CreateSpecWorkflow(_ context.Context, wf *SpecWorkflow) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if _, exists := m.workflows[wf.ID]; exists {
+		return fmt.Errorf("spec workflow %s already exists", wf.ID)
+	}
+	m.workflows[wf.ID] = wf
+	return nil
+}
+
+func (m *MemStore) GetSpecWorkflow(_ context.Context, id string) (*SpecWorkflow, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	wf, ok := m.workflows[id]
+	if !ok {
+		return nil, fmt.Errorf("spec workflow %s not found", id)
+	}
+	return wf, nil
+}
+
+func (m *MemStore) ListSpecWorkflows(_ context.Context) ([]*SpecWorkflow, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	result := make([]*SpecWorkflow, 0, len(m.workflows))
+	for _, v := range m.workflows {
+		result = append(result, v)
+	}
+	return result, nil
+}
+
+func (m *MemStore) UpdateSpecWorkflow(_ context.Context, wf *SpecWorkflow) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if _, exists := m.workflows[wf.ID]; !exists {
+		return fmt.Errorf("spec workflow %s not found", wf.ID)
+	}
+	m.workflows[wf.ID] = wf
+	return nil
+}
+
+// ---------------------------------------------------------------------------
+// JudgeRubric CRUD
+// ---------------------------------------------------------------------------
+
+func (m *MemStore) CreateJudgeRubric(_ context.Context, rubric *JudgeRubric) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if _, exists := m.judgeRubrics[rubric.ID]; exists {
+		return fmt.Errorf("judge rubric %s already exists", rubric.ID)
+	}
+	m.judgeRubrics[rubric.ID] = rubric
+	return nil
+}
+
+func (m *MemStore) GetJudgeRubric(_ context.Context, id string) (*JudgeRubric, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	rubric, ok := m.judgeRubrics[id]
+	if !ok {
+		return nil, fmt.Errorf("judge rubric %s not found", id)
+	}
+	return rubric, nil
+}
+
+func (m *MemStore) ListJudgeRubrics(_ context.Context, workflowID string) ([]*JudgeRubric, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	var result []*JudgeRubric
+	for _, r := range m.judgeRubrics {
+		if workflowID == "" || r.WorkflowID == workflowID {
+			result = append(result, r)
+		}
+	}
+	return result, nil
+}
+
+// ---------------------------------------------------------------------------
+// JudgeResult CRUD
+// ---------------------------------------------------------------------------
+
+func (m *MemStore) CreateJudgeResult(_ context.Context, result *JudgeResult) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if _, exists := m.judgeResults[result.ID]; exists {
+		return fmt.Errorf("judge result %s already exists", result.ID)
+	}
+	m.judgeResults[result.ID] = result
+	return nil
+}
+
+func (m *MemStore) ListJudgeResults(_ context.Context, initiativeID string) ([]*JudgeResult, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	var result []*JudgeResult
+	for _, r := range m.judgeResults {
+		if r.InitiativeID == initiativeID {
+			result = append(result, r)
+		}
+	}
 	return result, nil
 }
 

@@ -24,8 +24,11 @@ import (
 	"github.com/ProductBuildersHQ/prism-control/ent/phase"
 	"github.com/ProductBuildersHQ/prism-control/ent/repository"
 	"github.com/ProductBuildersHQ/prism-control/ent/repositorydependency"
+	"github.com/ProductBuildersHQ/prism-control/ent/judgeresult"
+	"github.com/ProductBuildersHQ/prism-control/ent/judgerubric"
 	"github.com/ProductBuildersHQ/prism-control/ent/rmidependency"
 	"github.com/ProductBuildersHQ/prism-control/ent/roadmapitem"
+	"github.com/ProductBuildersHQ/prism-control/ent/specworkflow"
 	"github.com/ProductBuildersHQ/prism-control/pkg/store"
 )
 
@@ -1099,6 +1102,187 @@ func (d *DoltStore) ListAllRepoDependencies(ctx context.Context) ([]*store.Repos
 			SourceRepositoryID: r.SourceRepositoryID,
 			TargetRepositoryID: r.TargetRepositoryID,
 			DependencyType:     r.DependencyType,
+		}
+	}
+	return result, nil
+}
+
+// ---------------------------------------------------------------------------
+// SpecWorkflow CRUD (Ent-backed)
+// ---------------------------------------------------------------------------
+
+func (d *DoltStore) CreateSpecWorkflow(ctx context.Context, wf *store.SpecWorkflow) error {
+	_, err := d.client.SpecWorkflow.Create().
+		SetID(wf.ID).
+		SetName(wf.Name).
+		SetDescription(wf.Description).
+		SetSpecsRequired(wf.SpecsRequired).
+		SetSpecsOptional(wf.SpecsOptional).
+		SetInitTypes(wf.InitTypes).
+		Save(ctx)
+	if err != nil {
+		return fmt.Errorf("create spec workflow: %w", err)
+	}
+	return nil
+}
+
+func (d *DoltStore) GetSpecWorkflow(ctx context.Context, id string) (*store.SpecWorkflow, error) {
+	row, err := d.client.SpecWorkflow.Get(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("get spec workflow %s: %w", id, err)
+	}
+	return &store.SpecWorkflow{
+		ID:            row.ID,
+		Name:          row.Name,
+		Description:   row.Description,
+		SpecsRequired: row.SpecsRequired,
+		SpecsOptional: row.SpecsOptional,
+		InitTypes:     row.InitTypes,
+	}, nil
+}
+
+func (d *DoltStore) ListSpecWorkflows(ctx context.Context) ([]*store.SpecWorkflow, error) {
+	rows, err := d.client.SpecWorkflow.Query().All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("list spec workflows: %w", err)
+	}
+	result := make([]*store.SpecWorkflow, len(rows))
+	for i, r := range rows {
+		result[i] = &store.SpecWorkflow{
+			ID:            r.ID,
+			Name:          r.Name,
+			Description:   r.Description,
+			SpecsRequired: r.SpecsRequired,
+			SpecsOptional: r.SpecsOptional,
+			InitTypes:     r.InitTypes,
+		}
+	}
+	return result, nil
+}
+
+func (d *DoltStore) UpdateSpecWorkflow(ctx context.Context, wf *store.SpecWorkflow) error {
+	_, err := d.client.SpecWorkflow.UpdateOneID(wf.ID).
+		SetName(wf.Name).
+		SetDescription(wf.Description).
+		SetSpecsRequired(wf.SpecsRequired).
+		SetSpecsOptional(wf.SpecsOptional).
+		SetInitTypes(wf.InitTypes).
+		Save(ctx)
+	if err != nil {
+		return fmt.Errorf("update spec workflow %s: %w", wf.ID, err)
+	}
+	return nil
+}
+
+// ---------------------------------------------------------------------------
+// JudgeRubric CRUD (Ent-backed)
+// ---------------------------------------------------------------------------
+
+func (d *DoltStore) CreateJudgeRubric(ctx context.Context, rubric *store.JudgeRubric) error {
+	builder := d.client.JudgeRubric.Create().
+		SetID(rubric.ID).
+		SetSpecType(rubric.SpecType).
+		SetCriteria(rubric.Criteria).
+		SetPromptTemplate(rubric.PromptTemplate)
+	if rubric.WorkflowID != "" {
+		builder = builder.SetWorkflowID(rubric.WorkflowID)
+	}
+	_, err := builder.Save(ctx)
+	if err != nil {
+		return fmt.Errorf("create judge rubric: %w", err)
+	}
+	return nil
+}
+
+func (d *DoltStore) GetJudgeRubric(ctx context.Context, id string) (*store.JudgeRubric, error) {
+	row, err := d.client.JudgeRubric.Get(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("get judge rubric %s: %w", id, err)
+	}
+	workflowID := ""
+	if wf, err := row.QueryWorkflow().Only(ctx); err == nil && wf != nil {
+		workflowID = wf.ID
+	}
+	return &store.JudgeRubric{
+		ID:             row.ID,
+		WorkflowID:     workflowID,
+		SpecType:       row.SpecType,
+		Criteria:       row.Criteria,
+		PromptTemplate: row.PromptTemplate,
+	}, nil
+}
+
+func (d *DoltStore) ListJudgeRubrics(ctx context.Context, workflowID string) ([]*store.JudgeRubric, error) {
+	q := d.client.JudgeRubric.Query()
+	if workflowID != "" {
+		q = q.Where(judgerubric.HasWorkflowWith(specworkflow.IDEQ(workflowID)))
+	}
+	rows, err := q.All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("list judge rubrics: %w", err)
+	}
+	result := make([]*store.JudgeRubric, len(rows))
+	for i, r := range rows {
+		wfID := ""
+		if wf, err := r.QueryWorkflow().Only(ctx); err == nil && wf != nil {
+			wfID = wf.ID
+		}
+		result[i] = &store.JudgeRubric{
+			ID:             r.ID,
+			WorkflowID:     wfID,
+			SpecType:       r.SpecType,
+			Criteria:       r.Criteria,
+			PromptTemplate: r.PromptTemplate,
+		}
+	}
+	return result, nil
+}
+
+// ---------------------------------------------------------------------------
+// JudgeResult CRUD (Ent-backed)
+// ---------------------------------------------------------------------------
+
+func (d *DoltStore) CreateJudgeResult(ctx context.Context, result *store.JudgeResult) error {
+	builder := d.client.JudgeResult.Create().
+		SetID(result.ID).
+		SetInitiativeID(result.InitiativeID).
+		SetSpecPath(result.SpecPath).
+		SetScore(result.Score).
+		SetRationale(result.Rationale).
+		SetModel(result.Model).
+		SetEvaluatedAt(result.EvaluatedAt)
+	if result.RubricID != "" {
+		builder = builder.SetRubricID(result.RubricID)
+	}
+	_, err := builder.Save(ctx)
+	if err != nil {
+		return fmt.Errorf("create judge result: %w", err)
+	}
+	return nil
+}
+
+func (d *DoltStore) ListJudgeResults(ctx context.Context, initiativeID string) ([]*store.JudgeResult, error) {
+	rows, err := d.client.JudgeResult.Query().
+		Where(judgeresult.InitiativeIDEQ(initiativeID)).
+		All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("list judge results for %s: %w", initiativeID, err)
+	}
+	result := make([]*store.JudgeResult, len(rows))
+	for i, r := range rows {
+		rubricID := ""
+		if rb, err := r.QueryRubric().Only(ctx); err == nil && rb != nil {
+			rubricID = rb.ID
+		}
+		result[i] = &store.JudgeResult{
+			ID:           r.ID,
+			InitiativeID: r.InitiativeID,
+			SpecPath:     r.SpecPath,
+			RubricID:     rubricID,
+			Score:        r.Score,
+			Rationale:    r.Rationale,
+			Model:        r.Model,
+			EvaluatedAt:  r.EvaluatedAt,
 		}
 	}
 	return result, nil

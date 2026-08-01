@@ -14,6 +14,7 @@ import (
 	"github.com/ProductBuildersHQ/prism-control/ent/phase"
 	"github.com/ProductBuildersHQ/prism-control/ent/program"
 	"github.com/ProductBuildersHQ/prism-control/ent/roadmapitem"
+	"github.com/ProductBuildersHQ/prism-control/ent/specworkflow"
 )
 
 // InitiativeCreate is the builder for creating a Initiative entity.
@@ -65,20 +66,6 @@ func (_c *InitiativeCreate) SetInitType(v string) *InitiativeCreate {
 func (_c *InitiativeCreate) SetNillableInitType(v *string) *InitiativeCreate {
 	if v != nil {
 		_c.SetInitType(*v)
-	}
-	return _c
-}
-
-// SetWorkflowID sets the "workflow_id" field.
-func (_c *InitiativeCreate) SetWorkflowID(v string) *InitiativeCreate {
-	_c.mutation.SetWorkflowID(v)
-	return _c
-}
-
-// SetNillableWorkflowID sets the "workflow_id" field if the given value is not nil.
-func (_c *InitiativeCreate) SetNillableWorkflowID(v *string) *InitiativeCreate {
-	if v != nil {
-		_c.SetWorkflowID(*v)
 	}
 	return _c
 }
@@ -268,6 +255,25 @@ func (_c *InitiativeCreate) SetProgram(v *Program) *InitiativeCreate {
 	return _c.SetProgramID(v.ID)
 }
 
+// SetWorkflowID sets the "workflow" edge to the SpecWorkflow entity by ID.
+func (_c *InitiativeCreate) SetWorkflowID(id string) *InitiativeCreate {
+	_c.mutation.SetWorkflowID(id)
+	return _c
+}
+
+// SetNillableWorkflowID sets the "workflow" edge to the SpecWorkflow entity by ID if the given value is not nil.
+func (_c *InitiativeCreate) SetNillableWorkflowID(id *string) *InitiativeCreate {
+	if id != nil {
+		_c = _c.SetWorkflowID(*id)
+	}
+	return _c
+}
+
+// SetWorkflow sets the "workflow" edge to the SpecWorkflow entity.
+func (_c *InitiativeCreate) SetWorkflow(v *SpecWorkflow) *InitiativeCreate {
+	return _c.SetWorkflowID(v.ID)
+}
+
 // Mutation returns the InitiativeMutation object of the builder.
 func (_c *InitiativeCreate) Mutation() *InitiativeMutation {
 	return _c.mutation
@@ -341,11 +347,6 @@ func (_c *InitiativeCreate) check() error {
 	if v, ok := _c.mutation.InitType(); ok {
 		if err := initiative.InitTypeValidator(v); err != nil {
 			return &ValidationError{Name: "init_type", err: fmt.Errorf(`ent: validator failed for field "Initiative.init_type": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.WorkflowID(); ok {
-		if err := initiative.WorkflowIDValidator(v); err != nil {
-			return &ValidationError{Name: "workflow_id", err: fmt.Errorf(`ent: validator failed for field "Initiative.workflow_id": %w`, err)}
 		}
 	}
 	if v, ok := _c.mutation.Priority(); ok {
@@ -428,10 +429,6 @@ func (_c *InitiativeCreate) createSpec() (*Initiative, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.InitType(); ok {
 		_spec.SetField(initiative.FieldInitType, field.TypeString, value)
 		_node.InitType = value
-	}
-	if value, ok := _c.mutation.WorkflowID(); ok {
-		_spec.SetField(initiative.FieldWorkflowID, field.TypeString, value)
-		_node.WorkflowID = value
 	}
 	if value, ok := _c.mutation.Priority(); ok {
 		_spec.SetField(initiative.FieldPriority, field.TypeString, value)
@@ -524,6 +521,23 @@ func (_c *InitiativeCreate) createSpec() (*Initiative, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.program_initiatives = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.WorkflowIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   initiative.WorkflowTable,
+			Columns: []string{initiative.WorkflowColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(specworkflow.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.spec_workflow_initiatives = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

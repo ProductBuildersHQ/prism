@@ -57,6 +57,30 @@ func (f InitiativeDependencyFunc) Mutate(ctx context.Context, m ent.Mutation) (e
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.InitiativeDependencyMutation", m)
 }
 
+// The JudgeResultFunc type is an adapter to allow the use of ordinary
+// function as JudgeResult mutator.
+type JudgeResultFunc func(context.Context, *ent.JudgeResultMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f JudgeResultFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.JudgeResultMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.JudgeResultMutation", m)
+}
+
+// The JudgeRubricFunc type is an adapter to allow the use of ordinary
+// function as JudgeRubric mutator.
+type JudgeRubricFunc func(context.Context, *ent.JudgeRubricMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f JudgeRubricFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.JudgeRubricMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.JudgeRubricMutation", m)
+}
+
 // The PhaseFunc type is an adapter to allow the use of ordinary
 // function as Phase mutator.
 type PhaseFunc func(context.Context, *ent.PhaseMutation) (ent.Value, error)
@@ -127,6 +151,18 @@ func (f RoadmapItemFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RoadmapItemMutation", m)
+}
+
+// The SpecWorkflowFunc type is an adapter to allow the use of ordinary
+// function as SpecWorkflow mutator.
+type SpecWorkflowFunc func(context.Context, *ent.SpecWorkflowMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SpecWorkflowFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SpecWorkflowMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SpecWorkflowMutation", m)
 }
 
 // Condition is a hook condition function.

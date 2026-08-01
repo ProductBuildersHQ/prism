@@ -19,7 +19,6 @@ func (Initiative) Fields() []ent.Field {
 		field.Text("description").Optional(),
 		field.String("status").MaxLen(32),
 		field.String("init_type").MaxLen(32).Default("feature"),
-		field.String("workflow_id").MaxLen(64).Optional(),
 		field.String("priority").MaxLen(32).Optional(),
 		field.String("home_repo").MaxLen(255).Optional(),
 		field.String("workspace").MaxLen(128).Optional(),
@@ -39,5 +38,6 @@ func (Initiative) Edges() []ent.Edge {
 		edge.To("phases", Phase.Type),
 		edge.To("roadmap_items", RoadmapItem.Type),
 		edge.From("program", Program.Type).Ref("initiatives").Unique(),
+		edge.From("workflow", SpecWorkflow.Type).Ref("initiatives").Unique(),
 	}
 }

@@ -16,12 +16,15 @@ import (
 	"github.com/ProductBuildersHQ/prism-control/ent/deliveryevidence"
 	"github.com/ProductBuildersHQ/prism-control/ent/initiative"
 	"github.com/ProductBuildersHQ/prism-control/ent/initiativedependency"
+	"github.com/ProductBuildersHQ/prism-control/ent/judgeresult"
+	"github.com/ProductBuildersHQ/prism-control/ent/judgerubric"
 	"github.com/ProductBuildersHQ/prism-control/ent/phase"
 	"github.com/ProductBuildersHQ/prism-control/ent/program"
 	"github.com/ProductBuildersHQ/prism-control/ent/repository"
 	"github.com/ProductBuildersHQ/prism-control/ent/repositorydependency"
 	"github.com/ProductBuildersHQ/prism-control/ent/rmidependency"
 	"github.com/ProductBuildersHQ/prism-control/ent/roadmapitem"
+	"github.com/ProductBuildersHQ/prism-control/ent/specworkflow"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -86,12 +89,15 @@ func checkColumn(t, c string) error {
 			deliveryevidence.Table:     deliveryevidence.ValidColumn,
 			initiative.Table:           initiative.ValidColumn,
 			initiativedependency.Table: initiativedependency.ValidColumn,
+			judgeresult.Table:          judgeresult.ValidColumn,
+			judgerubric.Table:          judgerubric.ValidColumn,
 			phase.Table:                phase.ValidColumn,
 			program.Table:              program.ValidColumn,
 			rmidependency.Table:        rmidependency.ValidColumn,
 			repository.Table:           repository.ValidColumn,
 			repositorydependency.Table: repositorydependency.ValidColumn,
 			roadmapitem.Table:          roadmapitem.ValidColumn,
+			specworkflow.Table:         specworkflow.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

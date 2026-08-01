@@ -15,6 +15,8 @@ import (
 	"github.com/ProductBuildersHQ/prism-control/ent/deliveryevidence"
 	"github.com/ProductBuildersHQ/prism-control/ent/initiative"
 	"github.com/ProductBuildersHQ/prism-control/ent/initiativedependency"
+	"github.com/ProductBuildersHQ/prism-control/ent/judgeresult"
+	"github.com/ProductBuildersHQ/prism-control/ent/judgerubric"
 	"github.com/ProductBuildersHQ/prism-control/ent/phase"
 	"github.com/ProductBuildersHQ/prism-control/ent/predicate"
 	"github.com/ProductBuildersHQ/prism-control/ent/program"
@@ -22,6 +24,7 @@ import (
 	"github.com/ProductBuildersHQ/prism-control/ent/repositorydependency"
 	"github.com/ProductBuildersHQ/prism-control/ent/rmidependency"
 	"github.com/ProductBuildersHQ/prism-control/ent/roadmapitem"
+	"github.com/ProductBuildersHQ/prism-control/ent/specworkflow"
 )
 
 const (
@@ -37,12 +40,15 @@ const (
 	TypeDeliveryEvidence     = "DeliveryEvidence"
 	TypeInitiative           = "Initiative"
 	TypeInitiativeDependency = "InitiativeDependency"
+	TypeJudgeResult          = "JudgeResult"
+	TypeJudgeRubric          = "JudgeRubric"
 	TypePhase                = "Phase"
 	TypeProgram              = "Program"
 	TypeRMIDependency        = "RMIDependency"
 	TypeRepository           = "Repository"
 	TypeRepositoryDependency = "RepositoryDependency"
 	TypeRoadmapItem          = "RoadmapItem"
+	TypeSpecWorkflow         = "SpecWorkflow"
 )
 
 // AssignmentMutation represents an operation that mutates the Assignment nodes in the graph.
@@ -1622,7 +1628,6 @@ type InitiativeMutation struct {
 	description          *string
 	status               *string
 	init_type            *string
-	workflow_id          *string
 	priority             *string
 	home_repo            *string
 	workspace            *string
@@ -1643,6 +1648,8 @@ type InitiativeMutation struct {
 	clearedroadmap_items bool
 	program              *string
 	clearedprogram       bool
+	workflow             *string
+	clearedworkflow      bool
 	done                 bool
 	oldValue             func(context.Context) (*Initiative, error)
 	predicates           []predicate.Initiative
@@ -1943,55 +1950,6 @@ func (m *InitiativeMutation) OldInitType(ctx context.Context) (v string, err err
 // ResetInitType resets all changes to the "init_type" field.
 func (m *InitiativeMutation) ResetInitType() {
 	m.init_type = nil
-}
-
-// SetWorkflowID sets the "workflow_id" field.
-func (m *InitiativeMutation) SetWorkflowID(s string) {
-	m.workflow_id = &s
-}
-
-// WorkflowID returns the value of the "workflow_id" field in the mutation.
-func (m *InitiativeMutation) WorkflowID() (r string, exists bool) {
-	v := m.workflow_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldWorkflowID returns the old "workflow_id" field's value of the Initiative entity.
-// If the Initiative object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *InitiativeMutation) OldWorkflowID(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldWorkflowID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldWorkflowID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldWorkflowID: %w", err)
-	}
-	return oldValue.WorkflowID, nil
-}
-
-// ClearWorkflowID clears the value of the "workflow_id" field.
-func (m *InitiativeMutation) ClearWorkflowID() {
-	m.workflow_id = nil
-	m.clearedFields[initiative.FieldWorkflowID] = struct{}{}
-}
-
-// WorkflowIDCleared returns if the "workflow_id" field was cleared in this mutation.
-func (m *InitiativeMutation) WorkflowIDCleared() bool {
-	_, ok := m.clearedFields[initiative.FieldWorkflowID]
-	return ok
-}
-
-// ResetWorkflowID resets all changes to the "workflow_id" field.
-func (m *InitiativeMutation) ResetWorkflowID() {
-	m.workflow_id = nil
-	delete(m.clearedFields, initiative.FieldWorkflowID)
 }
 
 // SetPriority sets the "priority" field.
@@ -2654,6 +2612,45 @@ func (m *InitiativeMutation) ResetProgram() {
 	m.clearedprogram = false
 }
 
+// SetWorkflowID sets the "workflow" edge to the SpecWorkflow entity by id.
+func (m *InitiativeMutation) SetWorkflowID(id string) {
+	m.workflow = &id
+}
+
+// ClearWorkflow clears the "workflow" edge to the SpecWorkflow entity.
+func (m *InitiativeMutation) ClearWorkflow() {
+	m.clearedworkflow = true
+}
+
+// WorkflowCleared reports if the "workflow" edge to the SpecWorkflow entity was cleared.
+func (m *InitiativeMutation) WorkflowCleared() bool {
+	return m.clearedworkflow
+}
+
+// WorkflowID returns the "workflow" edge ID in the mutation.
+func (m *InitiativeMutation) WorkflowID() (id string, exists bool) {
+	if m.workflow != nil {
+		return *m.workflow, true
+	}
+	return
+}
+
+// WorkflowIDs returns the "workflow" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// WorkflowID instead. It exists only for internal usage by the builders.
+func (m *InitiativeMutation) WorkflowIDs() (ids []string) {
+	if id := m.workflow; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetWorkflow resets all changes to the "workflow" edge.
+func (m *InitiativeMutation) ResetWorkflow() {
+	m.workflow = nil
+	m.clearedworkflow = false
+}
+
 // Where appends a list predicates to the InitiativeMutation builder.
 func (m *InitiativeMutation) Where(ps ...predicate.Initiative) {
 	m.predicates = append(m.predicates, ps...)
@@ -2688,7 +2685,7 @@ func (m *InitiativeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *InitiativeMutation) Fields() []string {
-	fields := make([]string, 0, 17)
+	fields := make([]string, 0, 16)
 	if m.organization != nil {
 		fields = append(fields, initiative.FieldOrganization)
 	}
@@ -2703,9 +2700,6 @@ func (m *InitiativeMutation) Fields() []string {
 	}
 	if m.init_type != nil {
 		fields = append(fields, initiative.FieldInitType)
-	}
-	if m.workflow_id != nil {
-		fields = append(fields, initiative.FieldWorkflowID)
 	}
 	if m.priority != nil {
 		fields = append(fields, initiative.FieldPriority)
@@ -2758,8 +2752,6 @@ func (m *InitiativeMutation) Field(name string) (ent.Value, bool) {
 		return m.Status()
 	case initiative.FieldInitType:
 		return m.InitType()
-	case initiative.FieldWorkflowID:
-		return m.WorkflowID()
 	case initiative.FieldPriority:
 		return m.Priority()
 	case initiative.FieldHomeRepo:
@@ -2801,8 +2793,6 @@ func (m *InitiativeMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldStatus(ctx)
 	case initiative.FieldInitType:
 		return m.OldInitType(ctx)
-	case initiative.FieldWorkflowID:
-		return m.OldWorkflowID(ctx)
 	case initiative.FieldPriority:
 		return m.OldPriority(ctx)
 	case initiative.FieldHomeRepo:
@@ -2868,13 +2858,6 @@ func (m *InitiativeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetInitType(v)
-		return nil
-	case initiative.FieldWorkflowID:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetWorkflowID(v)
 		return nil
 	case initiative.FieldPriority:
 		v, ok := value.(string)
@@ -2986,9 +2969,6 @@ func (m *InitiativeMutation) ClearedFields() []string {
 	if m.FieldCleared(initiative.FieldDescription) {
 		fields = append(fields, initiative.FieldDescription)
 	}
-	if m.FieldCleared(initiative.FieldWorkflowID) {
-		fields = append(fields, initiative.FieldWorkflowID)
-	}
 	if m.FieldCleared(initiative.FieldPriority) {
 		fields = append(fields, initiative.FieldPriority)
 	}
@@ -3032,9 +3012,6 @@ func (m *InitiativeMutation) ClearField(name string) error {
 	switch name {
 	case initiative.FieldDescription:
 		m.ClearDescription()
-		return nil
-	case initiative.FieldWorkflowID:
-		m.ClearWorkflowID()
 		return nil
 	case initiative.FieldPriority:
 		m.ClearPriority()
@@ -3086,9 +3063,6 @@ func (m *InitiativeMutation) ResetField(name string) error {
 	case initiative.FieldInitType:
 		m.ResetInitType()
 		return nil
-	case initiative.FieldWorkflowID:
-		m.ResetWorkflowID()
-		return nil
 	case initiative.FieldPriority:
 		m.ResetPriority()
 		return nil
@@ -3128,7 +3102,7 @@ func (m *InitiativeMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *InitiativeMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.phases != nil {
 		edges = append(edges, initiative.EdgePhases)
 	}
@@ -3137,6 +3111,9 @@ func (m *InitiativeMutation) AddedEdges() []string {
 	}
 	if m.program != nil {
 		edges = append(edges, initiative.EdgeProgram)
+	}
+	if m.workflow != nil {
+		edges = append(edges, initiative.EdgeWorkflow)
 	}
 	return edges
 }
@@ -3161,13 +3138,17 @@ func (m *InitiativeMutation) AddedIDs(name string) []ent.Value {
 		if id := m.program; id != nil {
 			return []ent.Value{*id}
 		}
+	case initiative.EdgeWorkflow:
+		if id := m.workflow; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *InitiativeMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.removedphases != nil {
 		edges = append(edges, initiative.EdgePhases)
 	}
@@ -3199,7 +3180,7 @@ func (m *InitiativeMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *InitiativeMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.clearedphases {
 		edges = append(edges, initiative.EdgePhases)
 	}
@@ -3208,6 +3189,9 @@ func (m *InitiativeMutation) ClearedEdges() []string {
 	}
 	if m.clearedprogram {
 		edges = append(edges, initiative.EdgeProgram)
+	}
+	if m.clearedworkflow {
+		edges = append(edges, initiative.EdgeWorkflow)
 	}
 	return edges
 }
@@ -3222,6 +3206,8 @@ func (m *InitiativeMutation) EdgeCleared(name string) bool {
 		return m.clearedroadmap_items
 	case initiative.EdgeProgram:
 		return m.clearedprogram
+	case initiative.EdgeWorkflow:
+		return m.clearedworkflow
 	}
 	return false
 }
@@ -3232,6 +3218,9 @@ func (m *InitiativeMutation) ClearEdge(name string) error {
 	switch name {
 	case initiative.EdgeProgram:
 		m.ClearProgram()
+		return nil
+	case initiative.EdgeWorkflow:
+		m.ClearWorkflow()
 		return nil
 	}
 	return fmt.Errorf("unknown Initiative unique edge %s", name)
@@ -3249,6 +3238,9 @@ func (m *InitiativeMutation) ResetEdge(name string) error {
 		return nil
 	case initiative.EdgeProgram:
 		m.ResetProgram()
+		return nil
+	case initiative.EdgeWorkflow:
+		m.ResetWorkflow()
 		return nil
 	}
 	return fmt.Errorf("unknown Initiative edge %s", name)
@@ -3686,6 +3678,1405 @@ func (m *InitiativeDependencyMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *InitiativeDependencyMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown InitiativeDependency edge %s", name)
+}
+
+// JudgeResultMutation represents an operation that mutates the JudgeResult nodes in the graph.
+type JudgeResultMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *string
+	initiative_id *string
+	spec_path     *string
+	score         *float64
+	addscore      *float64
+	rationale     *string
+	model         *string
+	evaluated_at  *time.Time
+	clearedFields map[string]struct{}
+	rubric        *string
+	clearedrubric bool
+	done          bool
+	oldValue      func(context.Context) (*JudgeResult, error)
+	predicates    []predicate.JudgeResult
+}
+
+var _ ent.Mutation = (*JudgeResultMutation)(nil)
+
+// judgeresultOption allows management of the mutation configuration using functional options.
+type judgeresultOption func(*JudgeResultMutation)
+
+// newJudgeResultMutation creates new mutation for the JudgeResult entity.
+func newJudgeResultMutation(c config, op Op, opts ...judgeresultOption) *JudgeResultMutation {
+	m := &JudgeResultMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeJudgeResult,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withJudgeResultID sets the ID field of the mutation.
+func withJudgeResultID(id string) judgeresultOption {
+	return func(m *JudgeResultMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *JudgeResult
+		)
+		m.oldValue = func(ctx context.Context) (*JudgeResult, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().JudgeResult.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withJudgeResult sets the old JudgeResult of the mutation.
+func withJudgeResult(node *JudgeResult) judgeresultOption {
+	return func(m *JudgeResultMutation) {
+		m.oldValue = func(context.Context) (*JudgeResult, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m JudgeResultMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m JudgeResultMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of JudgeResult entities.
+func (m *JudgeResultMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *JudgeResultMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *JudgeResultMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().JudgeResult.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetInitiativeID sets the "initiative_id" field.
+func (m *JudgeResultMutation) SetInitiativeID(s string) {
+	m.initiative_id = &s
+}
+
+// InitiativeID returns the value of the "initiative_id" field in the mutation.
+func (m *JudgeResultMutation) InitiativeID() (r string, exists bool) {
+	v := m.initiative_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldInitiativeID returns the old "initiative_id" field's value of the JudgeResult entity.
+// If the JudgeResult object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *JudgeResultMutation) OldInitiativeID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldInitiativeID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldInitiativeID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInitiativeID: %w", err)
+	}
+	return oldValue.InitiativeID, nil
+}
+
+// ResetInitiativeID resets all changes to the "initiative_id" field.
+func (m *JudgeResultMutation) ResetInitiativeID() {
+	m.initiative_id = nil
+}
+
+// SetSpecPath sets the "spec_path" field.
+func (m *JudgeResultMutation) SetSpecPath(s string) {
+	m.spec_path = &s
+}
+
+// SpecPath returns the value of the "spec_path" field in the mutation.
+func (m *JudgeResultMutation) SpecPath() (r string, exists bool) {
+	v := m.spec_path
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSpecPath returns the old "spec_path" field's value of the JudgeResult entity.
+// If the JudgeResult object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *JudgeResultMutation) OldSpecPath(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSpecPath is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSpecPath requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSpecPath: %w", err)
+	}
+	return oldValue.SpecPath, nil
+}
+
+// ResetSpecPath resets all changes to the "spec_path" field.
+func (m *JudgeResultMutation) ResetSpecPath() {
+	m.spec_path = nil
+}
+
+// SetScore sets the "score" field.
+func (m *JudgeResultMutation) SetScore(f float64) {
+	m.score = &f
+	m.addscore = nil
+}
+
+// Score returns the value of the "score" field in the mutation.
+func (m *JudgeResultMutation) Score() (r float64, exists bool) {
+	v := m.score
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldScore returns the old "score" field's value of the JudgeResult entity.
+// If the JudgeResult object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *JudgeResultMutation) OldScore(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldScore is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldScore requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldScore: %w", err)
+	}
+	return oldValue.Score, nil
+}
+
+// AddScore adds f to the "score" field.
+func (m *JudgeResultMutation) AddScore(f float64) {
+	if m.addscore != nil {
+		*m.addscore += f
+	} else {
+		m.addscore = &f
+	}
+}
+
+// AddedScore returns the value that was added to the "score" field in this mutation.
+func (m *JudgeResultMutation) AddedScore() (r float64, exists bool) {
+	v := m.addscore
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearScore clears the value of the "score" field.
+func (m *JudgeResultMutation) ClearScore() {
+	m.score = nil
+	m.addscore = nil
+	m.clearedFields[judgeresult.FieldScore] = struct{}{}
+}
+
+// ScoreCleared returns if the "score" field was cleared in this mutation.
+func (m *JudgeResultMutation) ScoreCleared() bool {
+	_, ok := m.clearedFields[judgeresult.FieldScore]
+	return ok
+}
+
+// ResetScore resets all changes to the "score" field.
+func (m *JudgeResultMutation) ResetScore() {
+	m.score = nil
+	m.addscore = nil
+	delete(m.clearedFields, judgeresult.FieldScore)
+}
+
+// SetRationale sets the "rationale" field.
+func (m *JudgeResultMutation) SetRationale(s string) {
+	m.rationale = &s
+}
+
+// Rationale returns the value of the "rationale" field in the mutation.
+func (m *JudgeResultMutation) Rationale() (r string, exists bool) {
+	v := m.rationale
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRationale returns the old "rationale" field's value of the JudgeResult entity.
+// If the JudgeResult object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *JudgeResultMutation) OldRationale(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRationale is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRationale requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRationale: %w", err)
+	}
+	return oldValue.Rationale, nil
+}
+
+// ClearRationale clears the value of the "rationale" field.
+func (m *JudgeResultMutation) ClearRationale() {
+	m.rationale = nil
+	m.clearedFields[judgeresult.FieldRationale] = struct{}{}
+}
+
+// RationaleCleared returns if the "rationale" field was cleared in this mutation.
+func (m *JudgeResultMutation) RationaleCleared() bool {
+	_, ok := m.clearedFields[judgeresult.FieldRationale]
+	return ok
+}
+
+// ResetRationale resets all changes to the "rationale" field.
+func (m *JudgeResultMutation) ResetRationale() {
+	m.rationale = nil
+	delete(m.clearedFields, judgeresult.FieldRationale)
+}
+
+// SetModel sets the "model" field.
+func (m *JudgeResultMutation) SetModel(s string) {
+	m.model = &s
+}
+
+// Model returns the value of the "model" field in the mutation.
+func (m *JudgeResultMutation) Model() (r string, exists bool) {
+	v := m.model
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldModel returns the old "model" field's value of the JudgeResult entity.
+// If the JudgeResult object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *JudgeResultMutation) OldModel(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldModel is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldModel requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldModel: %w", err)
+	}
+	return oldValue.Model, nil
+}
+
+// ClearModel clears the value of the "model" field.
+func (m *JudgeResultMutation) ClearModel() {
+	m.model = nil
+	m.clearedFields[judgeresult.FieldModel] = struct{}{}
+}
+
+// ModelCleared returns if the "model" field was cleared in this mutation.
+func (m *JudgeResultMutation) ModelCleared() bool {
+	_, ok := m.clearedFields[judgeresult.FieldModel]
+	return ok
+}
+
+// ResetModel resets all changes to the "model" field.
+func (m *JudgeResultMutation) ResetModel() {
+	m.model = nil
+	delete(m.clearedFields, judgeresult.FieldModel)
+}
+
+// SetEvaluatedAt sets the "evaluated_at" field.
+func (m *JudgeResultMutation) SetEvaluatedAt(t time.Time) {
+	m.evaluated_at = &t
+}
+
+// EvaluatedAt returns the value of the "evaluated_at" field in the mutation.
+func (m *JudgeResultMutation) EvaluatedAt() (r time.Time, exists bool) {
+	v := m.evaluated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEvaluatedAt returns the old "evaluated_at" field's value of the JudgeResult entity.
+// If the JudgeResult object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *JudgeResultMutation) OldEvaluatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEvaluatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEvaluatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEvaluatedAt: %w", err)
+	}
+	return oldValue.EvaluatedAt, nil
+}
+
+// ResetEvaluatedAt resets all changes to the "evaluated_at" field.
+func (m *JudgeResultMutation) ResetEvaluatedAt() {
+	m.evaluated_at = nil
+}
+
+// SetRubricID sets the "rubric" edge to the JudgeRubric entity by id.
+func (m *JudgeResultMutation) SetRubricID(id string) {
+	m.rubric = &id
+}
+
+// ClearRubric clears the "rubric" edge to the JudgeRubric entity.
+func (m *JudgeResultMutation) ClearRubric() {
+	m.clearedrubric = true
+}
+
+// RubricCleared reports if the "rubric" edge to the JudgeRubric entity was cleared.
+func (m *JudgeResultMutation) RubricCleared() bool {
+	return m.clearedrubric
+}
+
+// RubricID returns the "rubric" edge ID in the mutation.
+func (m *JudgeResultMutation) RubricID() (id string, exists bool) {
+	if m.rubric != nil {
+		return *m.rubric, true
+	}
+	return
+}
+
+// RubricIDs returns the "rubric" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// RubricID instead. It exists only for internal usage by the builders.
+func (m *JudgeResultMutation) RubricIDs() (ids []string) {
+	if id := m.rubric; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetRubric resets all changes to the "rubric" edge.
+func (m *JudgeResultMutation) ResetRubric() {
+	m.rubric = nil
+	m.clearedrubric = false
+}
+
+// Where appends a list predicates to the JudgeResultMutation builder.
+func (m *JudgeResultMutation) Where(ps ...predicate.JudgeResult) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the JudgeResultMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *JudgeResultMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.JudgeResult, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *JudgeResultMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *JudgeResultMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (JudgeResult).
+func (m *JudgeResultMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *JudgeResultMutation) Fields() []string {
+	fields := make([]string, 0, 6)
+	if m.initiative_id != nil {
+		fields = append(fields, judgeresult.FieldInitiativeID)
+	}
+	if m.spec_path != nil {
+		fields = append(fields, judgeresult.FieldSpecPath)
+	}
+	if m.score != nil {
+		fields = append(fields, judgeresult.FieldScore)
+	}
+	if m.rationale != nil {
+		fields = append(fields, judgeresult.FieldRationale)
+	}
+	if m.model != nil {
+		fields = append(fields, judgeresult.FieldModel)
+	}
+	if m.evaluated_at != nil {
+		fields = append(fields, judgeresult.FieldEvaluatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *JudgeResultMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case judgeresult.FieldInitiativeID:
+		return m.InitiativeID()
+	case judgeresult.FieldSpecPath:
+		return m.SpecPath()
+	case judgeresult.FieldScore:
+		return m.Score()
+	case judgeresult.FieldRationale:
+		return m.Rationale()
+	case judgeresult.FieldModel:
+		return m.Model()
+	case judgeresult.FieldEvaluatedAt:
+		return m.EvaluatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *JudgeResultMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case judgeresult.FieldInitiativeID:
+		return m.OldInitiativeID(ctx)
+	case judgeresult.FieldSpecPath:
+		return m.OldSpecPath(ctx)
+	case judgeresult.FieldScore:
+		return m.OldScore(ctx)
+	case judgeresult.FieldRationale:
+		return m.OldRationale(ctx)
+	case judgeresult.FieldModel:
+		return m.OldModel(ctx)
+	case judgeresult.FieldEvaluatedAt:
+		return m.OldEvaluatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown JudgeResult field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *JudgeResultMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case judgeresult.FieldInitiativeID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetInitiativeID(v)
+		return nil
+	case judgeresult.FieldSpecPath:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSpecPath(v)
+		return nil
+	case judgeresult.FieldScore:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetScore(v)
+		return nil
+	case judgeresult.FieldRationale:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRationale(v)
+		return nil
+	case judgeresult.FieldModel:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetModel(v)
+		return nil
+	case judgeresult.FieldEvaluatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEvaluatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown JudgeResult field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *JudgeResultMutation) AddedFields() []string {
+	var fields []string
+	if m.addscore != nil {
+		fields = append(fields, judgeresult.FieldScore)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *JudgeResultMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case judgeresult.FieldScore:
+		return m.AddedScore()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *JudgeResultMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case judgeresult.FieldScore:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddScore(v)
+		return nil
+	}
+	return fmt.Errorf("unknown JudgeResult numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *JudgeResultMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(judgeresult.FieldScore) {
+		fields = append(fields, judgeresult.FieldScore)
+	}
+	if m.FieldCleared(judgeresult.FieldRationale) {
+		fields = append(fields, judgeresult.FieldRationale)
+	}
+	if m.FieldCleared(judgeresult.FieldModel) {
+		fields = append(fields, judgeresult.FieldModel)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *JudgeResultMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *JudgeResultMutation) ClearField(name string) error {
+	switch name {
+	case judgeresult.FieldScore:
+		m.ClearScore()
+		return nil
+	case judgeresult.FieldRationale:
+		m.ClearRationale()
+		return nil
+	case judgeresult.FieldModel:
+		m.ClearModel()
+		return nil
+	}
+	return fmt.Errorf("unknown JudgeResult nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *JudgeResultMutation) ResetField(name string) error {
+	switch name {
+	case judgeresult.FieldInitiativeID:
+		m.ResetInitiativeID()
+		return nil
+	case judgeresult.FieldSpecPath:
+		m.ResetSpecPath()
+		return nil
+	case judgeresult.FieldScore:
+		m.ResetScore()
+		return nil
+	case judgeresult.FieldRationale:
+		m.ResetRationale()
+		return nil
+	case judgeresult.FieldModel:
+		m.ResetModel()
+		return nil
+	case judgeresult.FieldEvaluatedAt:
+		m.ResetEvaluatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown JudgeResult field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *JudgeResultMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.rubric != nil {
+		edges = append(edges, judgeresult.EdgeRubric)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *JudgeResultMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case judgeresult.EdgeRubric:
+		if id := m.rubric; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *JudgeResultMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *JudgeResultMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *JudgeResultMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedrubric {
+		edges = append(edges, judgeresult.EdgeRubric)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *JudgeResultMutation) EdgeCleared(name string) bool {
+	switch name {
+	case judgeresult.EdgeRubric:
+		return m.clearedrubric
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *JudgeResultMutation) ClearEdge(name string) error {
+	switch name {
+	case judgeresult.EdgeRubric:
+		m.ClearRubric()
+		return nil
+	}
+	return fmt.Errorf("unknown JudgeResult unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *JudgeResultMutation) ResetEdge(name string) error {
+	switch name {
+	case judgeresult.EdgeRubric:
+		m.ResetRubric()
+		return nil
+	}
+	return fmt.Errorf("unknown JudgeResult edge %s", name)
+}
+
+// JudgeRubricMutation represents an operation that mutates the JudgeRubric nodes in the graph.
+type JudgeRubricMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *string
+	spec_type       *string
+	criteria        *map[string]interface{}
+	prompt_template *string
+	clearedFields   map[string]struct{}
+	workflow        *string
+	clearedworkflow bool
+	results         map[string]struct{}
+	removedresults  map[string]struct{}
+	clearedresults  bool
+	done            bool
+	oldValue        func(context.Context) (*JudgeRubric, error)
+	predicates      []predicate.JudgeRubric
+}
+
+var _ ent.Mutation = (*JudgeRubricMutation)(nil)
+
+// judgerubricOption allows management of the mutation configuration using functional options.
+type judgerubricOption func(*JudgeRubricMutation)
+
+// newJudgeRubricMutation creates new mutation for the JudgeRubric entity.
+func newJudgeRubricMutation(c config, op Op, opts ...judgerubricOption) *JudgeRubricMutation {
+	m := &JudgeRubricMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeJudgeRubric,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withJudgeRubricID sets the ID field of the mutation.
+func withJudgeRubricID(id string) judgerubricOption {
+	return func(m *JudgeRubricMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *JudgeRubric
+		)
+		m.oldValue = func(ctx context.Context) (*JudgeRubric, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().JudgeRubric.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withJudgeRubric sets the old JudgeRubric of the mutation.
+func withJudgeRubric(node *JudgeRubric) judgerubricOption {
+	return func(m *JudgeRubricMutation) {
+		m.oldValue = func(context.Context) (*JudgeRubric, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m JudgeRubricMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m JudgeRubricMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of JudgeRubric entities.
+func (m *JudgeRubricMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *JudgeRubricMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *JudgeRubricMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().JudgeRubric.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetSpecType sets the "spec_type" field.
+func (m *JudgeRubricMutation) SetSpecType(s string) {
+	m.spec_type = &s
+}
+
+// SpecType returns the value of the "spec_type" field in the mutation.
+func (m *JudgeRubricMutation) SpecType() (r string, exists bool) {
+	v := m.spec_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSpecType returns the old "spec_type" field's value of the JudgeRubric entity.
+// If the JudgeRubric object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *JudgeRubricMutation) OldSpecType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSpecType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSpecType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSpecType: %w", err)
+	}
+	return oldValue.SpecType, nil
+}
+
+// ResetSpecType resets all changes to the "spec_type" field.
+func (m *JudgeRubricMutation) ResetSpecType() {
+	m.spec_type = nil
+}
+
+// SetCriteria sets the "criteria" field.
+func (m *JudgeRubricMutation) SetCriteria(value map[string]interface{}) {
+	m.criteria = &value
+}
+
+// Criteria returns the value of the "criteria" field in the mutation.
+func (m *JudgeRubricMutation) Criteria() (r map[string]interface{}, exists bool) {
+	v := m.criteria
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCriteria returns the old "criteria" field's value of the JudgeRubric entity.
+// If the JudgeRubric object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *JudgeRubricMutation) OldCriteria(ctx context.Context) (v map[string]interface{}, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCriteria is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCriteria requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCriteria: %w", err)
+	}
+	return oldValue.Criteria, nil
+}
+
+// ClearCriteria clears the value of the "criteria" field.
+func (m *JudgeRubricMutation) ClearCriteria() {
+	m.criteria = nil
+	m.clearedFields[judgerubric.FieldCriteria] = struct{}{}
+}
+
+// CriteriaCleared returns if the "criteria" field was cleared in this mutation.
+func (m *JudgeRubricMutation) CriteriaCleared() bool {
+	_, ok := m.clearedFields[judgerubric.FieldCriteria]
+	return ok
+}
+
+// ResetCriteria resets all changes to the "criteria" field.
+func (m *JudgeRubricMutation) ResetCriteria() {
+	m.criteria = nil
+	delete(m.clearedFields, judgerubric.FieldCriteria)
+}
+
+// SetPromptTemplate sets the "prompt_template" field.
+func (m *JudgeRubricMutation) SetPromptTemplate(s string) {
+	m.prompt_template = &s
+}
+
+// PromptTemplate returns the value of the "prompt_template" field in the mutation.
+func (m *JudgeRubricMutation) PromptTemplate() (r string, exists bool) {
+	v := m.prompt_template
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPromptTemplate returns the old "prompt_template" field's value of the JudgeRubric entity.
+// If the JudgeRubric object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *JudgeRubricMutation) OldPromptTemplate(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPromptTemplate is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPromptTemplate requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPromptTemplate: %w", err)
+	}
+	return oldValue.PromptTemplate, nil
+}
+
+// ClearPromptTemplate clears the value of the "prompt_template" field.
+func (m *JudgeRubricMutation) ClearPromptTemplate() {
+	m.prompt_template = nil
+	m.clearedFields[judgerubric.FieldPromptTemplate] = struct{}{}
+}
+
+// PromptTemplateCleared returns if the "prompt_template" field was cleared in this mutation.
+func (m *JudgeRubricMutation) PromptTemplateCleared() bool {
+	_, ok := m.clearedFields[judgerubric.FieldPromptTemplate]
+	return ok
+}
+
+// ResetPromptTemplate resets all changes to the "prompt_template" field.
+func (m *JudgeRubricMutation) ResetPromptTemplate() {
+	m.prompt_template = nil
+	delete(m.clearedFields, judgerubric.FieldPromptTemplate)
+}
+
+// SetWorkflowID sets the "workflow" edge to the SpecWorkflow entity by id.
+func (m *JudgeRubricMutation) SetWorkflowID(id string) {
+	m.workflow = &id
+}
+
+// ClearWorkflow clears the "workflow" edge to the SpecWorkflow entity.
+func (m *JudgeRubricMutation) ClearWorkflow() {
+	m.clearedworkflow = true
+}
+
+// WorkflowCleared reports if the "workflow" edge to the SpecWorkflow entity was cleared.
+func (m *JudgeRubricMutation) WorkflowCleared() bool {
+	return m.clearedworkflow
+}
+
+// WorkflowID returns the "workflow" edge ID in the mutation.
+func (m *JudgeRubricMutation) WorkflowID() (id string, exists bool) {
+	if m.workflow != nil {
+		return *m.workflow, true
+	}
+	return
+}
+
+// WorkflowIDs returns the "workflow" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// WorkflowID instead. It exists only for internal usage by the builders.
+func (m *JudgeRubricMutation) WorkflowIDs() (ids []string) {
+	if id := m.workflow; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetWorkflow resets all changes to the "workflow" edge.
+func (m *JudgeRubricMutation) ResetWorkflow() {
+	m.workflow = nil
+	m.clearedworkflow = false
+}
+
+// AddResultIDs adds the "results" edge to the JudgeResult entity by ids.
+func (m *JudgeRubricMutation) AddResultIDs(ids ...string) {
+	if m.results == nil {
+		m.results = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.results[ids[i]] = struct{}{}
+	}
+}
+
+// ClearResults clears the "results" edge to the JudgeResult entity.
+func (m *JudgeRubricMutation) ClearResults() {
+	m.clearedresults = true
+}
+
+// ResultsCleared reports if the "results" edge to the JudgeResult entity was cleared.
+func (m *JudgeRubricMutation) ResultsCleared() bool {
+	return m.clearedresults
+}
+
+// RemoveResultIDs removes the "results" edge to the JudgeResult entity by IDs.
+func (m *JudgeRubricMutation) RemoveResultIDs(ids ...string) {
+	if m.removedresults == nil {
+		m.removedresults = make(map[string]struct{})
+	}
+	for i := range ids {
+		delete(m.results, ids[i])
+		m.removedresults[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedResults returns the removed IDs of the "results" edge to the JudgeResult entity.
+func (m *JudgeRubricMutation) RemovedResultsIDs() (ids []string) {
+	for id := range m.removedresults {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResultsIDs returns the "results" edge IDs in the mutation.
+func (m *JudgeRubricMutation) ResultsIDs() (ids []string) {
+	for id := range m.results {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetResults resets all changes to the "results" edge.
+func (m *JudgeRubricMutation) ResetResults() {
+	m.results = nil
+	m.clearedresults = false
+	m.removedresults = nil
+}
+
+// Where appends a list predicates to the JudgeRubricMutation builder.
+func (m *JudgeRubricMutation) Where(ps ...predicate.JudgeRubric) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the JudgeRubricMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *JudgeRubricMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.JudgeRubric, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *JudgeRubricMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *JudgeRubricMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (JudgeRubric).
+func (m *JudgeRubricMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *JudgeRubricMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.spec_type != nil {
+		fields = append(fields, judgerubric.FieldSpecType)
+	}
+	if m.criteria != nil {
+		fields = append(fields, judgerubric.FieldCriteria)
+	}
+	if m.prompt_template != nil {
+		fields = append(fields, judgerubric.FieldPromptTemplate)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *JudgeRubricMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case judgerubric.FieldSpecType:
+		return m.SpecType()
+	case judgerubric.FieldCriteria:
+		return m.Criteria()
+	case judgerubric.FieldPromptTemplate:
+		return m.PromptTemplate()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *JudgeRubricMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case judgerubric.FieldSpecType:
+		return m.OldSpecType(ctx)
+	case judgerubric.FieldCriteria:
+		return m.OldCriteria(ctx)
+	case judgerubric.FieldPromptTemplate:
+		return m.OldPromptTemplate(ctx)
+	}
+	return nil, fmt.Errorf("unknown JudgeRubric field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *JudgeRubricMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case judgerubric.FieldSpecType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSpecType(v)
+		return nil
+	case judgerubric.FieldCriteria:
+		v, ok := value.(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCriteria(v)
+		return nil
+	case judgerubric.FieldPromptTemplate:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPromptTemplate(v)
+		return nil
+	}
+	return fmt.Errorf("unknown JudgeRubric field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *JudgeRubricMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *JudgeRubricMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *JudgeRubricMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown JudgeRubric numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *JudgeRubricMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(judgerubric.FieldCriteria) {
+		fields = append(fields, judgerubric.FieldCriteria)
+	}
+	if m.FieldCleared(judgerubric.FieldPromptTemplate) {
+		fields = append(fields, judgerubric.FieldPromptTemplate)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *JudgeRubricMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *JudgeRubricMutation) ClearField(name string) error {
+	switch name {
+	case judgerubric.FieldCriteria:
+		m.ClearCriteria()
+		return nil
+	case judgerubric.FieldPromptTemplate:
+		m.ClearPromptTemplate()
+		return nil
+	}
+	return fmt.Errorf("unknown JudgeRubric nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *JudgeRubricMutation) ResetField(name string) error {
+	switch name {
+	case judgerubric.FieldSpecType:
+		m.ResetSpecType()
+		return nil
+	case judgerubric.FieldCriteria:
+		m.ResetCriteria()
+		return nil
+	case judgerubric.FieldPromptTemplate:
+		m.ResetPromptTemplate()
+		return nil
+	}
+	return fmt.Errorf("unknown JudgeRubric field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *JudgeRubricMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.workflow != nil {
+		edges = append(edges, judgerubric.EdgeWorkflow)
+	}
+	if m.results != nil {
+		edges = append(edges, judgerubric.EdgeResults)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *JudgeRubricMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case judgerubric.EdgeWorkflow:
+		if id := m.workflow; id != nil {
+			return []ent.Value{*id}
+		}
+	case judgerubric.EdgeResults:
+		ids := make([]ent.Value, 0, len(m.results))
+		for id := range m.results {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *JudgeRubricMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.removedresults != nil {
+		edges = append(edges, judgerubric.EdgeResults)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *JudgeRubricMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case judgerubric.EdgeResults:
+		ids := make([]ent.Value, 0, len(m.removedresults))
+		for id := range m.removedresults {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *JudgeRubricMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedworkflow {
+		edges = append(edges, judgerubric.EdgeWorkflow)
+	}
+	if m.clearedresults {
+		edges = append(edges, judgerubric.EdgeResults)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *JudgeRubricMutation) EdgeCleared(name string) bool {
+	switch name {
+	case judgerubric.EdgeWorkflow:
+		return m.clearedworkflow
+	case judgerubric.EdgeResults:
+		return m.clearedresults
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *JudgeRubricMutation) ClearEdge(name string) error {
+	switch name {
+	case judgerubric.EdgeWorkflow:
+		m.ClearWorkflow()
+		return nil
+	}
+	return fmt.Errorf("unknown JudgeRubric unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *JudgeRubricMutation) ResetEdge(name string) error {
+	switch name {
+	case judgerubric.EdgeWorkflow:
+		m.ResetWorkflow()
+		return nil
+	case judgerubric.EdgeResults:
+		m.ResetResults()
+		return nil
+	}
+	return fmt.Errorf("unknown JudgeRubric edge %s", name)
 }
 
 // PhaseMutation represents an operation that mutates the Phase nodes in the graph.
@@ -8180,4 +9571,858 @@ func (m *RoadmapItemMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown RoadmapItem edge %s", name)
+}
+
+// SpecWorkflowMutation represents an operation that mutates the SpecWorkflow nodes in the graph.
+type SpecWorkflowMutation struct {
+	config
+	op                   Op
+	typ                  string
+	id                   *string
+	name                 *string
+	description          *string
+	specs_required       *[]string
+	appendspecs_required []string
+	specs_optional       *[]string
+	appendspecs_optional []string
+	init_types           *[]string
+	appendinit_types     []string
+	clearedFields        map[string]struct{}
+	initiatives          map[string]struct{}
+	removedinitiatives   map[string]struct{}
+	clearedinitiatives   bool
+	rubrics              map[string]struct{}
+	removedrubrics       map[string]struct{}
+	clearedrubrics       bool
+	done                 bool
+	oldValue             func(context.Context) (*SpecWorkflow, error)
+	predicates           []predicate.SpecWorkflow
+}
+
+var _ ent.Mutation = (*SpecWorkflowMutation)(nil)
+
+// specworkflowOption allows management of the mutation configuration using functional options.
+type specworkflowOption func(*SpecWorkflowMutation)
+
+// newSpecWorkflowMutation creates new mutation for the SpecWorkflow entity.
+func newSpecWorkflowMutation(c config, op Op, opts ...specworkflowOption) *SpecWorkflowMutation {
+	m := &SpecWorkflowMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSpecWorkflow,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSpecWorkflowID sets the ID field of the mutation.
+func withSpecWorkflowID(id string) specworkflowOption {
+	return func(m *SpecWorkflowMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *SpecWorkflow
+		)
+		m.oldValue = func(ctx context.Context) (*SpecWorkflow, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().SpecWorkflow.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSpecWorkflow sets the old SpecWorkflow of the mutation.
+func withSpecWorkflow(node *SpecWorkflow) specworkflowOption {
+	return func(m *SpecWorkflowMutation) {
+		m.oldValue = func(context.Context) (*SpecWorkflow, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SpecWorkflowMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SpecWorkflowMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of SpecWorkflow entities.
+func (m *SpecWorkflowMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SpecWorkflowMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *SpecWorkflowMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().SpecWorkflow.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetName sets the "name" field.
+func (m *SpecWorkflowMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *SpecWorkflowMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the SpecWorkflow entity.
+// If the SpecWorkflow object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SpecWorkflowMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *SpecWorkflowMutation) ResetName() {
+	m.name = nil
+}
+
+// SetDescription sets the "description" field.
+func (m *SpecWorkflowMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *SpecWorkflowMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the SpecWorkflow entity.
+// If the SpecWorkflow object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SpecWorkflowMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ClearDescription clears the value of the "description" field.
+func (m *SpecWorkflowMutation) ClearDescription() {
+	m.description = nil
+	m.clearedFields[specworkflow.FieldDescription] = struct{}{}
+}
+
+// DescriptionCleared returns if the "description" field was cleared in this mutation.
+func (m *SpecWorkflowMutation) DescriptionCleared() bool {
+	_, ok := m.clearedFields[specworkflow.FieldDescription]
+	return ok
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *SpecWorkflowMutation) ResetDescription() {
+	m.description = nil
+	delete(m.clearedFields, specworkflow.FieldDescription)
+}
+
+// SetSpecsRequired sets the "specs_required" field.
+func (m *SpecWorkflowMutation) SetSpecsRequired(s []string) {
+	m.specs_required = &s
+	m.appendspecs_required = nil
+}
+
+// SpecsRequired returns the value of the "specs_required" field in the mutation.
+func (m *SpecWorkflowMutation) SpecsRequired() (r []string, exists bool) {
+	v := m.specs_required
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSpecsRequired returns the old "specs_required" field's value of the SpecWorkflow entity.
+// If the SpecWorkflow object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SpecWorkflowMutation) OldSpecsRequired(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSpecsRequired is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSpecsRequired requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSpecsRequired: %w", err)
+	}
+	return oldValue.SpecsRequired, nil
+}
+
+// AppendSpecsRequired adds s to the "specs_required" field.
+func (m *SpecWorkflowMutation) AppendSpecsRequired(s []string) {
+	m.appendspecs_required = append(m.appendspecs_required, s...)
+}
+
+// AppendedSpecsRequired returns the list of values that were appended to the "specs_required" field in this mutation.
+func (m *SpecWorkflowMutation) AppendedSpecsRequired() ([]string, bool) {
+	if len(m.appendspecs_required) == 0 {
+		return nil, false
+	}
+	return m.appendspecs_required, true
+}
+
+// ClearSpecsRequired clears the value of the "specs_required" field.
+func (m *SpecWorkflowMutation) ClearSpecsRequired() {
+	m.specs_required = nil
+	m.appendspecs_required = nil
+	m.clearedFields[specworkflow.FieldSpecsRequired] = struct{}{}
+}
+
+// SpecsRequiredCleared returns if the "specs_required" field was cleared in this mutation.
+func (m *SpecWorkflowMutation) SpecsRequiredCleared() bool {
+	_, ok := m.clearedFields[specworkflow.FieldSpecsRequired]
+	return ok
+}
+
+// ResetSpecsRequired resets all changes to the "specs_required" field.
+func (m *SpecWorkflowMutation) ResetSpecsRequired() {
+	m.specs_required = nil
+	m.appendspecs_required = nil
+	delete(m.clearedFields, specworkflow.FieldSpecsRequired)
+}
+
+// SetSpecsOptional sets the "specs_optional" field.
+func (m *SpecWorkflowMutation) SetSpecsOptional(s []string) {
+	m.specs_optional = &s
+	m.appendspecs_optional = nil
+}
+
+// SpecsOptional returns the value of the "specs_optional" field in the mutation.
+func (m *SpecWorkflowMutation) SpecsOptional() (r []string, exists bool) {
+	v := m.specs_optional
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSpecsOptional returns the old "specs_optional" field's value of the SpecWorkflow entity.
+// If the SpecWorkflow object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SpecWorkflowMutation) OldSpecsOptional(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSpecsOptional is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSpecsOptional requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSpecsOptional: %w", err)
+	}
+	return oldValue.SpecsOptional, nil
+}
+
+// AppendSpecsOptional adds s to the "specs_optional" field.
+func (m *SpecWorkflowMutation) AppendSpecsOptional(s []string) {
+	m.appendspecs_optional = append(m.appendspecs_optional, s...)
+}
+
+// AppendedSpecsOptional returns the list of values that were appended to the "specs_optional" field in this mutation.
+func (m *SpecWorkflowMutation) AppendedSpecsOptional() ([]string, bool) {
+	if len(m.appendspecs_optional) == 0 {
+		return nil, false
+	}
+	return m.appendspecs_optional, true
+}
+
+// ClearSpecsOptional clears the value of the "specs_optional" field.
+func (m *SpecWorkflowMutation) ClearSpecsOptional() {
+	m.specs_optional = nil
+	m.appendspecs_optional = nil
+	m.clearedFields[specworkflow.FieldSpecsOptional] = struct{}{}
+}
+
+// SpecsOptionalCleared returns if the "specs_optional" field was cleared in this mutation.
+func (m *SpecWorkflowMutation) SpecsOptionalCleared() bool {
+	_, ok := m.clearedFields[specworkflow.FieldSpecsOptional]
+	return ok
+}
+
+// ResetSpecsOptional resets all changes to the "specs_optional" field.
+func (m *SpecWorkflowMutation) ResetSpecsOptional() {
+	m.specs_optional = nil
+	m.appendspecs_optional = nil
+	delete(m.clearedFields, specworkflow.FieldSpecsOptional)
+}
+
+// SetInitTypes sets the "init_types" field.
+func (m *SpecWorkflowMutation) SetInitTypes(s []string) {
+	m.init_types = &s
+	m.appendinit_types = nil
+}
+
+// InitTypes returns the value of the "init_types" field in the mutation.
+func (m *SpecWorkflowMutation) InitTypes() (r []string, exists bool) {
+	v := m.init_types
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldInitTypes returns the old "init_types" field's value of the SpecWorkflow entity.
+// If the SpecWorkflow object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SpecWorkflowMutation) OldInitTypes(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldInitTypes is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldInitTypes requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInitTypes: %w", err)
+	}
+	return oldValue.InitTypes, nil
+}
+
+// AppendInitTypes adds s to the "init_types" field.
+func (m *SpecWorkflowMutation) AppendInitTypes(s []string) {
+	m.appendinit_types = append(m.appendinit_types, s...)
+}
+
+// AppendedInitTypes returns the list of values that were appended to the "init_types" field in this mutation.
+func (m *SpecWorkflowMutation) AppendedInitTypes() ([]string, bool) {
+	if len(m.appendinit_types) == 0 {
+		return nil, false
+	}
+	return m.appendinit_types, true
+}
+
+// ClearInitTypes clears the value of the "init_types" field.
+func (m *SpecWorkflowMutation) ClearInitTypes() {
+	m.init_types = nil
+	m.appendinit_types = nil
+	m.clearedFields[specworkflow.FieldInitTypes] = struct{}{}
+}
+
+// InitTypesCleared returns if the "init_types" field was cleared in this mutation.
+func (m *SpecWorkflowMutation) InitTypesCleared() bool {
+	_, ok := m.clearedFields[specworkflow.FieldInitTypes]
+	return ok
+}
+
+// ResetInitTypes resets all changes to the "init_types" field.
+func (m *SpecWorkflowMutation) ResetInitTypes() {
+	m.init_types = nil
+	m.appendinit_types = nil
+	delete(m.clearedFields, specworkflow.FieldInitTypes)
+}
+
+// AddInitiativeIDs adds the "initiatives" edge to the Initiative entity by ids.
+func (m *SpecWorkflowMutation) AddInitiativeIDs(ids ...string) {
+	if m.initiatives == nil {
+		m.initiatives = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.initiatives[ids[i]] = struct{}{}
+	}
+}
+
+// ClearInitiatives clears the "initiatives" edge to the Initiative entity.
+func (m *SpecWorkflowMutation) ClearInitiatives() {
+	m.clearedinitiatives = true
+}
+
+// InitiativesCleared reports if the "initiatives" edge to the Initiative entity was cleared.
+func (m *SpecWorkflowMutation) InitiativesCleared() bool {
+	return m.clearedinitiatives
+}
+
+// RemoveInitiativeIDs removes the "initiatives" edge to the Initiative entity by IDs.
+func (m *SpecWorkflowMutation) RemoveInitiativeIDs(ids ...string) {
+	if m.removedinitiatives == nil {
+		m.removedinitiatives = make(map[string]struct{})
+	}
+	for i := range ids {
+		delete(m.initiatives, ids[i])
+		m.removedinitiatives[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedInitiatives returns the removed IDs of the "initiatives" edge to the Initiative entity.
+func (m *SpecWorkflowMutation) RemovedInitiativesIDs() (ids []string) {
+	for id := range m.removedinitiatives {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// InitiativesIDs returns the "initiatives" edge IDs in the mutation.
+func (m *SpecWorkflowMutation) InitiativesIDs() (ids []string) {
+	for id := range m.initiatives {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetInitiatives resets all changes to the "initiatives" edge.
+func (m *SpecWorkflowMutation) ResetInitiatives() {
+	m.initiatives = nil
+	m.clearedinitiatives = false
+	m.removedinitiatives = nil
+}
+
+// AddRubricIDs adds the "rubrics" edge to the JudgeRubric entity by ids.
+func (m *SpecWorkflowMutation) AddRubricIDs(ids ...string) {
+	if m.rubrics == nil {
+		m.rubrics = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.rubrics[ids[i]] = struct{}{}
+	}
+}
+
+// ClearRubrics clears the "rubrics" edge to the JudgeRubric entity.
+func (m *SpecWorkflowMutation) ClearRubrics() {
+	m.clearedrubrics = true
+}
+
+// RubricsCleared reports if the "rubrics" edge to the JudgeRubric entity was cleared.
+func (m *SpecWorkflowMutation) RubricsCleared() bool {
+	return m.clearedrubrics
+}
+
+// RemoveRubricIDs removes the "rubrics" edge to the JudgeRubric entity by IDs.
+func (m *SpecWorkflowMutation) RemoveRubricIDs(ids ...string) {
+	if m.removedrubrics == nil {
+		m.removedrubrics = make(map[string]struct{})
+	}
+	for i := range ids {
+		delete(m.rubrics, ids[i])
+		m.removedrubrics[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedRubrics returns the removed IDs of the "rubrics" edge to the JudgeRubric entity.
+func (m *SpecWorkflowMutation) RemovedRubricsIDs() (ids []string) {
+	for id := range m.removedrubrics {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// RubricsIDs returns the "rubrics" edge IDs in the mutation.
+func (m *SpecWorkflowMutation) RubricsIDs() (ids []string) {
+	for id := range m.rubrics {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetRubrics resets all changes to the "rubrics" edge.
+func (m *SpecWorkflowMutation) ResetRubrics() {
+	m.rubrics = nil
+	m.clearedrubrics = false
+	m.removedrubrics = nil
+}
+
+// Where appends a list predicates to the SpecWorkflowMutation builder.
+func (m *SpecWorkflowMutation) Where(ps ...predicate.SpecWorkflow) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the SpecWorkflowMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SpecWorkflowMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.SpecWorkflow, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *SpecWorkflowMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SpecWorkflowMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (SpecWorkflow).
+func (m *SpecWorkflowMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SpecWorkflowMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.name != nil {
+		fields = append(fields, specworkflow.FieldName)
+	}
+	if m.description != nil {
+		fields = append(fields, specworkflow.FieldDescription)
+	}
+	if m.specs_required != nil {
+		fields = append(fields, specworkflow.FieldSpecsRequired)
+	}
+	if m.specs_optional != nil {
+		fields = append(fields, specworkflow.FieldSpecsOptional)
+	}
+	if m.init_types != nil {
+		fields = append(fields, specworkflow.FieldInitTypes)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SpecWorkflowMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case specworkflow.FieldName:
+		return m.Name()
+	case specworkflow.FieldDescription:
+		return m.Description()
+	case specworkflow.FieldSpecsRequired:
+		return m.SpecsRequired()
+	case specworkflow.FieldSpecsOptional:
+		return m.SpecsOptional()
+	case specworkflow.FieldInitTypes:
+		return m.InitTypes()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SpecWorkflowMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case specworkflow.FieldName:
+		return m.OldName(ctx)
+	case specworkflow.FieldDescription:
+		return m.OldDescription(ctx)
+	case specworkflow.FieldSpecsRequired:
+		return m.OldSpecsRequired(ctx)
+	case specworkflow.FieldSpecsOptional:
+		return m.OldSpecsOptional(ctx)
+	case specworkflow.FieldInitTypes:
+		return m.OldInitTypes(ctx)
+	}
+	return nil, fmt.Errorf("unknown SpecWorkflow field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SpecWorkflowMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case specworkflow.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case specworkflow.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
+		return nil
+	case specworkflow.FieldSpecsRequired:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSpecsRequired(v)
+		return nil
+	case specworkflow.FieldSpecsOptional:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSpecsOptional(v)
+		return nil
+	case specworkflow.FieldInitTypes:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetInitTypes(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SpecWorkflow field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SpecWorkflowMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SpecWorkflowMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SpecWorkflowMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown SpecWorkflow numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SpecWorkflowMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(specworkflow.FieldDescription) {
+		fields = append(fields, specworkflow.FieldDescription)
+	}
+	if m.FieldCleared(specworkflow.FieldSpecsRequired) {
+		fields = append(fields, specworkflow.FieldSpecsRequired)
+	}
+	if m.FieldCleared(specworkflow.FieldSpecsOptional) {
+		fields = append(fields, specworkflow.FieldSpecsOptional)
+	}
+	if m.FieldCleared(specworkflow.FieldInitTypes) {
+		fields = append(fields, specworkflow.FieldInitTypes)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SpecWorkflowMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SpecWorkflowMutation) ClearField(name string) error {
+	switch name {
+	case specworkflow.FieldDescription:
+		m.ClearDescription()
+		return nil
+	case specworkflow.FieldSpecsRequired:
+		m.ClearSpecsRequired()
+		return nil
+	case specworkflow.FieldSpecsOptional:
+		m.ClearSpecsOptional()
+		return nil
+	case specworkflow.FieldInitTypes:
+		m.ClearInitTypes()
+		return nil
+	}
+	return fmt.Errorf("unknown SpecWorkflow nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SpecWorkflowMutation) ResetField(name string) error {
+	switch name {
+	case specworkflow.FieldName:
+		m.ResetName()
+		return nil
+	case specworkflow.FieldDescription:
+		m.ResetDescription()
+		return nil
+	case specworkflow.FieldSpecsRequired:
+		m.ResetSpecsRequired()
+		return nil
+	case specworkflow.FieldSpecsOptional:
+		m.ResetSpecsOptional()
+		return nil
+	case specworkflow.FieldInitTypes:
+		m.ResetInitTypes()
+		return nil
+	}
+	return fmt.Errorf("unknown SpecWorkflow field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SpecWorkflowMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.initiatives != nil {
+		edges = append(edges, specworkflow.EdgeInitiatives)
+	}
+	if m.rubrics != nil {
+		edges = append(edges, specworkflow.EdgeRubrics)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SpecWorkflowMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case specworkflow.EdgeInitiatives:
+		ids := make([]ent.Value, 0, len(m.initiatives))
+		for id := range m.initiatives {
+			ids = append(ids, id)
+		}
+		return ids
+	case specworkflow.EdgeRubrics:
+		ids := make([]ent.Value, 0, len(m.rubrics))
+		for id := range m.rubrics {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SpecWorkflowMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.removedinitiatives != nil {
+		edges = append(edges, specworkflow.EdgeInitiatives)
+	}
+	if m.removedrubrics != nil {
+		edges = append(edges, specworkflow.EdgeRubrics)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SpecWorkflowMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case specworkflow.EdgeInitiatives:
+		ids := make([]ent.Value, 0, len(m.removedinitiatives))
+		for id := range m.removedinitiatives {
+			ids = append(ids, id)
+		}
+		return ids
+	case specworkflow.EdgeRubrics:
+		ids := make([]ent.Value, 0, len(m.removedrubrics))
+		for id := range m.removedrubrics {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SpecWorkflowMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedinitiatives {
+		edges = append(edges, specworkflow.EdgeInitiatives)
+	}
+	if m.clearedrubrics {
+		edges = append(edges, specworkflow.EdgeRubrics)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SpecWorkflowMutation) EdgeCleared(name string) bool {
+	switch name {
+	case specworkflow.EdgeInitiatives:
+		return m.clearedinitiatives
+	case specworkflow.EdgeRubrics:
+		return m.clearedrubrics
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SpecWorkflowMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown SpecWorkflow unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SpecWorkflowMutation) ResetEdge(name string) error {
+	switch name {
+	case specworkflow.EdgeInitiatives:
+		m.ResetInitiatives()
+		return nil
+	case specworkflow.EdgeRubrics:
+		m.ResetRubrics()
+		return nil
+	}
+	return fmt.Errorf("unknown SpecWorkflow edge %s", name)
 }

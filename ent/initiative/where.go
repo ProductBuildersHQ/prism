@@ -90,11 +90,6 @@ func InitType(v string) predicate.Initiative {
 	return predicate.Initiative(sql.FieldEQ(FieldInitType, v))
 }
 
-// WorkflowID applies equality check predicate on the "workflow_id" field. It's identical to WorkflowIDEQ.
-func WorkflowID(v string) predicate.Initiative {
-	return predicate.Initiative(sql.FieldEQ(FieldWorkflowID, v))
-}
-
 // Priority applies equality check predicate on the "priority" field. It's identical to PriorityEQ.
 func Priority(v string) predicate.Initiative {
 	return predicate.Initiative(sql.FieldEQ(FieldPriority, v))
@@ -478,81 +473,6 @@ func InitTypeEqualFold(v string) predicate.Initiative {
 // InitTypeContainsFold applies the ContainsFold predicate on the "init_type" field.
 func InitTypeContainsFold(v string) predicate.Initiative {
 	return predicate.Initiative(sql.FieldContainsFold(FieldInitType, v))
-}
-
-// WorkflowIDEQ applies the EQ predicate on the "workflow_id" field.
-func WorkflowIDEQ(v string) predicate.Initiative {
-	return predicate.Initiative(sql.FieldEQ(FieldWorkflowID, v))
-}
-
-// WorkflowIDNEQ applies the NEQ predicate on the "workflow_id" field.
-func WorkflowIDNEQ(v string) predicate.Initiative {
-	return predicate.Initiative(sql.FieldNEQ(FieldWorkflowID, v))
-}
-
-// WorkflowIDIn applies the In predicate on the "workflow_id" field.
-func WorkflowIDIn(vs ...string) predicate.Initiative {
-	return predicate.Initiative(sql.FieldIn(FieldWorkflowID, vs...))
-}
-
-// WorkflowIDNotIn applies the NotIn predicate on the "workflow_id" field.
-func WorkflowIDNotIn(vs ...string) predicate.Initiative {
-	return predicate.Initiative(sql.FieldNotIn(FieldWorkflowID, vs...))
-}
-
-// WorkflowIDGT applies the GT predicate on the "workflow_id" field.
-func WorkflowIDGT(v string) predicate.Initiative {
-	return predicate.Initiative(sql.FieldGT(FieldWorkflowID, v))
-}
-
-// WorkflowIDGTE applies the GTE predicate on the "workflow_id" field.
-func WorkflowIDGTE(v string) predicate.Initiative {
-	return predicate.Initiative(sql.FieldGTE(FieldWorkflowID, v))
-}
-
-// WorkflowIDLT applies the LT predicate on the "workflow_id" field.
-func WorkflowIDLT(v string) predicate.Initiative {
-	return predicate.Initiative(sql.FieldLT(FieldWorkflowID, v))
-}
-
-// WorkflowIDLTE applies the LTE predicate on the "workflow_id" field.
-func WorkflowIDLTE(v string) predicate.Initiative {
-	return predicate.Initiative(sql.FieldLTE(FieldWorkflowID, v))
-}
-
-// WorkflowIDContains applies the Contains predicate on the "workflow_id" field.
-func WorkflowIDContains(v string) predicate.Initiative {
-	return predicate.Initiative(sql.FieldContains(FieldWorkflowID, v))
-}
-
-// WorkflowIDHasPrefix applies the HasPrefix predicate on the "workflow_id" field.
-func WorkflowIDHasPrefix(v string) predicate.Initiative {
-	return predicate.Initiative(sql.FieldHasPrefix(FieldWorkflowID, v))
-}
-
-// WorkflowIDHasSuffix applies the HasSuffix predicate on the "workflow_id" field.
-func WorkflowIDHasSuffix(v string) predicate.Initiative {
-	return predicate.Initiative(sql.FieldHasSuffix(FieldWorkflowID, v))
-}
-
-// WorkflowIDIsNil applies the IsNil predicate on the "workflow_id" field.
-func WorkflowIDIsNil() predicate.Initiative {
-	return predicate.Initiative(sql.FieldIsNull(FieldWorkflowID))
-}
-
-// WorkflowIDNotNil applies the NotNil predicate on the "workflow_id" field.
-func WorkflowIDNotNil() predicate.Initiative {
-	return predicate.Initiative(sql.FieldNotNull(FieldWorkflowID))
-}
-
-// WorkflowIDEqualFold applies the EqualFold predicate on the "workflow_id" field.
-func WorkflowIDEqualFold(v string) predicate.Initiative {
-	return predicate.Initiative(sql.FieldEqualFold(FieldWorkflowID, v))
-}
-
-// WorkflowIDContainsFold applies the ContainsFold predicate on the "workflow_id" field.
-func WorkflowIDContainsFold(v string) predicate.Initiative {
-	return predicate.Initiative(sql.FieldContainsFold(FieldWorkflowID, v))
 }
 
 // PriorityEQ applies the EQ predicate on the "priority" field.
@@ -1181,6 +1101,29 @@ func HasProgram() predicate.Initiative {
 func HasProgramWith(preds ...predicate.Program) predicate.Initiative {
 	return predicate.Initiative(func(s *sql.Selector) {
 		step := newProgramStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasWorkflow applies the HasEdge predicate on the "workflow" edge.
+func HasWorkflow() predicate.Initiative {
+	return predicate.Initiative(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, WorkflowTable, WorkflowColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasWorkflowWith applies the HasEdge predicate on the "workflow" edge with a given conditions (other predicates).
+func HasWorkflowWith(preds ...predicate.SpecWorkflow) predicate.Initiative {
+	return predicate.Initiative(func(s *sql.Selector) {
+		step := newWorkflowStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

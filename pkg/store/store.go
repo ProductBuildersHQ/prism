@@ -19,6 +19,8 @@ type Store interface {
 	AssignmentStore
 	EvidenceStore
 	RepositoryStore
+	SpecWorkflowStore
+	JudgeStore
 }
 
 // UnitOfWork groups a SQL transaction with a subsequent Dolt commit.
@@ -247,4 +249,52 @@ type RepositoryStore interface {
 	CreateRepoDependency(ctx context.Context, dep *RepositoryDependency) error
 	ListRepoDependencies(ctx context.Context, repoID string) ([]*RepositoryDependency, error)
 	ListAllRepoDependencies(ctx context.Context) ([]*RepositoryDependency, error)
+}
+
+// SpecWorkflow defines a specification workflow template.
+type SpecWorkflow struct {
+	ID            string
+	Name          string
+	Description   string
+	SpecsRequired []string // e.g. ["PLAN.md", "ROADMAP.md"]
+	SpecsOptional []string // e.g. ["PRD.md", "TRD.md"]
+	InitTypes     []string // initiative types this workflow applies to
+}
+
+// JudgeRubric defines scoring criteria for evaluating a spec type.
+type JudgeRubric struct {
+	ID             string
+	WorkflowID     string
+	SpecType       string         // e.g. "PRD.md"
+	Criteria       map[string]any // scoring dimensions
+	PromptTemplate string         // LLM prompt for evaluation
+}
+
+// JudgeResult stores an LLM-as-a-Judge evaluation result.
+type JudgeResult struct {
+	ID           string
+	InitiativeID string
+	SpecPath     string
+	RubricID     string
+	Score        float64
+	Rationale    string
+	Model        string
+	EvaluatedAt  time.Time
+}
+
+// SpecWorkflowStore defines persistence for spec workflows.
+type SpecWorkflowStore interface {
+	CreateSpecWorkflow(ctx context.Context, wf *SpecWorkflow) error
+	GetSpecWorkflow(ctx context.Context, id string) (*SpecWorkflow, error)
+	ListSpecWorkflows(ctx context.Context) ([]*SpecWorkflow, error)
+	UpdateSpecWorkflow(ctx context.Context, wf *SpecWorkflow) error
+}
+
+// JudgeStore defines persistence for judge rubrics and results.
+type JudgeStore interface {
+	CreateJudgeRubric(ctx context.Context, rubric *JudgeRubric) error
+	GetJudgeRubric(ctx context.Context, id string) (*JudgeRubric, error)
+	ListJudgeRubrics(ctx context.Context, workflowID string) ([]*JudgeRubric, error)
+	CreateJudgeResult(ctx context.Context, result *JudgeResult) error
+	ListJudgeResults(ctx context.Context, initiativeID string) ([]*JudgeResult, error)
 }

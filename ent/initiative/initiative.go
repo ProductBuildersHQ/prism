@@ -22,8 +22,6 @@ const (
 	FieldStatus = "status"
 	// FieldInitType holds the string denoting the init_type field in the database.
 	FieldInitType = "init_type"
-	// FieldWorkflowID holds the string denoting the workflow_id field in the database.
-	FieldWorkflowID = "workflow_id"
 	// FieldPriority holds the string denoting the priority field in the database.
 	FieldPriority = "priority"
 	// FieldHomeRepo holds the string denoting the home_repo field in the database.
@@ -52,12 +50,16 @@ const (
 	EdgeRoadmapItems = "roadmap_items"
 	// EdgeProgram holds the string denoting the program edge name in mutations.
 	EdgeProgram = "program"
+	// EdgeWorkflow holds the string denoting the workflow edge name in mutations.
+	EdgeWorkflow = "workflow"
 	// PhaseFieldID holds the string denoting the ID field of the Phase.
 	PhaseFieldID = "phase_id"
 	// RoadmapItemFieldID holds the string denoting the ID field of the RoadmapItem.
 	RoadmapItemFieldID = "rmi_id"
 	// ProgramFieldID holds the string denoting the ID field of the Program.
 	ProgramFieldID = "program_id"
+	// SpecWorkflowFieldID holds the string denoting the ID field of the SpecWorkflow.
+	SpecWorkflowFieldID = "workflow_id"
 	// Table holds the table name of the initiative in the database.
 	Table = "initiatives"
 	// PhasesTable is the table that holds the phases relation/edge.
@@ -81,6 +83,13 @@ const (
 	ProgramInverseTable = "programs"
 	// ProgramColumn is the table column denoting the program relation/edge.
 	ProgramColumn = "program_initiatives"
+	// WorkflowTable is the table that holds the workflow relation/edge.
+	WorkflowTable = "initiatives"
+	// WorkflowInverseTable is the table name for the SpecWorkflow entity.
+	// It exists in this package in order to avoid circular dependency with the "specworkflow" package.
+	WorkflowInverseTable = "spec_workflows"
+	// WorkflowColumn is the table column denoting the workflow relation/edge.
+	WorkflowColumn = "spec_workflow_initiatives"
 )
 
 // Columns holds all SQL columns for initiative fields.
@@ -91,7 +100,6 @@ var Columns = []string{
 	FieldDescription,
 	FieldStatus,
 	FieldInitType,
-	FieldWorkflowID,
 	FieldPriority,
 	FieldHomeRepo,
 	FieldWorkspace,
@@ -109,6 +117,7 @@ var Columns = []string{
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"program_initiatives",
+	"spec_workflow_initiatives",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -137,8 +146,6 @@ var (
 	DefaultInitType string
 	// InitTypeValidator is a validator for the "init_type" field. It is called by the builders before save.
 	InitTypeValidator func(string) error
-	// WorkflowIDValidator is a validator for the "workflow_id" field. It is called by the builders before save.
-	WorkflowIDValidator func(string) error
 	// PriorityValidator is a validator for the "priority" field. It is called by the builders before save.
 	PriorityValidator func(string) error
 	// HomeRepoValidator is a validator for the "home_repo" field. It is called by the builders before save.
@@ -180,11 +187,6 @@ func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 // ByInitType orders the results by the init_type field.
 func ByInitType(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldInitType, opts...).ToFunc()
-}
-
-// ByWorkflowID orders the results by the workflow_id field.
-func ByWorkflowID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldWorkflowID, opts...).ToFunc()
 }
 
 // ByPriority orders the results by the priority field.
@@ -271,6 +273,13 @@ func ByProgramField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newProgramStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByWorkflowField orders the results by workflow field.
+func ByWorkflowField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newWorkflowStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newPhasesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -290,5 +299,12 @@ func newProgramStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ProgramInverseTable, ProgramFieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, ProgramTable, ProgramColumn),
+	)
+}
+func newWorkflowStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(WorkflowInverseTable, SpecWorkflowFieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, WorkflowTable, WorkflowColumn),
 	)
 }

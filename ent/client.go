@@ -19,12 +19,15 @@ import (
 	"github.com/ProductBuildersHQ/prism-control/ent/deliveryevidence"
 	"github.com/ProductBuildersHQ/prism-control/ent/initiative"
 	"github.com/ProductBuildersHQ/prism-control/ent/initiativedependency"
+	"github.com/ProductBuildersHQ/prism-control/ent/judgeresult"
+	"github.com/ProductBuildersHQ/prism-control/ent/judgerubric"
 	"github.com/ProductBuildersHQ/prism-control/ent/phase"
 	"github.com/ProductBuildersHQ/prism-control/ent/program"
 	"github.com/ProductBuildersHQ/prism-control/ent/repository"
 	"github.com/ProductBuildersHQ/prism-control/ent/repositorydependency"
 	"github.com/ProductBuildersHQ/prism-control/ent/rmidependency"
 	"github.com/ProductBuildersHQ/prism-control/ent/roadmapitem"
+	"github.com/ProductBuildersHQ/prism-control/ent/specworkflow"
 )
 
 // Client is the client that holds all ent builders.
@@ -40,6 +43,10 @@ type Client struct {
 	Initiative *InitiativeClient
 	// InitiativeDependency is the client for interacting with the InitiativeDependency builders.
 	InitiativeDependency *InitiativeDependencyClient
+	// JudgeResult is the client for interacting with the JudgeResult builders.
+	JudgeResult *JudgeResultClient
+	// JudgeRubric is the client for interacting with the JudgeRubric builders.
+	JudgeRubric *JudgeRubricClient
 	// Phase is the client for interacting with the Phase builders.
 	Phase *PhaseClient
 	// Program is the client for interacting with the Program builders.
@@ -52,6 +59,8 @@ type Client struct {
 	RepositoryDependency *RepositoryDependencyClient
 	// RoadmapItem is the client for interacting with the RoadmapItem builders.
 	RoadmapItem *RoadmapItemClient
+	// SpecWorkflow is the client for interacting with the SpecWorkflow builders.
+	SpecWorkflow *SpecWorkflowClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -67,12 +76,15 @@ func (c *Client) init() {
 	c.DeliveryEvidence = NewDeliveryEvidenceClient(c.config)
 	c.Initiative = NewInitiativeClient(c.config)
 	c.InitiativeDependency = NewInitiativeDependencyClient(c.config)
+	c.JudgeResult = NewJudgeResultClient(c.config)
+	c.JudgeRubric = NewJudgeRubricClient(c.config)
 	c.Phase = NewPhaseClient(c.config)
 	c.Program = NewProgramClient(c.config)
 	c.RMIDependency = NewRMIDependencyClient(c.config)
 	c.Repository = NewRepositoryClient(c.config)
 	c.RepositoryDependency = NewRepositoryDependencyClient(c.config)
 	c.RoadmapItem = NewRoadmapItemClient(c.config)
+	c.SpecWorkflow = NewSpecWorkflowClient(c.config)
 }
 
 type (
@@ -169,12 +181,15 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		DeliveryEvidence:     NewDeliveryEvidenceClient(cfg),
 		Initiative:           NewInitiativeClient(cfg),
 		InitiativeDependency: NewInitiativeDependencyClient(cfg),
+		JudgeResult:          NewJudgeResultClient(cfg),
+		JudgeRubric:          NewJudgeRubricClient(cfg),
 		Phase:                NewPhaseClient(cfg),
 		Program:              NewProgramClient(cfg),
 		RMIDependency:        NewRMIDependencyClient(cfg),
 		Repository:           NewRepositoryClient(cfg),
 		RepositoryDependency: NewRepositoryDependencyClient(cfg),
 		RoadmapItem:          NewRoadmapItemClient(cfg),
+		SpecWorkflow:         NewSpecWorkflowClient(cfg),
 	}, nil
 }
 
@@ -198,12 +213,15 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		DeliveryEvidence:     NewDeliveryEvidenceClient(cfg),
 		Initiative:           NewInitiativeClient(cfg),
 		InitiativeDependency: NewInitiativeDependencyClient(cfg),
+		JudgeResult:          NewJudgeResultClient(cfg),
+		JudgeRubric:          NewJudgeRubricClient(cfg),
 		Phase:                NewPhaseClient(cfg),
 		Program:              NewProgramClient(cfg),
 		RMIDependency:        NewRMIDependencyClient(cfg),
 		Repository:           NewRepositoryClient(cfg),
 		RepositoryDependency: NewRepositoryDependencyClient(cfg),
 		RoadmapItem:          NewRoadmapItemClient(cfg),
+		SpecWorkflow:         NewSpecWorkflowClient(cfg),
 	}, nil
 }
 
@@ -233,9 +251,9 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Assignment, c.DeliveryEvidence, c.Initiative, c.InitiativeDependency, c.Phase,
-		c.Program, c.RMIDependency, c.Repository, c.RepositoryDependency,
-		c.RoadmapItem,
+		c.Assignment, c.DeliveryEvidence, c.Initiative, c.InitiativeDependency,
+		c.JudgeResult, c.JudgeRubric, c.Phase, c.Program, c.RMIDependency,
+		c.Repository, c.RepositoryDependency, c.RoadmapItem, c.SpecWorkflow,
 	} {
 		n.Use(hooks...)
 	}
@@ -245,9 +263,9 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Assignment, c.DeliveryEvidence, c.Initiative, c.InitiativeDependency, c.Phase,
-		c.Program, c.RMIDependency, c.Repository, c.RepositoryDependency,
-		c.RoadmapItem,
+		c.Assignment, c.DeliveryEvidence, c.Initiative, c.InitiativeDependency,
+		c.JudgeResult, c.JudgeRubric, c.Phase, c.Program, c.RMIDependency,
+		c.Repository, c.RepositoryDependency, c.RoadmapItem, c.SpecWorkflow,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -264,6 +282,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Initiative.mutate(ctx, m)
 	case *InitiativeDependencyMutation:
 		return c.InitiativeDependency.mutate(ctx, m)
+	case *JudgeResultMutation:
+		return c.JudgeResult.mutate(ctx, m)
+	case *JudgeRubricMutation:
+		return c.JudgeRubric.mutate(ctx, m)
 	case *PhaseMutation:
 		return c.Phase.mutate(ctx, m)
 	case *ProgramMutation:
@@ -276,6 +298,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.RepositoryDependency.mutate(ctx, m)
 	case *RoadmapItemMutation:
 		return c.RoadmapItem.mutate(ctx, m)
+	case *SpecWorkflowMutation:
+		return c.SpecWorkflow.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -735,6 +759,22 @@ func (c *InitiativeClient) QueryProgram(_m *Initiative) *ProgramQuery {
 	return query
 }
 
+// QueryWorkflow queries the workflow edge of a Initiative.
+func (c *InitiativeClient) QueryWorkflow(_m *Initiative) *SpecWorkflowQuery {
+	query := (&SpecWorkflowClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(initiative.Table, initiative.FieldID, id),
+			sqlgraph.To(specworkflow.Table, specworkflow.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, initiative.WorkflowTable, initiative.WorkflowColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *InitiativeClient) Hooks() []Hook {
 	return c.hooks.Initiative
@@ -890,6 +930,320 @@ func (c *InitiativeDependencyClient) mutate(ctx context.Context, m *InitiativeDe
 		return (&InitiativeDependencyDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown InitiativeDependency mutation op: %q", m.Op())
+	}
+}
+
+// JudgeResultClient is a client for the JudgeResult schema.
+type JudgeResultClient struct {
+	config
+}
+
+// NewJudgeResultClient returns a client for the JudgeResult from the given config.
+func NewJudgeResultClient(c config) *JudgeResultClient {
+	return &JudgeResultClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `judgeresult.Hooks(f(g(h())))`.
+func (c *JudgeResultClient) Use(hooks ...Hook) {
+	c.hooks.JudgeResult = append(c.hooks.JudgeResult, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `judgeresult.Intercept(f(g(h())))`.
+func (c *JudgeResultClient) Intercept(interceptors ...Interceptor) {
+	c.inters.JudgeResult = append(c.inters.JudgeResult, interceptors...)
+}
+
+// Create returns a builder for creating a JudgeResult entity.
+func (c *JudgeResultClient) Create() *JudgeResultCreate {
+	mutation := newJudgeResultMutation(c.config, OpCreate)
+	return &JudgeResultCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of JudgeResult entities.
+func (c *JudgeResultClient) CreateBulk(builders ...*JudgeResultCreate) *JudgeResultCreateBulk {
+	return &JudgeResultCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *JudgeResultClient) MapCreateBulk(slice any, setFunc func(*JudgeResultCreate, int)) *JudgeResultCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &JudgeResultCreateBulk{err: fmt.Errorf("calling to JudgeResultClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*JudgeResultCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &JudgeResultCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for JudgeResult.
+func (c *JudgeResultClient) Update() *JudgeResultUpdate {
+	mutation := newJudgeResultMutation(c.config, OpUpdate)
+	return &JudgeResultUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *JudgeResultClient) UpdateOne(_m *JudgeResult) *JudgeResultUpdateOne {
+	mutation := newJudgeResultMutation(c.config, OpUpdateOne, withJudgeResult(_m))
+	return &JudgeResultUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *JudgeResultClient) UpdateOneID(id string) *JudgeResultUpdateOne {
+	mutation := newJudgeResultMutation(c.config, OpUpdateOne, withJudgeResultID(id))
+	return &JudgeResultUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for JudgeResult.
+func (c *JudgeResultClient) Delete() *JudgeResultDelete {
+	mutation := newJudgeResultMutation(c.config, OpDelete)
+	return &JudgeResultDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *JudgeResultClient) DeleteOne(_m *JudgeResult) *JudgeResultDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *JudgeResultClient) DeleteOneID(id string) *JudgeResultDeleteOne {
+	builder := c.Delete().Where(judgeresult.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &JudgeResultDeleteOne{builder}
+}
+
+// Query returns a query builder for JudgeResult.
+func (c *JudgeResultClient) Query() *JudgeResultQuery {
+	return &JudgeResultQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeJudgeResult},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a JudgeResult entity by its id.
+func (c *JudgeResultClient) Get(ctx context.Context, id string) (*JudgeResult, error) {
+	return c.Query().Where(judgeresult.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *JudgeResultClient) GetX(ctx context.Context, id string) *JudgeResult {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryRubric queries the rubric edge of a JudgeResult.
+func (c *JudgeResultClient) QueryRubric(_m *JudgeResult) *JudgeRubricQuery {
+	query := (&JudgeRubricClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(judgeresult.Table, judgeresult.FieldID, id),
+			sqlgraph.To(judgerubric.Table, judgerubric.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, judgeresult.RubricTable, judgeresult.RubricColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *JudgeResultClient) Hooks() []Hook {
+	return c.hooks.JudgeResult
+}
+
+// Interceptors returns the client interceptors.
+func (c *JudgeResultClient) Interceptors() []Interceptor {
+	return c.inters.JudgeResult
+}
+
+func (c *JudgeResultClient) mutate(ctx context.Context, m *JudgeResultMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&JudgeResultCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&JudgeResultUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&JudgeResultUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&JudgeResultDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown JudgeResult mutation op: %q", m.Op())
+	}
+}
+
+// JudgeRubricClient is a client for the JudgeRubric schema.
+type JudgeRubricClient struct {
+	config
+}
+
+// NewJudgeRubricClient returns a client for the JudgeRubric from the given config.
+func NewJudgeRubricClient(c config) *JudgeRubricClient {
+	return &JudgeRubricClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `judgerubric.Hooks(f(g(h())))`.
+func (c *JudgeRubricClient) Use(hooks ...Hook) {
+	c.hooks.JudgeRubric = append(c.hooks.JudgeRubric, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `judgerubric.Intercept(f(g(h())))`.
+func (c *JudgeRubricClient) Intercept(interceptors ...Interceptor) {
+	c.inters.JudgeRubric = append(c.inters.JudgeRubric, interceptors...)
+}
+
+// Create returns a builder for creating a JudgeRubric entity.
+func (c *JudgeRubricClient) Create() *JudgeRubricCreate {
+	mutation := newJudgeRubricMutation(c.config, OpCreate)
+	return &JudgeRubricCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of JudgeRubric entities.
+func (c *JudgeRubricClient) CreateBulk(builders ...*JudgeRubricCreate) *JudgeRubricCreateBulk {
+	return &JudgeRubricCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *JudgeRubricClient) MapCreateBulk(slice any, setFunc func(*JudgeRubricCreate, int)) *JudgeRubricCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &JudgeRubricCreateBulk{err: fmt.Errorf("calling to JudgeRubricClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*JudgeRubricCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &JudgeRubricCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for JudgeRubric.
+func (c *JudgeRubricClient) Update() *JudgeRubricUpdate {
+	mutation := newJudgeRubricMutation(c.config, OpUpdate)
+	return &JudgeRubricUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *JudgeRubricClient) UpdateOne(_m *JudgeRubric) *JudgeRubricUpdateOne {
+	mutation := newJudgeRubricMutation(c.config, OpUpdateOne, withJudgeRubric(_m))
+	return &JudgeRubricUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *JudgeRubricClient) UpdateOneID(id string) *JudgeRubricUpdateOne {
+	mutation := newJudgeRubricMutation(c.config, OpUpdateOne, withJudgeRubricID(id))
+	return &JudgeRubricUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for JudgeRubric.
+func (c *JudgeRubricClient) Delete() *JudgeRubricDelete {
+	mutation := newJudgeRubricMutation(c.config, OpDelete)
+	return &JudgeRubricDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *JudgeRubricClient) DeleteOne(_m *JudgeRubric) *JudgeRubricDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *JudgeRubricClient) DeleteOneID(id string) *JudgeRubricDeleteOne {
+	builder := c.Delete().Where(judgerubric.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &JudgeRubricDeleteOne{builder}
+}
+
+// Query returns a query builder for JudgeRubric.
+func (c *JudgeRubricClient) Query() *JudgeRubricQuery {
+	return &JudgeRubricQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeJudgeRubric},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a JudgeRubric entity by its id.
+func (c *JudgeRubricClient) Get(ctx context.Context, id string) (*JudgeRubric, error) {
+	return c.Query().Where(judgerubric.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *JudgeRubricClient) GetX(ctx context.Context, id string) *JudgeRubric {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryWorkflow queries the workflow edge of a JudgeRubric.
+func (c *JudgeRubricClient) QueryWorkflow(_m *JudgeRubric) *SpecWorkflowQuery {
+	query := (&SpecWorkflowClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(judgerubric.Table, judgerubric.FieldID, id),
+			sqlgraph.To(specworkflow.Table, specworkflow.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, judgerubric.WorkflowTable, judgerubric.WorkflowColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryResults queries the results edge of a JudgeRubric.
+func (c *JudgeRubricClient) QueryResults(_m *JudgeRubric) *JudgeResultQuery {
+	query := (&JudgeResultClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(judgerubric.Table, judgerubric.FieldID, id),
+			sqlgraph.To(judgeresult.Table, judgeresult.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, judgerubric.ResultsTable, judgerubric.ResultsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *JudgeRubricClient) Hooks() []Hook {
+	return c.hooks.JudgeRubric
+}
+
+// Interceptors returns the client interceptors.
+func (c *JudgeRubricClient) Interceptors() []Interceptor {
+	return c.inters.JudgeRubric
+}
+
+func (c *JudgeRubricClient) mutate(ctx context.Context, m *JudgeRubricMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&JudgeRubricCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&JudgeRubricUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&JudgeRubricUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&JudgeRubricDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown JudgeRubric mutation op: %q", m.Op())
 	}
 }
 
@@ -1835,14 +2189,181 @@ func (c *RoadmapItemClient) mutate(ctx context.Context, m *RoadmapItemMutation) 
 	}
 }
 
+// SpecWorkflowClient is a client for the SpecWorkflow schema.
+type SpecWorkflowClient struct {
+	config
+}
+
+// NewSpecWorkflowClient returns a client for the SpecWorkflow from the given config.
+func NewSpecWorkflowClient(c config) *SpecWorkflowClient {
+	return &SpecWorkflowClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `specworkflow.Hooks(f(g(h())))`.
+func (c *SpecWorkflowClient) Use(hooks ...Hook) {
+	c.hooks.SpecWorkflow = append(c.hooks.SpecWorkflow, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `specworkflow.Intercept(f(g(h())))`.
+func (c *SpecWorkflowClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SpecWorkflow = append(c.inters.SpecWorkflow, interceptors...)
+}
+
+// Create returns a builder for creating a SpecWorkflow entity.
+func (c *SpecWorkflowClient) Create() *SpecWorkflowCreate {
+	mutation := newSpecWorkflowMutation(c.config, OpCreate)
+	return &SpecWorkflowCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SpecWorkflow entities.
+func (c *SpecWorkflowClient) CreateBulk(builders ...*SpecWorkflowCreate) *SpecWorkflowCreateBulk {
+	return &SpecWorkflowCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SpecWorkflowClient) MapCreateBulk(slice any, setFunc func(*SpecWorkflowCreate, int)) *SpecWorkflowCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SpecWorkflowCreateBulk{err: fmt.Errorf("calling to SpecWorkflowClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SpecWorkflowCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SpecWorkflowCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SpecWorkflow.
+func (c *SpecWorkflowClient) Update() *SpecWorkflowUpdate {
+	mutation := newSpecWorkflowMutation(c.config, OpUpdate)
+	return &SpecWorkflowUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SpecWorkflowClient) UpdateOne(_m *SpecWorkflow) *SpecWorkflowUpdateOne {
+	mutation := newSpecWorkflowMutation(c.config, OpUpdateOne, withSpecWorkflow(_m))
+	return &SpecWorkflowUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SpecWorkflowClient) UpdateOneID(id string) *SpecWorkflowUpdateOne {
+	mutation := newSpecWorkflowMutation(c.config, OpUpdateOne, withSpecWorkflowID(id))
+	return &SpecWorkflowUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SpecWorkflow.
+func (c *SpecWorkflowClient) Delete() *SpecWorkflowDelete {
+	mutation := newSpecWorkflowMutation(c.config, OpDelete)
+	return &SpecWorkflowDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SpecWorkflowClient) DeleteOne(_m *SpecWorkflow) *SpecWorkflowDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SpecWorkflowClient) DeleteOneID(id string) *SpecWorkflowDeleteOne {
+	builder := c.Delete().Where(specworkflow.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SpecWorkflowDeleteOne{builder}
+}
+
+// Query returns a query builder for SpecWorkflow.
+func (c *SpecWorkflowClient) Query() *SpecWorkflowQuery {
+	return &SpecWorkflowQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSpecWorkflow},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SpecWorkflow entity by its id.
+func (c *SpecWorkflowClient) Get(ctx context.Context, id string) (*SpecWorkflow, error) {
+	return c.Query().Where(specworkflow.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SpecWorkflowClient) GetX(ctx context.Context, id string) *SpecWorkflow {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryInitiatives queries the initiatives edge of a SpecWorkflow.
+func (c *SpecWorkflowClient) QueryInitiatives(_m *SpecWorkflow) *InitiativeQuery {
+	query := (&InitiativeClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(specworkflow.Table, specworkflow.FieldID, id),
+			sqlgraph.To(initiative.Table, initiative.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, specworkflow.InitiativesTable, specworkflow.InitiativesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRubrics queries the rubrics edge of a SpecWorkflow.
+func (c *SpecWorkflowClient) QueryRubrics(_m *SpecWorkflow) *JudgeRubricQuery {
+	query := (&JudgeRubricClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(specworkflow.Table, specworkflow.FieldID, id),
+			sqlgraph.To(judgerubric.Table, judgerubric.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, specworkflow.RubricsTable, specworkflow.RubricsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *SpecWorkflowClient) Hooks() []Hook {
+	return c.hooks.SpecWorkflow
+}
+
+// Interceptors returns the client interceptors.
+func (c *SpecWorkflowClient) Interceptors() []Interceptor {
+	return c.inters.SpecWorkflow
+}
+
+func (c *SpecWorkflowClient) mutate(ctx context.Context, m *SpecWorkflowMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SpecWorkflowCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SpecWorkflowUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SpecWorkflowUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SpecWorkflowDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SpecWorkflow mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Assignment, DeliveryEvidence, Initiative, InitiativeDependency, Phase, Program,
-		RMIDependency, Repository, RepositoryDependency, RoadmapItem []ent.Hook
+		Assignment, DeliveryEvidence, Initiative, InitiativeDependency, JudgeResult,
+		JudgeRubric, Phase, Program, RMIDependency, Repository, RepositoryDependency,
+		RoadmapItem, SpecWorkflow []ent.Hook
 	}
 	inters struct {
-		Assignment, DeliveryEvidence, Initiative, InitiativeDependency, Phase, Program,
-		RMIDependency, Repository, RepositoryDependency, RoadmapItem []ent.Interceptor
+		Assignment, DeliveryEvidence, Initiative, InitiativeDependency, JudgeResult,
+		JudgeRubric, Phase, Program, RMIDependency, Repository, RepositoryDependency,
+		RoadmapItem, SpecWorkflow []ent.Interceptor
 	}
 )

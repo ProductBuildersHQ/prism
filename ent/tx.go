@@ -20,6 +20,10 @@ type Tx struct {
 	Initiative *InitiativeClient
 	// InitiativeDependency is the client for interacting with the InitiativeDependency builders.
 	InitiativeDependency *InitiativeDependencyClient
+	// JudgeResult is the client for interacting with the JudgeResult builders.
+	JudgeResult *JudgeResultClient
+	// JudgeRubric is the client for interacting with the JudgeRubric builders.
+	JudgeRubric *JudgeRubricClient
 	// Phase is the client for interacting with the Phase builders.
 	Phase *PhaseClient
 	// Program is the client for interacting with the Program builders.
@@ -32,6 +36,8 @@ type Tx struct {
 	RepositoryDependency *RepositoryDependencyClient
 	// RoadmapItem is the client for interacting with the RoadmapItem builders.
 	RoadmapItem *RoadmapItemClient
+	// SpecWorkflow is the client for interacting with the SpecWorkflow builders.
+	SpecWorkflow *SpecWorkflowClient
 
 	// lazily loaded.
 	client     *Client
@@ -167,12 +173,15 @@ func (tx *Tx) init() {
 	tx.DeliveryEvidence = NewDeliveryEvidenceClient(tx.config)
 	tx.Initiative = NewInitiativeClient(tx.config)
 	tx.InitiativeDependency = NewInitiativeDependencyClient(tx.config)
+	tx.JudgeResult = NewJudgeResultClient(tx.config)
+	tx.JudgeRubric = NewJudgeRubricClient(tx.config)
 	tx.Phase = NewPhaseClient(tx.config)
 	tx.Program = NewProgramClient(tx.config)
 	tx.RMIDependency = NewRMIDependencyClient(tx.config)
 	tx.Repository = NewRepositoryClient(tx.config)
 	tx.RepositoryDependency = NewRepositoryDependencyClient(tx.config)
 	tx.RoadmapItem = NewRoadmapItemClient(tx.config)
+	tx.SpecWorkflow = NewSpecWorkflowClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.
