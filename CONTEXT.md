@@ -5,40 +5,52 @@
 
 ## Current State
 
-**Initiative Status:** executing (5/21 RMIs completed)
+**Initiative Status:** executing (9/21 RMIs completed)
 
 ### Completed This Session
 
-1. **RMI-PRISMCONTROL-101** — Initiative.type enum field (committed, pushed)
-2. **RMI-PRISMCONTROL-102** — SpecWorkflow entity (committed, pushed)
-3. **RMI-PRISMCONTROL-103** — JudgeRubric entity (committed, pushed)
-4. **RMI-PRISMCONTROL-104** — JudgeResult entity (committed, pushed)
-5. **RMI-PRISMCONTROL-120** — Seed built-in workflows (committed, pushed)
-   - Schema: `ent/schema/initiative.go` — added `init_type`, `workflow_id` fields
-   - Constants: `pkg/initiative/initiative.go` — TypeFeature/Maintenance/Migration/Compliance/Refactor
-   - Store: `pkg/store/store.go`, `pkg/store/doltstore/doltstore.go` — field mappings
-   - Service: `pkg/service/initiative.go` — CreateInitiative accepts initType
-   - CLI: `cmd/prismctl/initiative.go` — `--type` flag
-   - MCP: `pkg/mcpserver/server.go` — `init_type` field
+**Phase 1 — Schema Foundation (complete):**
 
-2. **Cancelled (duplicates INIT-TOKENATTRIB-001):**
-   - RMI-105, RMI-106, RMI-110, RMI-111 — token entities/commands already delivered
-
-### Phase 1 Complete
-
-All Phase 1 schema RMIs delivered:
-
-- RMI-101: Initiative.type
+- RMI-101: Initiative.type enum field
 - RMI-102: SpecWorkflow entity
 - RMI-103: JudgeRubric entity
 - RMI-104: JudgeResult entity
 - RMI-120: Seed built-in workflows
 
-### Phase 2-4 Summary
+**Phase 2 — CLI Commands (4/6 complete):**
 
-- **Phase 2 (CLI):** spec init/scaffold, validate, judge, path standardization
-- **Phase 3 (Maturity):** CapabilityModel, MaturityAssessment, assess/report commands
-- **Phase 4 (visionstudio):** Extract UI components, dashboard, spend viz, radar chart
+- RMI-107: `prismctl spec init` — scaffolds specs from workflow
+- RMI-108: `prismctl spec validate` — checks specs exist
+- RMI-109: `prismctl spec judge show/record/list` — agent-driven evaluation
+- RMI-112: Standardize canonical spec path onto initiative record
+
+**Cancelled (duplicates INIT-TOKENATTRIB-001):**
+
+- RMI-105, RMI-106, RMI-110, RMI-111 — token entities/commands already delivered
+
+### Remaining Phase 2 RMIs
+
+| RMI | Title | Notes |
+|-----|-------|-------|
+| RMI-??? | `prismctl spend report` | May already exist via `prismctl report tokens` |
+| RMI-??? | Remaining spend CLI | Check against INIT-TOKENATTRIB-001 |
+
+### Phase 3 — Maturity Model (not started)
+
+| RMI | Title |
+|-----|-------|
+| RMI-113 | Add CapabilityModel entity |
+| RMI-114 | Add MaturityAssessment entity |
+| RMI-115 | `prismctl assess` command |
+| RMI-116 | `prismctl maturity report` command |
+
+### Phase 4 — visionstudio UI extraction (not started)
+
+| RMI | Title |
+|-----|-------|
+| RMI-117 | Extract UI components from visionstudio |
+| RMI-118 | Integrate spend visualization |
+| RMI-119 | Add radar chart for maturity |
 
 ## Key Design Decisions
 
@@ -66,33 +78,27 @@ docs/specs/initiatives/{INIT-ID}/
 - `pkg/report/tokens.go` — report generation
 - `prismctl report tokens` — initiative and period modes
 
-## Next Steps
+### D5 — Agent-driven judging (not API-driven)
+Judging runs via interactive agent sessions (e.g., Claude Code) reading
+specs and rubrics, not remote API calls. `spec judge show` presents the
+content; `spec judge record` persists the verdict. Remote/CI judging
+can be layered later without changing the contract.
 
-### Phase 2 — CLI spec commands
+## New CLI Commands
 
-| RMI | Title |
-|-----|-------|
-| RMI-107 | `prismctl spec init` scaffolds specs from workflow |
-| RMI-108 | `prismctl spec validate` checks specs exist |
-| RMI-109 | `prismctl spec judge` runs LLM evaluation |
-| RMI-112 | Standardize spec path in initiative (canonical path) |
+```bash
+# Workflow management
+prismctl workflow list
+prismctl workflow get <id>
+prismctl workflow seed
 
-### Phase 3 — Maturity model
-
-| RMI | Title |
-|-----|-------|
-| RMI-113 | Add CapabilityModel entity |
-| RMI-114 | Add MaturityAssessment entity |
-| RMI-115 | `prismctl assess` command |
-| RMI-116 | `prismctl maturity report` command |
-
-### Phase 4 — visionstudio UI extraction
-
-| RMI | Title |
-|-----|-------|
-| RMI-117 | Extract UI components from visionstudio |
-| RMI-118 | Integrate spend visualization |
-| RMI-119 | Add radar chart for maturity
+# Spec management
+prismctl spec init <initiative-id> [--with-optional]
+prismctl spec validate <initiative-id>
+prismctl spec judge show <initiative-id> <spec-file>
+prismctl spec judge record <initiative-id> <spec-file> --score <0-10> --rationale "..." --model <id>
+prismctl spec judge list <initiative-id>
+```
 
 ## Related Context
 
@@ -116,17 +122,20 @@ docs/specs/initiatives/{INIT-ID}/
 
 ```bash
 # Check initiative status
-prismctl initiative get INIT-PRISMCONTROL-003
+PRISMCTL_DSN="root:@tcp(127.0.0.1:13306)/prismcontrol" prismctl initiative get INIT-PRISMCONTROL-003
 
 # List remaining RMIs
-prismctl rmi list --initiative INIT-PRISMCONTROL-003
-
-# Start next RMI
-prismctl rmi update RMI-PRISMCONTROL-102 --status in_progress
+PRISMCTL_DSN="root:@tcp(127.0.0.1:13306)/prismcontrol" prismctl rmi list --initiative INIT-PRISMCONTROL-003
 
 # Regenerate ent after schema changes
 cd ~/go/src/github.com/ProductBuildersHQ/prism-control
 go generate ./ent
 go build ./...
 go test ./...
+
+# Build with dolt tag (requires ICU)
+CGO_CFLAGS="-I/opt/homebrew/opt/icu4c/include" \
+CGO_CXXFLAGS="-I/opt/homebrew/opt/icu4c/include" \
+CGO_LDFLAGS="-L/opt/homebrew/opt/icu4c/lib" \
+go build -tags dolt -o ~/go/bin/prismctl ./cmd/prismctl
 ```
