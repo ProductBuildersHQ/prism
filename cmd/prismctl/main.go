@@ -51,6 +51,7 @@ func rootCmd() *cobra.Command {
 		roadmapCmd(),
 		releaseCmd(),
 		workflowCmd(),
+		specCmd(),
 	)
 	return cmd
 }

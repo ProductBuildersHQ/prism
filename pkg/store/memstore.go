@@ -9,20 +9,20 @@ import (
 // MemStore is an in-memory Store implementation for unit testing.
 // It is safe for concurrent use.
 type MemStore struct {
-	mu            sync.RWMutex
-	programs      map[string]*Program
-	initiatives   map[string]*Initiative
-	phases        map[string]*Phase
-	rmis          map[string]*RoadmapItem
-	deps          []*RMIDependency
-	initDeps      []*InitiativeDependency
-	assignments   map[string]*Assignment
-	evidence      map[string]*DeliveryEvidence
-	repositories  map[string]*Repository
-	repoDeps      []*RepositoryDependency
-	workflows     map[string]*SpecWorkflow
-	judgeRubrics  map[string]*JudgeRubric
-	judgeResults  map[string]*JudgeResult
+	mu           sync.RWMutex
+	programs     map[string]*Program
+	initiatives  map[string]*Initiative
+	phases       map[string]*Phase
+	rmis         map[string]*RoadmapItem
+	deps         []*RMIDependency
+	initDeps     []*InitiativeDependency
+	assignments  map[string]*Assignment
+	evidence     map[string]*DeliveryEvidence
+	repositories map[string]*Repository
+	repoDeps     []*RepositoryDependency
+	workflows    map[string]*SpecWorkflow
+	judgeRubrics map[string]*JudgeRubric
+	judgeResults map[string]*JudgeResult
 }
 
 // NewMemStore creates a new in-memory store.

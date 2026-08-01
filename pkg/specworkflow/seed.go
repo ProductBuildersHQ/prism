@@ -4,6 +4,7 @@ package specworkflow
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 
 	"github.com/ProductBuildersHQ/prism-control/pkg/initiative"
 	"github.com/ProductBuildersHQ/prism-control/pkg/store"
@@ -59,6 +60,35 @@ func DefaultWorkflowForType(initType string) string {
 	default:
 		return "pbhq-standard"
 	}
+}
+
+// SpecDir returns the canonical spec directory for an initiative,
+// relative to its home repository root: docs/specs/initiatives/{INIT-ID}/
+func SpecDir(initiativeID string) string {
+	return filepath.Join("docs", "specs", "initiatives", initiativeID)
+}
+
+// Resolve returns the workflow that applies to an initiative: its explicit
+// WorkflowID override if set, otherwise the default for its type. It checks
+// the store first, falling back to the built-in definitions so resolution
+// works even before `workflow seed` has been run.
+func Resolve(ctx context.Context, s store.SpecWorkflowStore, init *store.Initiative) (*store.SpecWorkflow, error) {
+	id := init.WorkflowID
+	if id == "" {
+		id = DefaultWorkflowForType(init.InitType)
+	}
+
+	wf, err := s.GetSpecWorkflow(ctx, id)
+	if err == nil {
+		return wf, nil
+	}
+
+	for _, builtin := range BuiltInWorkflows() {
+		if builtin.ID == id {
+			return builtin, nil
+		}
+	}
+	return nil, fmt.Errorf("workflow %q not found (store: %w)", id, err)
 }
 
 // SeedBuiltIn creates the built-in workflows if they don't exist.
