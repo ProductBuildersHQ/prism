@@ -21,27 +21,55 @@ When a Claude Code session claims an RMI via `prismctl work claim`, the
 Claude Code session UUID, omnidevx can attribute every token from that
 session to the claimed RMI and, by extension, to its initiative.
 
-## Current Limitation
+## Worker Auto-Detection
 
-The `worker` field is human-chosen. The session protocol suggests
-`"session-$(date +%s)"` for convenience, but that timestamp-based ID
-does not match the UUID that omnidevx reads from Claude Code JSONL
-history files.
-
-For accurate joins, sessions should use the actual Claude Code session
-UUID as the worker ID when claiming work:
+Claude Code exposes the session UUID via the `CLAUDE_CODE_SESSION_ID`
+environment variable. When claiming work, `prismctl` auto-detects this:
 
 ```bash
-# The Claude Code session UUID is available in the JSONL filename or
-# the sessionId field inside the session's conversation file.
+# The session UUID is automatically used when CLAUDE_CODE_SESSION_ID is set
+prismctl work claim RMI-MYREPO-042 --lease-hours 4
+
+# Or explicitly provide it if needed
 prismctl work claim RMI-MYREPO-042 \
-  --worker "01234567-89ab-cdef-0123-456789abcdef" \
+  --worker "$CLAUDE_CODE_SESSION_ID" \
   --lease-hours 4
 ```
 
-Until all sessions adopt UUID-based worker IDs, the join is partial:
-only assignments whose `worker` value is a valid Claude Code session
-UUID will match omnidevx events.
+The auto-detection enables seamless attribution: every token event from
+the claiming session is automatically attributed to the claimed RMI.
+
+## Token Attribution Reports
+
+Use `prismctl report tokens` to generate attribution reports:
+
+```bash
+# Initiative mode: per-RMI and per-model breakdown
+prismctl report tokens --initiative INIT-PRISM-001 --format markdown
+
+# Quarter mode: all initiatives in the period
+prismctl report tokens --quarter 2026-Q3
+
+# Custom date range
+prismctl report tokens --since 2026-07-01 --until 2026-07-31
+
+# JSON output for programmatic use
+prismctl report tokens --initiative INIT-PRISM-001 --format json
+```
+
+Reports show:
+
+- **Attributed spend**: tokens/cost mapped to RMIs via session→assignment
+- **Residual**: tokens matched to a repository but not a specific RMI
+- **Unmanaged**: tokens from workspaces not in the registry
+- **Coverage**: managed spend ÷ total spend
+
+## Legacy Worker IDs
+
+Prior to auto-detection, sessions used timestamp-based IDs like
+`"session-$(date +%s)"`. These don't match Claude Code session UUIDs
+and won't attribute correctly. Update old assignments or re-claim work
+with the proper session UUID to enable attribution.
 
 ## SQL View
 
