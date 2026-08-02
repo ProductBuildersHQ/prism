@@ -1,7 +1,7 @@
 {
   "irVersion": "1.0",
-  "project": "prism-control",
-  "repository": "https://github.com/ProductBuildersHQ/prism",
+  "project": "prism-build",
+  "repository": "https://github.com/ProductBuildersHQ/prism-build",
   "versioning": "semver",
   "commitConvention": "conventional",
   "maintainers": [
@@ -9,6 +9,43 @@
     "johncwang@gmail.com"
   ],
   "releases": [
+    {
+      "version": "v0.2.0",
+      "date": "2026-08-01",
+      "commit": "95d1a6e",
+      "highlights": [
+        {
+          "description": "Module renamed from `prism-control` to `prism-build` to match the GitHub repository and align with the prism-* module family"
+        },
+        {
+          "description": "All store entity structs now carry JSON tags for IR export, enabling visionstudio to import them as its execution domain types"
+        }
+      ],
+      "breaking": [
+        {
+          "description": "Import paths changed from `github.com/ProductBuildersHQ/prism-control/...` to `github.com/ProductBuildersHQ/prism-build/...`; root SDK package renamed `prismcontrol` → `prismbuild`",
+          "commit": "4de60c7"
+        }
+      ],
+      "added": [
+        {
+          "description": "JSON tags (snake_case) on all store entity structs: Program, Initiative, Phase, RoadmapItem, Assignment, DeliveryEvidence, Repository, dependency edges, SpecWorkflow, JudgeRubric, JudgeResult, CapabilityModel, MaturityAssessment",
+          "commit": "312a719"
+        }
+      ],
+      "fixed": [
+        {
+          "description": "Resolved golangci-lint gosec/dupl warnings: WriteFile permissions tightened to 0o600, nolint directives for false-positive G101 and safe G202 SQL concatenation, dupl suppression for intentionally similar maturity model builders",
+          "commit": "95d1a6e"
+        }
+      ],
+      "dependencies": [
+        {
+          "description": "Updated Go module dependencies",
+          "commit": "9a06a15"
+        }
+      ]
+    },
     {
       "version": "v0.1.0",
       "date": "2026-07-25",
