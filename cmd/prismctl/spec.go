@@ -19,7 +19,7 @@ func specCmd() *cobra.Command {
 		Use:   "spec",
 		Short: "Manage initiative specification documents",
 	}
-	cmd.AddCommand(specInitCmd(), specValidateCmd(), specJudgeCmd())
+	cmd.AddCommand(specInitCmd(), specValidateCmd(), specJudgeCmd(), specSyncCmd())
 	return cmd
 }
 
