@@ -55,15 +55,18 @@ func rootCmd() *cobra.Command {
 		maturityCmd(),
 	)
 
-	// DB-backed orchestration moved to the visionstudio CLI
-	// (INIT-VISIONSTUDIO-001 Phase 4). The prismctl commands keep working
-	// against the legacy prismcontrol database until the data migration,
-	// but print a pointer to their successor. Cobra only prints the notice
-	// on the executed leaf command, so it is propagated to all children.
+	// The full prismctl command surface moved to the vistudio CLI in the
+	// visionstudio repo (INIT-VISIONSTUDIO-001 Phase 4), and the data
+	// migrated to ~/.productbuildershq/visionstudio. The prismctl commands
+	// keep working against the legacy prismcontrol database, but print a
+	// pointer to their successor. Cobra only prints the notice on the
+	// executed leaf command, so it is propagated to all children.
 	for _, c := range cmd.Commands() {
 		switch c.Name() {
-		case "db", "registry", "program", "initiative", "phase", "rmi", "work":
-			markDeprecated(c, fmt.Sprintf("orchestration has moved to the visionstudio CLI; use `visionstudio %s` instead", c.Name()))
+		case "version":
+			// prismctl-only; not deprecated.
+		default:
+			markDeprecated(c, fmt.Sprintf("prismctl has moved to the vistudio CLI; use `vistudio %s` instead", c.Name()))
 		}
 	}
 	return cmd
