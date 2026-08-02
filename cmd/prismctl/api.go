@@ -70,13 +70,27 @@ type APIStatusCount struct {
 	Count  int    `json:"count"`
 }
 
+type APIRMIDependency struct {
+	SourceRMIID  string `json:"sourceRmiId"`
+	TargetRMIID  string `json:"targetRmiId"`
+	Relationship string `json:"relationship"`
+}
+
+type APIInitiativeDependency struct {
+	SourceInitiativeID string `json:"sourceInitiativeId"`
+	TargetInitiativeID string `json:"targetInitiativeId"`
+	Relationship       string `json:"relationship"`
+}
+
 // ExecutionResponse is the response for /api/execution.
 type ExecutionResponse struct {
-	Programs    []APIProgram     `json:"programs"`
-	Initiatives []APIInitiative  `json:"initiatives"`
-	Phases      []APIPhase       `json:"phases"`
-	RMIs        []APIRMI         `json:"rmis"`
-	StatusDist  []APIStatusCount `json:"statusDistribution"`
+	Programs              []APIProgram              `json:"programs"`
+	Initiatives           []APIInitiative           `json:"initiatives"`
+	Phases                []APIPhase                `json:"phases"`
+	RMIs                  []APIRMI                  `json:"rmis"`
+	StatusDist            []APIStatusCount          `json:"statusDistribution"`
+	RMIDependencies       []APIRMIDependency        `json:"rmiDependencies"`
+	InitiativeDependencies []APIInitiativeDependency `json:"initiativeDependencies"`
 }
 
 // SpendResponse is the response for /api/spend.
@@ -321,12 +335,41 @@ func buildExecutionResponse(ctx context.Context, svc *service.Service) (*Executi
 		statusDist = append(statusDist, APIStatusCount{Status: status, Count: count})
 	}
 
+	// Load dependencies
+	allDeps, err := svc.Store.ListAllDependencies(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var rmiDeps []APIRMIDependency
+	for _, d := range allDeps {
+		rmiDeps = append(rmiDeps, APIRMIDependency{
+			SourceRMIID:  d.SourceRMIID,
+			TargetRMIID:  d.TargetRMIID,
+			Relationship: d.Relationship,
+		})
+	}
+
+	initDeps, err := svc.Store.ListAllInitiativeDependencies(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var apiInitDeps []APIInitiativeDependency
+	for _, d := range initDeps {
+		apiInitDeps = append(apiInitDeps, APIInitiativeDependency{
+			SourceInitiativeID: d.SourceInitiativeID,
+			TargetInitiativeID: d.TargetInitiativeID,
+			Relationship:       d.Relationship,
+		})
+	}
+
 	return &ExecutionResponse{
-		Programs:    apiPrograms,
-		Initiatives: apiInitiatives,
-		Phases:      apiPhases,
-		RMIs:        apiRMIs,
-		StatusDist:  statusDist,
+		Programs:               apiPrograms,
+		Initiatives:            apiInitiatives,
+		Phases:                 apiPhases,
+		RMIs:                   apiRMIs,
+		StatusDist:             statusDist,
+		RMIDependencies:        rmiDeps,
+		InitiativeDependencies: apiInitDeps,
 	}, nil
 }
 
