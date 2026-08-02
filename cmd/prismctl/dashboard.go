@@ -84,6 +84,14 @@ func runDashboardStatic(cmd *cobra.Command) error {
 func runDashboardServer(cmd *cobra.Command, port int) error {
 	mux := http.NewServeMux()
 
+	dataDir, _ := cmd.Flags().GetString("data-dir")
+
+	// Register JSON API routes
+	connectSvc := func() (*service.Service, func(), error) {
+		return connectService(cmd)
+	}
+	registerAPIRoutes(mux, connectSvc, dataDir)
+
 	serve := func(w http.ResponseWriter, _ *http.Request, render func(*service.Service) ([]byte, error)) {
 		svc, cleanup, err := connectService(cmd)
 		if err != nil {
@@ -102,8 +110,6 @@ func runDashboardServer(cmd *cobra.Command, port int) error {
 			return
 		}
 	}
-
-	dataDir, _ := cmd.Flags().GetString("data-dir")
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
