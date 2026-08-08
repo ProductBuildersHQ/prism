@@ -1,4 +1,4 @@
-# PRISM Control
+# PRISM Build
 
 **Product Delivery Control Plane** — the canonical, queryable store for cross-repository initiatives, per-repo Roadmap Items (RMIs), lease-based work assignments, and delivery evidence.
 
