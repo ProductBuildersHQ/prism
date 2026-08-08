@@ -1,8 +1,8 @@
-site_name: PRISM Control
-site_description: Product Delivery Control Plane — cross-repository initiatives, RMIs, lease-based assignments, and delivery evidence
-site_url: https://productbuildershq.com/prism
-repo_url: https://github.com/ProductBuildersHQ/prism
-repo_name: ProductBuildersHQ/prism
+site_name: PRISM Build
+site_description: Product Delivery Control Plane Build Arifacts — cross-repository initiatives, RMIs, lease-based assignments, and delivery evidence
+site_url: https://productbuildershq.com/prism-build
+repo_url: https://github.com/ProductBuildersHQ/prism-build
+repo_name: ProductBuildersHQ/prism-build
 
 theme:
   name: material
