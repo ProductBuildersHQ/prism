@@ -84,12 +84,12 @@ type APIInitiativeDependency struct {
 
 // ExecutionResponse is the response for /api/execution.
 type ExecutionResponse struct {
-	Programs              []APIProgram              `json:"programs"`
-	Initiatives           []APIInitiative           `json:"initiatives"`
-	Phases                []APIPhase                `json:"phases"`
-	RMIs                  []APIRMI                  `json:"rmis"`
-	StatusDist            []APIStatusCount          `json:"statusDistribution"`
-	RMIDependencies       []APIRMIDependency        `json:"rmiDependencies"`
+	Programs               []APIProgram              `json:"programs"`
+	Initiatives            []APIInitiative           `json:"initiatives"`
+	Phases                 []APIPhase                `json:"phases"`
+	RMIs                   []APIRMI                  `json:"rmis"`
+	StatusDist             []APIStatusCount          `json:"statusDistribution"`
+	RMIDependencies        []APIRMIDependency        `json:"rmiDependencies"`
 	InitiativeDependencies []APIInitiativeDependency `json:"initiativeDependencies"`
 }
 
